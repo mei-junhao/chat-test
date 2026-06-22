@@ -429,9 +429,9 @@
   </div>
 </div>
 <script>
-// Default config (DeepSeek V4 Flash)
-const DEFAULT_API = 'https://api.deepseek.com/v1/chat/completions';
-const DEFAULT_KEY = 'sk-717b41725e584601902bb777596b7ad3';
+// Default config (DeepSeek V4 Flash via EdgeOne)
+const DEFAULT_API = 'https://winnicott-chat-ujnaxky5.edgeone.cool/api/proxy';
+const DEFAULT_KEY = '';
 const DEFAULT_MODEL = 'deepseek-v4-flash';
 
 let systemPrompt = '';
@@ -615,7 +615,7 @@ async function sendMessage() {
   if (!systemPrompt) { showBanner('error', '知识库加载中，请稍等……'); return; }
 
   var cfg = getActiveConfig();
-  if (!cfg.key) { showBanner('error', '未配置 API Key，请在设置中填写。'); return; }
+  if (apiMode === 'custom' && !cfg.key) { showBanner('error', '未配置 API Key，请在设置中填写。'); return; }
 
   var intro = document.getElementById('intro');
   if (intro) intro.style.display = 'none';
@@ -670,9 +670,11 @@ async function sendMessage() {
 
   isLoading = true; sendBtn.disabled = true; showTyping();
   try {
+    var fetchHeaders = { 'Content-Type': 'application/json' };
+    if (cfg.key) fetchHeaders['Authorization'] = 'Bearer ' + cfg.key;
     var res = await fetch(cfg.api, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
+      headers: fetchHeaders,
       body: JSON.stringify({ model: cfg.model, messages: ctxMessages, temperature: 0.7, max_tokens: 1800, stream: true })
     });
 
