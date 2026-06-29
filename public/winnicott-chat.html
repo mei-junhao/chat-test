@@ -956,7 +956,7 @@ let conversation = [];
 let isLoading = false;
 let talkTemp = parseInt(localStorage.getItem('winnicott_temp') || '60');
 var _maxTokens = parseInt(localStorage.getItem('winnicott_len') || '0');
-var _autoSaveCounter = 0;
+var _lastHistorySave = 0;
 let apiMode = localStorage.getItem('winnicott_api_mode') || 'default';
 let customApi = localStorage.getItem('winnicott_custom_api') || '';
 let customKey = localStorage.getItem('winnicott_custom_key') || '';
@@ -1120,6 +1120,8 @@ function checkChapterShift() {
   if (sim < 0.15 && _chapterCount < 50) { // topic shift threshold
     _chapterCount++;
     insertChapterDivider();
+    saveToHistory();
+    _lastHistorySave = conversation.length;
   }
 }
 
@@ -1807,11 +1809,10 @@ async function sendMessage() {
   conversation.push({ role: 'assistant', content: fullReply });
   // 话题检测：新话题转折时插入章节分隔
   checkChapterShift();
-  // 自动保存历史：每 5 轮静默保存一次
-  _autoSaveCounter++;
-  if (_autoSaveCounter >= 5 && conversation.length > 2) {
-    _autoSaveCounter = 0;
+  // 兜底保存：超过 20 条消息未触发话题切换时强制保存
+  if (conversation.length - _lastHistorySave > 20) {
     saveToHistory();
+    _lastHistorySave = conversation.length;
   }
   saveConversation();
   saveConversation();
@@ -1869,7 +1870,7 @@ function showChangelog() {
 }
 function resetConversation() {
   conversation = [];
-  _tierLevel = 0; _chapterCount = 0; _chapterKeywords = {}; // 新对话重置章节
+  _tierLevel = 0; _chapterCount = 0; _chapterKeywords = {}; _lastHistorySave = 0; // 新对话重置章节
   localStorage.removeItem('winnicott_conversation');
   localStorage.removeItem('winnicott_conv');
   messagesEl.querySelectorAll('.msg').forEach(function(el){el.remove();});

@@ -93,9 +93,7 @@
   }
 
   /* === ENHANCED MASTER FEATURES === */
-  .lang-btn { position:absolute; top:12px; left:50px; font-size:10px; background:none; border:1px solid var(--border); border-radius:4px; padding:2px 5px; cursor:pointer; color:var(--muted); font-family:inherit; line-height:1.4; }
-  .lang-btn:hover { background:var(--light-accent); color:var(--accent); }
-  .header.compact .lang-btn { top:8px; left:46px; }
+  .header.compact .back-link { top:8px; left:10px; }
   .msg .bubble { position:relative; }
   .msg .bubble .share-btn { position:absolute; right:4px; top:4px; opacity:0; transition:opacity 0.2s; cursor:pointer; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:0 4px; font-size:10px; line-height:1.6; }
   .msg .bubble .copy-btn { position:absolute; right:28px; top:4px; opacity:0; transition:opacity 0.2s; cursor:pointer; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:0 4px; font-size:10px; line-height:1.6; }
@@ -180,7 +178,6 @@
 <div class="app">
   <div class="header" id="header">
     <a class="back-link" href="index.html">← 返回</a>
-    <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
     <h1 id="headerTitle">与大师对话</h1>
     <p id="headerSub"></p>
     <button class="settings-btn" onclick="toggleSettings()">⚙️ 设置</button>
@@ -189,6 +186,8 @@
   <div class="settings-panel" id="settingsPanel">
     <div style="display:flex;gap:4px;justify-content:center;margin-bottom:10px;flex-wrap:wrap;">
       <button onclick="toggleDark()" id="darkBtn" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="dark-btn">🌙 深色</button>
+      <button onclick="toggleLang()" id="langBtn" style="background:none;border:1px solid var(--border);padding:4px 12px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;">EN</button>
+      <button onclick="saveChat()" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="save-btn">💾 保存</button>
       <button onclick="changeFontSize(-1)" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;">A−</button>
       <button onclick="changeFontSize(1)" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;">A+</button>
       <button onclick="toggleForwardMode()" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="forward-btn">✂️ 转发</button>
@@ -677,6 +676,12 @@ function saveHistory(){
   if(h.length>20)h=h.slice(0,20);
   localStorage.setItem('mc_hist_'+masterKey,JSON.stringify(h));
 }
+function saveChat(){
+  if(!conversation.length){showBanner('暂无对话可保存');return;}
+  saveHistory();
+  saveConversation();
+  showBanner('对话已保存');
+}
 function resetConversation(){
   conversation=[];_tierLevel=0;_chapterCount=0;
   localStorage.removeItem('mc_conv_'+masterKey);
@@ -754,6 +759,7 @@ var i18n = {
   'dark-btn': { zh: '🌙 深色', en: '🌙 Dark' },
   'forward-btn': { zh: '✂️ 转发', en: '✂️ Select' },
   'reward-btn': { zh: '☕ 打赏', en: '☕ Tip' },
+  'save-btn': { zh: '💾 保存', en: '💾 Save' },
   'export-btn': { zh: '📥 导出对话', en: '📥 Export' },
   'changelog-btn': { zh: '📋 更新日志', en: '📋 Changelog' },
   'reset-btn': { zh: '🔄 新对话', en: '🔄 New Chat' },
