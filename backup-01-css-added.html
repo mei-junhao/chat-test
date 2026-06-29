@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>与温尼科特对话</title>
+<style>
+  :root {
+    --bg: #faf8f5; --card: #ffffff; --text: #2c2416; --muted: #8b7355;
+    --accent: #a6845b; --light-accent: #f0e8dc; --bubble-user: #e8dfd3;
+    --bubble-ai: #ffffff; --border: #e5d9c8; --shadow: 0 2px 16px rgba(0,0,0,0.06);
+    --danger: #c0392b; --panel-bg: #fefcf9;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "STSong", Georgia, serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    display: flex; justify-content: center; line-height: 1.8;
+  }
+  .app { width: 100%; max-width: 680px; display: flex; flex-direction: column; height: 100vh; }
+
+  .header {
+    padding: 14px 20px 10px; text-align: center; border-bottom: 1px solid var(--border);
+    background: var(--card); flex-shrink: 0; position: relative;
+  }
+  .header h1 { font-size: 19px; font-weight: 500; letter-spacing: 1px; }
+  .header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .settings-btn {
+    position: absolute; right: 16px; top: 14px;
+    background: none; border: none; cursor: pointer;
+    font-size: 20px; color: var(--muted); transition: color 0.2s;
+    padding: 4px; line-height: 1;
+  }
+  .settings-btn:hover { color: var(--accent); }
+  .settings-btn.custom { color: #d4a056; }
+
+  .settings-panel {
+    background: #fefcf9; border-bottom: 1px solid var(--border);
+    padding: 0 20px; max-height: 0; overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    flex-shrink: 0;
+  }
+  .settings-panel.open { max-height: none; padding: 16px 20px; }
+
+  .settings-panel h3 { font-size: 13px; font-weight: 500; margin-bottom: 10px; color: var(--muted); }
+  .settings-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .settings-row label { font-size: 12px; color: var(--muted); width: 72px; flex-shrink: 0; }
+  .settings-row input {
+    flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 13px; outline: none; background: var(--bg); font-family: monospace;
+  }
+  .settings-row input:focus { border-color: var(--accent); }
+
+  .mode-toggle {
+    display: flex; gap: 0; margin-bottom: 14px; border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .mode-toggle button {
+    flex: 1; padding: 8px 0; border: none; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: 0.2s;
+  }
+  .mode-toggle .default-btn { background: var(--light-accent); color: var(--text); }
+  .mode-toggle .default-btn.active { background: var(--accent); color: white; }
+  .mode-toggle .custom-btn { background: var(--bg); color: var(--text); }
+  .mode-toggle .custom-btn.active { background: #d4a056; color: white; }
+
+  .rich-text {
+    text-align: center; font-size: 11px; color: #b8860b; margin: 6px 0 10px;
+    animation: glow 2s ease-in-out infinite;
+  }
+  @keyframes glow { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+  .messages {
+    flex: 1; overflow-y: auto; padding: 20px 24px;
+    display: flex; flex-direction: column; gap: 18px; scroll-behavior: smooth;
+  }
+  .messages::-webkit-scrollbar { width: 5px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
+  .msg { display: flex; gap: 12px; animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .msg.user { flex-direction: row-reverse; }
+  .msg .avatar {
+    width: 36px; height: 36px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; font-weight: 500;
+  }
+  .msg.ai .avatar { background: var(--light-accent); color: var(--accent); }
+  .msg.user .avatar { background: var(--accent); color: white; }
+  .msg .bubble {
+    max-width: 78%; padding: 14px 18px; border-radius: 18px 18px 18px 4px;
+    font-size: 15px; line-height: 1.85; white-space: pre-wrap; word-break: break-word;
+  }
+  .msg.ai .bubble { background: var(--bubble-ai); box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .msg.user .bubble { background: var(--bubble-user); border-radius: 18px 18px 4px 18px; }
+
+  /* Streaming cursor */
+  .stream-cursor::after {
+    content: '▍'; animation: blink 0.7s steps(1) infinite; color: var(--accent); margin-left: 1px;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .typing { display: flex; gap: 6px; padding: 14px 18px; }
+  .typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: bounce 1.2s infinite ease; }
+  .typing span:nth-child(2) { animation-delay: 0.15s; }
+  .typing span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+  .input-area {
+    padding: 14px 20px 22px; border-top: 1px solid var(--border);
+    background: var(--card); flex-shrink: 0;
+  }
+  .input-wrap { display: flex; gap: 10px; align-items: flex-end; }
+  .input-wrap textarea {
+    flex: 1; border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px;
+    font-size: 15px; font-family: inherit; resize: none; outline: none;
+    background: var(--bg); color: var(--text); line-height: 1.6; max-height: 120px;
+  }
+  .input-wrap textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(166,132,91,0.1); }
+  .input-wrap button {
+    width: 44px; height: 44px; border-radius: 50%; border: none;
+    background: var(--accent); color: white; cursor: pointer; flex-shrink: 0;
+    transition: background 0.2s; display: flex; align-items: center; justify-content: center;
+  }
+  .input-wrap button:hover { background: #8c6e4a; }
+  .input-wrap button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .disclaimer { text-align: center; padding: 10px 24px 0; font-size: 11px; color: var(--muted); flex-shrink: 0; }
+  .intro { text-align: center; padding: 40px 20px 20px; }
+  .intro .icon { font-size: 48px; margin-bottom: 12px; }
+  .intro h2 { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+  .intro p { font-size: 14px; color: var(--muted); max-width: 420px; margin: 0 auto; line-height: 1.8; }
+  .intro .hints { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .intro .hint {
+    background: var(--light-accent); padding: 8px 16px; border-radius: 20px;
+    font-size: 13px; cursor: pointer; transition: background 0.2s; border: none; font-family: inherit; color: var(--text);
+  }
+  .intro .hint:hover { background: #e0d4c0; }
+  .banner {
+    padding: 10px 16px; border-radius: 10px; font-size: 13px;
+    margin: 8px 20px; text-align: center;
+  }
+  .banner.error { background: #fef0ef; border: 1px solid #f5c6cb; color: var(--danger); }
+
+  @media (min-width: 769px) {
+    .header h1 { font-size: 22px; }
+    .header p { font-size: 14px; }
+    .msg .bubble { font-size: 17px; line-height: 1.9; padding: 16px 22px; }
+    .msg .avatar { width: 40px; height: 40px; font-size: 15px; }
+    .input-wrap textarea { font-size: 17px; padding: 14px 18px; max-height: 140px; }
+    .intro p { font-size: 16px; }
+    .intro h2 { font-size: 20px; }
+    .intro .hint { font-size: 14px; padding: 10px 18px; }
+    .disclaimer { font-size: 12px; }
+    .settings-panel label, .settings-panel input, .settings-panel button { font-size: 14px; }
+    .settings-panel h3 { font-size: 14px; }
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); cursor: pointer;
+    border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+
+  .dark-btn {
+    position: absolute; right: 48px; top: 14px;
+    background: none; border: none; cursor: pointer;
+    font-size: 16px; color: var(--muted); transition: color 0.2s;
+    padding: 4px; line-height: 1;
+  }
+  .dark-btn:hover { color: var(--accent); }
+
+  .copy-btn {
+    background:none; border:none; cursor:pointer;
+    font-size:12px; padding:2px 6px; opacity:0.4;
+    transition:opacity 0.2s; float:right; margin-top:-2px;
+    color:var(--muted);
+  }
+  .msg:hover .copy-btn { opacity:0.8; }
+  @media (max-width: 768px) { .copy-btn { opacity:0.6; } }
+
+  /* Reward modal */
+  .reward-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1001;
+    justify-content:center; align-items:center; backdrop-filter:blur(4px);
+  }
+  .reward-overlay.show { display:flex; }
+  .reward-box {
+    background:var(--card); border-radius:18px; padding:22px 24px 18px;
+    max-width:340px; width:90%; text-align:center; box-shadow:0 12px 40px rgba(0,0,0,0.25);
+    animation:rewardPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes rewardPop { from { transform:scale(0.7); opacity:0; } to { transform:scale(1); opacity:1; } }
+  .reward-box h3 { font-size:16px; font-weight:500; margin-bottom:6px; color:var(--accent); }
+  .reward-box .reward-sub { font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.6; }
+  .reward-box img { width:240px; max-width:100%; border-radius:12px; display:block; margin:0 auto 12px; }
+  .reward-box .reward-tip { font-size:11px; color:var(--muted); margin-bottom:14px; line-height:1.6; }
+  .reward-box .reward-close {
+    background:var(--accent); color:white; border:none; padding:8px 28px;
+    border-radius:10px; font-size:13px; cursor:pointer; font-family:inherit;
+  }
+  .reward-box .reward-close:hover { opacity:0.85; }
+
+  /* Header reward icon */
+  .reward-btn {
+    position:absolute; right: 80px; top: 14px;
+    background:none; border:none; cursor:pointer; font-size:18px;
+    color:var(--muted); padding:4px; line-height:1; transition:color 0.2s, transform 0.2s;
+  }
+  .reward-btn:hover { color:#e6a23c; transform:scale(1.1); }
+
+  /* Dark mode */
+  .dark { --bg: #1a1510; --card: #241e18; --text: #e0d8cc; --muted: #8b7d6a;
+    --accent: #c4a87a; --light-accent: #2a241e; --bubble-user: #2a241e;
+    --bubble-ai: #1e1914; --border: #3a3028; --shadow: 0 2px 16px rgba(0,0,0,0.3);
+    --panel-bg: #1e1914; --danger: #e05050;
+  }
+  .dark .msg .avatar { color: var(--accent); }
+  .dark .msg.user .avatar { color: white; }
+  .dark input, .dark textarea { background: #1e1914 !important; color: #e0d8cc !important; border-color: #3a3028 !important; }
+  .dark .settings-panel { background: var(--panel-bg); }
+  .dark .changelogContent { background: #1e1914; }
+  .dark .greet-btn { background: #1e1914 !important; color: #e0d8cc !important; border-color: #3a3028 !important; }
+
+  /* Context indicator */
+  .ctx-bar {
+    display:flex; align-items:center; gap:6px; padding:6px 24px 0;
+    font-size:10px; color:#c9b99d; flex-shrink:0;
+  }
+  .ctx-track { flex:1; height:2px; background:var(--border); border-radius:2px; position:relative; }
+  .ctx-fill { height:100%; background:var(--accent); border-radius:2px; transition:width 0.3s; }
+  .ctx-label { white-space:nowrap; }
+
+  /* Custom modal */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:999;
+    justify-content:center; align-items:center;
+  }
+  .modal-overlay.show { display:flex; }
+  .modal-box {
+    background:var(--card); border-radius:16px; padding:24px 28px 20px;
+    max-width:340px; width:90%; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.15);
+  }
+  .modal-box h3 { font-size:15px; font-weight:500; margin-bottom:8px; color:var(--text); }
+  .modal-box p { font-size:13px; color:var(--muted); margin-bottom:18px; line-height:1.6; }
+  .modal-actions { display:flex; gap:10px; justify-content:center; }
+  .modal-actions button {
+    padding:8px 24px; border-radius:10px; border:1px solid var(--border); font-size:13px;
+    cursor:pointer; font-family:inherit; transition:0.2s;
+  }
+  .modal-actions .btn-cancel { background:var(--bg); color:var(--muted); }
+  .modal-actions .btn-confirm { background:var(--accent); color:white; border-color:var(--accent); }
+  .modal-actions .btn-cancel:hover { background:var(--border); }
+  .modal-actions .btn-confirm:hover { opacity:0.85; }
+
+  /* Slider markers */
+  .slider-wrap { position:relative; }
+  .slider-marks { display:flex; justify-content:space-between; padding:0 1px; margin-top:-4px; }
+  .slider-marks span {
+    width:2px; height:8px; background:#d0c4b0; border-radius:1px;
+    position:relative; opacity:0;
+  }
+  .slider-marks span:nth-child(3) { opacity:1; } /* 20 */
+  .slider-marks span:nth-child(7) { opacity:1; } /* 60 */
+  .slider-marks span:nth-child(10) { opacity:1; } /* 80 */
+
+  /* ---- ENHANCEMENTS ---- */
+  /* Header buttons row */
+  .header-btns { position:absolute; right:16px; top:14px; display:flex; gap:2px; align-items:center; }
+  .header-btns button {
+    background:none; border:none; cursor:pointer; font-size:17px;
+    color:var(--muted); transition:color 0.2s, transform 0.2s;
+    padding:4px 5px; line-height:1; border-radius:6px;
+  }
+  .header-btns button:hover { color:var(--accent); transform:scale(1.1); }
+  .header-btns .lang-btn { font-size:11px; font-weight:600; padding:2px 7px; border:1px solid var(--border); border-radius:5px; letter-spacing:0.5px; }
+  .header-btns .lang-btn:hover { border-color:var(--accent); color:var(--accent); transform:none; }
+
+  /* AI message: avatar on top + name label */
+  .msg.ai { display:flex; flex-direction:column; align-items:flex-start; }
+  .msg.ai .msg-meta { display:flex; align-items:center; gap:8px; margin-bottom:5px; padding-left:4px; }
+  .msg.ai .msg-meta .avatar { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; background:var(--light-accent); color:var(--accent); }
+  .msg.ai .msg-meta .name { font-size:12px; color:var(--muted); font-weight:500; }
+  .msg.ai .bubble { max-width:90%; position:relative; }
+  .msg.ai .bubble .copy-btn { display:inline-block; margin-top:4px; opacity:0.5; }
+  .msg.ai .bubble .copy-btn:hover { opacity:1; }
+
+  /* User message: right-aligned */
+  .msg.user { display:flex; flex-direction:column; align-items:flex-end; }
+  .msg.user .msg-meta { display:flex; align-items:center; gap:8px; margin-bottom:5px; padding-right:4px; flex-direction:row-reverse; }
+  .msg.user .msg-meta .avatar { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; background:var(--accent); color:white; }
+  .msg.user .msg-meta .name { font-size:12px; color:var(--muted); font-weight:500; }
+  .msg.user .bubble { max-width:85%; }
+
+  /* Typing dots */
+  .typing-dots { display:flex; gap:5px; padding:8px 0; }
+  .typing-dots span { width:7px; height:7px; border-radius:50%; background:var(--muted); animation:bounce 1.2s infinite ease; }
+  .typing-dots span:nth-child(2) { animation-delay:0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay:0.3s; }
+
+  /* Settings actions flex-wrap */
+  .settings-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:4px; }
+  .settings-actions button { background:none; border:1px solid var(--border); padding:6px 14px; border-radius:8px; font-size:12px; cursor:pointer; color:var(--muted); font-family:inherit; transition:0.2s; }
+  .settings-actions button:hover { border-color:var(--accent); color:var(--text); }
+  .settings-actions .danger { color:#b8860b; }
+  .settings-actions .link-btn { color:var(--accent); font-weight:500; }
+
+  /* Health check */
+  .health-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .health-item { font-size:11px; padding:4px 10px; border-radius:6px; border:1px solid var(--border); display:flex; align-items:center; gap:4px; }
+  .health-dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
+  .health-dot.green { background:#27ae60; }
+  .health-dot.red { background:#e74c3c; }
+  .health-dot.gray { background:#bdc3c7; }
+
+  /* Quick presets */
+  .presets { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+  .presets button { font-size:11px; padding:4px 12px; border-radius:6px; border:1px solid var(--border); background:var(--bg); cursor:pointer; font-family:inherit; color:var(--muted); transition:0.2s; }
+  .presets button:hover { border-color:var(--accent); color:var(--text); }
+
+  /* Character toggle */
+  .char-toggle { display:flex; gap:0; margin-bottom:12px; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+  .char-toggle button { flex:1; padding:8px 0; border:none; font-size:13px; cursor:pointer; font-family:inherit; transition:0.2s; }
+  .char-toggle .char-w { background:var(--light-accent); color:var(--text); }
+  .char-toggle .char-w.active { background:var(--accent); color:white; }
+  .char-toggle .char-l { background:var(--bg); color:var(--text); }
+  .char-toggle .char-l.active { background:#8b0000; color:white; }
+
+  /* History panel */
+  .hist-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; justify-content:center; align-items:center; backdrop-filter:blur(3px); }
+  .hist-overlay.show { display:flex; }
+  .hist-box { background:var(--card); border-radius:16px; padding:20px; max-width:400px; width:92%; max-height:70vh; display:flex; flex-direction:column; box-shadow:0 12px 40px rgba(0,0,0,0.2); animation:fadeIn 0.25s ease; }
+  .hist-box h3 { font-size:15px; font-weight:500; margin-bottom:12px; color:var(--text); }
+  .hist-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; }
+  .hist-item { display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--border); border-radius:10px; cursor:pointer; transition:0.15s; }
+  .hist-item:hover { border-color:var(--accent); background:var(--light-accent); }
+  .hist-item .hist-info { flex:1; min-width:0; }
+  .hist-item .hist-title { font-size:13px; font-weight:500; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hist-item .hist-meta { font-size:11px; color:var(--muted); margin-top:2px; }
+  .hist-item .hist-del { background:none; border:none; font-size:14px; cursor:pointer; color:#ccc; padding:4px; flex-shrink:0; transition:0.2s; }
+  .hist-item .hist-del:hover { color:var(--danger); }
+  .hist-empty { text-align:center; padding:30px 0; color:var(--muted); font-size:13px; }
+  .hist-close { margin-top:12px; text-align:center; }
+  .hist-close button { background:var(--bg); border:1px solid var(--border); padding:8px 28px; border-radius:10px; font-size:13px; cursor:pointer; font-family:inherit; color:var(--muted); }
+  .hist-close button:hover { border-color:var(--accent); }
+
+  /* Chapter divider */
+  .chapter-divider { text-align:center; font-size:10px; color:var(--muted); padding:4px 0; opacity:0.5; letter-spacing:2px; display:flex; align-items:center; gap:10px; }
+  .chapter-divider::before, .chapter-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* Lacan theme */
+  body.lacan { --bg:#0d0b0a; --card:#161312; --text:#c8c0b0; --muted:#6a6055; --accent:#7a1a1a; --light-accent:#1f1815; --bubble-user:#1f1815; --bubble-ai:#12100e; --border:#2a221c; --shadow:0 2px 16px rgba(0,0,0,0.5); --panel-bg:#12100e; --danger:#cc3333; }
+  body.lacan .header h1 { letter-spacing:3px; font-weight:400; }
+  body.lacan .msg.ai .msg-meta .avatar { background:#2a1a1a; color:#7a1a1a; }
+  body.lacan .msg.ai .bubble { border-radius:2px 14px 14px 14px; border-color:#2a221c; }
+  body.lacan .msg.user .bubble { border-radius:14px 2px 14px 14px; }
+  body.lacan .intro .hint-btn { background:#12100e; border-color:#2a221c; }
+  body.lacan .intro .hint-btn:hover { border-color:#7a1a1a; }
+  body.lacan input, body.lacan textarea { background:#12100e !important; border-color:#2a221c !important; }
+  body.lacan .settings-panel { background:#12100e; }
+  body.lacan .hist-item:hover { background:#1f1815; }
+
+  /* Dark mode extras */
+  .dark .hist-item:hover { background:#2a241e; }
+  .dark .intro .hint-btn { background:#1e1914; color:#e0d8cc; border-color:#3a3028; }
+  .dark .changelogContent { background:#1e1914; }
+  .dark .greet-btn { background:#1e1914 !important; color:#e0d8cc !important; border-color:#3a3028 !important; }
+
+  /* Banner types */
+  .banner.info { background:#eef6f0; border:1px solid #c6e0cc; color:#2d7d46; }
+  .banner.warn { background:#fef9ed; border:1px solid #f0dca0; color:#9a7b2a; }
+
+  /* Hint button */
+  .intro .hint-btn { display:block; width:220px; padding:12px 0; border:1px solid var(--border); border-radius:12px; background:var(--card); cursor:pointer; font-family:inherit; font-size:15px; color:var(--text); transition:0.2s; }
+  .intro .hint-btn:hover { border-color:var(--accent); background:var(--light-accent); }
+</style>
+<script src="https://beacon.cdn.qq.com/sdk/4.5.9/beacon_web.min.js"></script>
+<script>
+(function(){
+  try{
+    var beacon=new BeaconAction({
+      appkey:'0WEB06U85YBSLJNL',
+      versionCode:'1.0.0',
+      channelID:'share',
+      delay:1000,
+      sessionDuration:30*60*1000,
+      isOversea:false,
+      needReportRqdEvent:false
+    });
+    beacon.onDirectUserAction('preview_page_view',{
+      'url':location.href,
+      'referrer':document.referrer,
+      'title':document.title,
+      'sandbox_id':'08fcbf9c0bd341bb8d05350303fd2dd9'
+    });
+  }catch(e){}
+})();
+</script></head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>与温尼科特对话</h1>
+    <p>一个观察了六十年婴儿的儿科医生，用日常语言讨论人类经验</p>
+    <p style="font-size:11px;color:#a09080;margin-top:4px;">English / 中文 均可</p>
+    <button class="reward-btn" onclick="showRewardModal(false)" title="觉得是个好活？打赏点token钱~">☕</button>
+    <button class="dark-btn" id="darkBtn" onclick="toggleDark()" title="暗黑模式">🌙</button>
+    <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()" title="API 设置">⚙️</button>
+  </div>
+
+  <div class="settings-panel" id="settingsPanel">
+    <h3>🔌 API 设置</h3>
+    <div class="mode-toggle">
+      <button class="default-btn active" id="defaultModeBtn" onclick="setMode('default')">默认（DeepSeek）</button>
+      <button class="custom-btn" id="customModeBtn" onclick="setMode('custom')">自用 API</button>
+    </div>
+    <div id="customFields" style="display:none;">
+      <div class="rich-text">👑 膜拜有钱大佬 👑</div>
+      <div class="settings-row"><label>API 地址</label><input id="customApi" placeholder="https://api.example.com/v1/chat/completions"></div>
+      <div class="settings-row"><label>API Key</label><input id="customKey" type="password" placeholder="sk-..."></div>
+      <div class="settings-row"><label>模型名</label><input id="customModel" placeholder="gpt-4o, claude-3, deepseek-chat 等"></div>
+    </div>
+
+    <hr style="border:0;border-top:1px solid #ece4d8;margin:14px 0;">
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px;">
+        <span>❤️ 情感对话</span>
+        <span id="tempLabel" style="color:var(--accent);font-weight:600;">60</span>
+        <span>📚 知识回答</span>
+      </div>
+      <input type="range" id="tempSlider" min="0" max="100" value="60"
+        oninput="updateTemp(this.value)"
+        style="width:100%;height:4px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right, #a6845b 60%, #e5d9c8 60%);border-radius:2px;outline:none;cursor:pointer;">
+      <div class="slider-marks">
+        <span></span><span></span><span style="opacity:1;">20</span><span></span><span></span>
+        <span></span><span style="opacity:1;">60</span><span></span><span></span>
+        <span style="opacity:1;">80</span><span></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:#c9b99d;margin-top:2px;">
+        <span>更像温尼科特本人</span>
+        <span>更准更详细</span>
+      </div>
+    </div>
+
+    <hr style="border:0;border-top:1px solid #ece4d8;margin:14px 0 12px;">
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="showChangelog()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;">📋 更新日志</button>
+      <button onclick="resetConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:#b8860b;font-family:inherit;">🔄 新对话</button>
+      <button onclick="exportConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;">📥 导出对话</button>
+    </div>
+    <div id="changelogContent" style="display:none;margin-top:10px;background:#faf8f5;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:#5c4c38;line-height:1.8;max-height:180px;overflow-y:auto;">
+      <p><strong style="color:#1a1510;">v3.1</strong> (2026-06-22)<br>
+      • 重构：SSE 流式输出——回复逐字出现，不再卡等<br>
+      • 新增：☕ 打赏按钮（顶部咖啡杯图标）<br>
+      • 新增：聊到 15 轮自动弹打赏二维码<br>
+      • 新增：自定义打赏模态框（带柔光弹动效）</p>
+      <p><strong style="color:#1a1510;">v3.0</strong> (2026-06-22)<br>
+      • 优化：设置面板不再遮挡底部操作按钮<br>
+      • 优化：移动端复制按钮始终可见<br>
+      • 优化：自定义确认弹窗替换原生 confirm<br>
+      • 优化：导出文件名包含时分秒<br>
+      • 优化：输入框高度上限提升至180px<br>
+      • 优化：温度滑块增加20/60/80刻度标记<br>
+      • 优化：上下文使用量指示器<br>
+      • 优化：错误提示区分场景（Key无效/额度不足/超长）<br>
+      • 优化：回复不再输出 markdown 符号<br>
+      • 优化：分隔线改为柔和留空<br>
+      • 优化：增加温尼科特标志性口癖（I wonder/在我看来等）<br>
+      • 更换：默认模型切换为 DeepSeek V4 Flash</p>
+      <p><strong style="color:#1a1510;">v2.6</strong> (2026-06-22)<br>
+      • 优化：心事模式只回复情感内容，删除分隔线和理论部分<br>
+      • 新增：进入对话时选择模式（心事/专业/随便聊聊）</p>
+      <p><strong style="color:#1a1510;">v2.5</strong> (2026-06-22)<br>
+      • 新增：对话温度调节（情感↔知识可调）<br>
+      • 新增：导出对话到本地<br>
+      • 新增：对话上下文自动精简</p>
+      <p><strong style="color:#1a1510;">v2.4</strong> (2026-06-22)<br>
+      • 新增：知识问答模式自动加载完整知识库（181KB）<br>
+      • 优化：移除引导问题按钮</p>
+      <p><strong style="color:#1a1510;">v2.3</strong> (2026-06-22)<br>
+      • 新增：更新日志 & 了解作者<br>
+      • 优化：桌面端字体放大<br>
+      • 新增：访问统计</p>
+      <p><strong style="color:#1a1510;">v2.2</strong> (2026-06-22)<br>
+      • 优化：回答增加英文提示<br>
+      • 优化：温度调节联动知识库切换</p>
+      <p><strong style="color:#1a1510;">v2.1</strong> (2026-06-22)<br>
+      • 新增：自定义 API 设置<br>
+      • 新增：新对话按钮</p>
+      <p><strong style="color:#1a1510;">v2.0</strong> (2026-06-22)<br>
+      • 重构：对话上下文自动精简<br>
+      • 优化：长对话自动提示重置</p>
+      <p><strong style="color:#1a1510;">v1.0</strong> (2026-06-21)<br>
+      • 首发：温尼科特思维框架对话</p>
+    </div>
+  </div>
+
+  <div class="ctx-bar" id="ctxBar" style="display:none;">
+    <span class="ctx-label">上下文</span>
+    <div class="ctx-track"><div class="ctx-fill" id="ctxFill" style="width:0%"></div></div>
+    <span class="ctx-label" id="ctxPct">0%</span>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="intro" id="intro">
+      <div class="icon">🧸</div>
+      <h2 id="greetingTitle">今天想聊聊什么？</h2>
+      <p id="greetingSub" style="font-size:14px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.8;">选一个方向，我来调成最适合聊天的模式</p>
+      <div class="hints" id="greetingBtns" style="margin-top:20px;display:flex;flex-direction:column;gap:10px;align-items:center;">
+        <button class="greet-btn" onclick="startChat(10)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+          <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">❤️</span>
+          聊聊心事
+          <span style="font-size:10px;color:#b0a090;display:block;margin-top:2px;">温度 10 · 温暖陪伴</span>
+        </button>
+        <button class="greet-btn" onclick="startChat(90)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+          <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">📚</span>
+          聊聊专业
+          <span style="font-size:10px;color:#b0a090;display:block;margin-top:2px;">温度 90 · 深度知识</span>
+        </button>
+        <button class="greet-btn" onclick="startChat(60)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+          <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">🫖</span>
+          随便聊聊
+          <span style="font-size:10px;color:#b0a090;display:block;margin-top:2px;">温度 60 · 默认平衡</span>
+        </button>
+      </div>
+      <p style="font-size:12px;color:#8b7355;margin-top:22px;line-height:1.6;">💡 原始语料为英文，用英文提问效果更佳 / <span style="font-size:11px;opacity:0.7;">English prompts work best</span></p>
+    </div>
+  </div>
+  <div class="disclaimer">
+    此对话由 AI 模拟温尼科特思维框架生成，非临床治疗建议。如有心理困扰，可请寻求作者帮助。
+    <span id="busuanzi_container_page_pv" style="opacity:0.3;margin-left:8px;">| 👁️ <span id="busuanzi_value_page_pv"></span></span>
+    <br><span style="opacity:0.8;">| <strong><a href="https://757b6f9d7772430ab0dba04609cfa611.app.codebuddy.work" target="_blank" style="color:#a6845b;text-decoration:none;font-weight:bold;">了解作者</a></strong> | <a onclick="showChangelog()" style="color:var(--muted);text-decoration:none;cursor:pointer;">v3.1</a></span>
+  </div>
+  <div class="input-area">
+    <div class="input-wrap">
+      <textarea id="input" rows="1" placeholder="写下你想说的……" onkeydown="handleKey(event)"></textarea>
+      <button id="sendBtn" onclick="sendMessage()" title="发送">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <p style="font-size:10px;color:#c9b99d;text-align:right;margin-top:6px;padding-right:4px;">↩ Enter 发送 · ⇧ Shift+Enter 换行</p>
+  </div>
+</div>
+
+<div class="reward-overlay" id="rewardOverlay" onclick="if(event.target===this)closeReward()">
+  <div class="reward-box">
+    <h3>☕ 觉得是个好活？</h3>
+    <p class="reward-sub">这网站免费用，但 API 调一次几毛钱<br>如果你聊得开心，可以打赏点 token 钱</p>
+    <img src="reward-qr.jpg" alt="打赏二维码">
+    <p class="reward-tip">微信扫码 · 多少随意 · 全靠缘分</p>
+    <button class="reward-close" onclick="closeReward()">收到，关掉</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <h3 id="modalTitle">确认</h3>
+    <p id="modalText">确定执行此操作？</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="modalCancel">取消</button>
+      <button class="btn-confirm" id="modalConfirm">确定</button>
+    </div>
+  </div>
+</div>
+<script>
+// Default config (DeepSeek V4 Flash via EdgeOne)
+const DEFAULT_API = 'https://winnicott-chat-ujnaxky5.edgeone.cool/api/proxy';
+const DEFAULT_KEY = '';
+const DEFAULT_MODEL = 'deepseek-v4-flash';
+
+let systemPrompt = '';
+let conversation = [];
+let isLoading = false;
+let talkTemp = parseInt(localStorage.getItem('winnicott_temp') || '60');
+let apiMode = localStorage.getItem('winnicott_api_mode') || 'default';
+let customApi = localStorage.getItem('winnicott_custom_api') || '';
+let customKey = localStorage.getItem('winnicott_custom_key') || '';
+let customModel = localStorage.getItem('winnicott_custom_model') || '';
+
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('sendBtn');
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsPanel = document.getElementById('settingsPanel');
+const defaultModeBtn = document.getElementById('defaultModeBtn');
+const customModeBtn = document.getElementById('customModeBtn');
+const customFields = document.getElementById('customFields');
+const ctxBar = document.getElementById('ctxBar');
+const ctxFill = document.getElementById('ctxFill');
+const ctxPct = document.getElementById('ctxPct');
+var modalResolve = null;
+
+function toggleSettings() { settingsPanel.classList.toggle('open'); restoreForm(); }
+function setMode(mode) {
+  apiMode = mode;
+  localStorage.setItem('winnicott_api_mode', mode);
+  defaultModeBtn.className = 'default-btn' + (mode === 'default' ? ' active' : '');
+  customModeBtn.className = 'custom-btn' + (mode === 'custom' ? ' active' : '');
+  customFields.style.display = mode === 'custom' ? 'block' : 'none';
+  settingsBtn.className = 'settings-btn' + (mode === 'custom' ? ' custom' : '');
+}
+function restoreForm() {
+  document.getElementById('customApi').value = customApi;
+  document.getElementById('customKey').value = customKey;
+  document.getElementById('customModel').value = customModel;
+  setMode(apiMode);
+}
+function saveSettings() {
+  customApi = document.getElementById('customApi').value.trim();
+  customKey = document.getElementById('customKey').value.trim();
+  customModel = document.getElementById('customModel').value.trim() || 'gpt-4o';
+  if (customApi) localStorage.setItem('winnicott_custom_api', customApi);
+  else localStorage.removeItem('winnicott_custom_api');
+  if (customKey) localStorage.setItem('winnicott_custom_key', customKey);
+  else localStorage.removeItem('winnicott_custom_key');
+  localStorage.setItem('winnicott_custom_model', customModel);
+  showBanner('info', '设置已保存（存于浏览器本地）');
+}
+
+function getActiveConfig() {
+  if (apiMode === 'custom' && customApi && customKey) {
+    return { api: customApi, key: customKey, model: customModel };
+  }
+  return { api: DEFAULT_API, key: DEFAULT_KEY, model: DEFAULT_MODEL };
+}
+
+// Init
+restoreForm();
+document.getElementById('tempSlider').value = talkTemp;
+updateTemp(talkTemp);
+loadSystemPrompt();
+// Dark mode restore
+if (localStorage.getItem('winnicott_dark') === '1') { document.body.classList.add('dark'); document.getElementById('darkBtn').textContent = '☀️'; }
+// Conversation restore
+var saved = localStorage.getItem('winnicott_conversation');
+if (saved) {
+  try { conversation = JSON.parse(saved); } catch(e) {}
+  if (conversation.length > 0) {
+    document.getElementById('intro').style.display = 'none';
+    for (var i = 0; i < conversation.length; i++) {
+      appendMessage(conversation[i].role, conversation[i].content);
+    }
+  }
+}
+function saveConversation() {
+  if (conversation.length > 0) localStorage.setItem('winnicott_conversation', JSON.stringify(conversation));
+  else localStorage.removeItem('winnicott_conversation');
+}
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  var isDark = document.body.classList.contains('dark');
+  document.getElementById('darkBtn').textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('winnicott_dark', isDark ? '1' : '0');
+}
+function copyMsg(btn, idx) {
+  var text = conversation[idx] ? conversation[idx].content : '';
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = '✅';
+    setTimeout(function(){btn.textContent = '📋';}, 1500);
+  });
+}
+function showConfirm(title, text) {
+  return new Promise(function(resolve) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('show');
+    modalResolve = resolve;
+  });
+}
+document.getElementById('modalConfirm').onclick = function() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  if (modalResolve) { modalResolve(true); modalResolve = null; }
+};
+document.getElementById('modalCancel').onclick = function() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  if (modalResolve) { modalResolve(false); modalResolve = null; }
+};
+
+function updateCtxBar() {
+  if (!ctxBar) return;
+  if (conversation.length <= 2) { ctxBar.style.display = 'none'; return; }
+  ctxBar.style.display = 'flex';
+  var pct = Math.min(100, Math.round((conversation.length / 14) * 100));
+  ctxFill.style.width = pct + '%';
+  ctxPct.textContent = pct + '%';
+}
+
+async function loadSystemPrompt() {
+  var file = 'winnicott-knowledge.md';
+  if (talkTemp > 80) file = 'winnicott-knowledge-full.md';
+  else if (talkTemp < 20) file = 'winnicott-emotional.md';
+  try {
+    const res = await fetch(file);
+    systemPrompt = await res.text();
+  } catch (e) {
+    showBanner('error', '加载温尼科特知识库失败，请刷新页面重试。');
+  }
+}
+
+function appendMessage(role, content) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  var idx = conversation.length;
+  div.innerHTML = '<div class="avatar">' + (role === 'user' ? '我' : 'DW') + '</div><div class="bubble">' + escapeHtml(content) + '<button class="copy-btn" onclick="copyMsg(this,' + idx + ')" title="复制">📋</button></div>';
+  messagesEl.appendChild(div);
+  scrollToBottom();
+  updateCtxBar();
+}
+function showBanner(type, text) {
+  const d = document.createElement('div');
+  d.className = 'banner ' + type;
+  d.textContent = text;
+  messagesEl.appendChild(d);
+  setTimeout(function(){d.remove();}, type==='info'?3000:10000);
+  scrollToBottom();
+}
+
+function showRewardModal(auto) {
+  document.getElementById('rewardOverlay').classList.add('show');
+  if (auto) {
+    // Mark as shown for this session so we don't auto-pop repeatedly
+    sessionStorage.setItem('winnicott_reward_auto_shown', '1');
+  }
+}
+function closeReward() {
+  document.getElementById('rewardOverlay').classList.remove('show');
+}
+function showTyping() {
+  const div = document.createElement('div');
+  div.className = 'msg ai typing-msg'; div.id = 'typing';
+  div.innerHTML = '<div class="avatar">DW</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
+  messagesEl.appendChild(div); scrollToBottom();
+}
+function removeTyping() { var el = document.getElementById('typing'); if (el) el.remove(); }
+function scrollToBottom() { messagesEl.scrollTop = messagesEl.scrollHeight; }
+function escapeHtml(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+
+async function sendMessage() {
+  // Save any unsaved settings changes
+  var dirtyKey = document.getElementById('customKey').value.trim();
+  var dirtyApi = document.getElementById('customApi').value.trim();
+  var dirtyModel = document.getElementById('customModel').value.trim();
+  if (apiMode === 'custom' && dirtyKey !== customKey) { saveSettings(); }
+
+  var text = inputEl.value.trim();
+  if (!text || isLoading) return;
+  if (!systemPrompt) { showBanner('error', '知识库加载中，请稍等……'); return; }
+
+  var cfg = getActiveConfig();
+  if (apiMode === 'custom' && !cfg.key) { showBanner('error', '未配置 API Key，请在设置中填写。'); return; }
+
+  var intro = document.getElementById('intro');
+  if (intro) intro.style.display = 'none';
+
+  inputEl.value = ''; inputEl.style.height = 'auto';
+  appendMessage('user', text);
+  conversation.push({ role: 'user', content: text });
+  saveConversation();
+
+  // Reward trigger: 15 user messages, once per session
+  var userMsgCount = conversation.filter(function(m){return m.role==='user';}).length;
+  if (userMsgCount === 15 && !sessionStorage.getItem('winnicott_reward_auto_shown')) {
+    setTimeout(function(){ showRewardModal(true); }, 1200);
+  }
+
+  // Build context: inject temperature instruction
+  var tempInstr = '\n\n[温度指令：当前对话权重 ' + talkTemp + '/100。';
+  if (talkTemp <= 20) {
+    tempInstr += '只用情感化个人回应，不要分隔线，不要理论部分。用温尼科特自己的声音说话，像一个人在跟你聊天。每次回复控制在150字以内，精简，温暖，有人味儿。适当使用"I wonder...""在我看来""你知道……"等口癖。不要输出任何markdown符号（**、##、---、-、*等），用纯文本。不要出现分隔线。]';
+  } else if (talkTemp <= 40) {
+    tempInstr += '第一部分情感回应为主（约70%），第二部分理论锚点简略带过（约30%）。两部分之间用柔和的留空分隔，不要用"---"或者"—"。不要输出任何markdown符号（**、##、---等），用纯文本。]';
+  } else if (talkTemp <= 60) {
+    tempInstr += '默认模式：第一部分情感回应（约40%）+ 第二部分理论锚点（约60%）。两部分之间用柔和的留空分隔，不要用"---"。不要输出任何markdown符号（**、##等），用纯文本。]';
+  } else if (talkTemp <= 80) {
+    tempInstr += '重点在第二部分理论锚点（约80%），第一部分情感回应简略带过（约20%）。不要用"---"或"—"分隔。不要输出任何markdown符号（**、##等），用纯文本。]';
+  } else {
+    tempInstr += '优先使用第二部分（精确理论回答），情感回应大幅减少。直接给出专业准确的理论说明。不要用"---"分隔。不要输出任何markdown符号（**、##等），用纯文本。]';
+  }
+
+  // Smart context: keep first exchange + last 4 exchanges
+  var ctxMessages = [{ role: 'system', content: systemPrompt + tempInstr }];
+  if (conversation.length > 2) {
+    // Always keep first exchange to preserve original topic
+    ctxMessages.push(conversation[0]);
+    ctxMessages.push(conversation[1]);
+    // Keep last 4 exchanges (most recent)
+    var recent = conversation.slice(-8);
+    for (var i = 0; i < recent.length; i++) {
+      var msg = recent[i];
+      // Skip if already included from first exchange
+      if (msg === conversation[0] || msg === conversation[1]) continue;
+      ctxMessages.push(msg);
+    }
+  } else {
+    ctxMessages = ctxMessages.concat(conversation.slice(-10));
+  }
+
+  // Warn if conversation getting too long
+  if (conversation.length > 12) {
+    showBanner('info', '对话较长，已自动精简上下文以保持准确性。如果效果下降可点击设置→新对话');
+  }
+
+  isLoading = true; sendBtn.disabled = true; showTyping();
+  try {
+    var fetchHeaders = { 'Content-Type': 'application/json' };
+    if (cfg.key) fetchHeaders['Authorization'] = 'Bearer ' + cfg.key;
+    var res = await fetch(cfg.api, {
+      method: 'POST',
+      headers: fetchHeaders,
+      body: JSON.stringify({ model: cfg.model, messages: ctxMessages, temperature: 0.7, max_tokens: 1800, stream: true })
+    });
+
+    if (!res.ok || !res.body) {
+      // Non-streaming fallback for error responses
+      var errData;
+      try { errData = await res.json(); } catch(e) { errData = {}; }
+      removeTyping();
+      var errMsg = (errData.error && errData.error.message) || '';
+      if (res.status === 401 || errMsg.indexOf('invalid_api_key') >= 0 || errMsg.indexOf('auth') >= 0) {
+        showBanner('error', 'API Key 无效，请在设置中检查。');
+      } else if (errMsg.indexOf('rate') >= 0 || errMsg.indexOf('quota') >= 0 || errMsg.indexOf('insufficient') >= 0) {
+        showBanner('error', 'API 调用额度不足或频率过高，稍后再试。');
+      } else if (errMsg.indexOf('token') >= 0 || errMsg.indexOf('too long') >= 0) {
+        showBanner('error', '对话过长，建议点击设置→新对话后重试。');
+      } else {
+        showBanner('error', '请求失败 (' + res.status + ')：' + (errMsg || '未知错误'));
+      }
+      conversation.pop(); isLoading = false; sendBtn.disabled = false; return;
+    }
+
+    // --- SSE streaming ---
+    removeTyping();
+    var reader = res.body.getReader();
+    var decoder = new TextDecoder();
+    var fullReply = '';
+    var streamIdx = conversation.length;
+    var streamBubble = null;
+
+    // Create streaming message container
+    var div = document.createElement('div');
+    div.className = 'msg ai';
+    div.innerHTML = '<div class="avatar">DW</div><div class="bubble" id="streamBubble' + streamIdx + '"></div>';
+    messagesEl.appendChild(div);
+    streamBubble = document.getElementById('streamBubble' + streamIdx);
+    scrollToBottom();
+
+    var buffer = '';
+    while (true) {
+      var done = false;
+      var chunk;
+      try { var result = await reader.read(); done = result.done; chunk = result.value; } catch(e) { break; }
+      if (done) break;
+      buffer += decoder.decode(chunk, { stream: true });
+      var lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (line.startsWith('data: ')) {
+          var payload = line.slice(6).trim();
+          if (payload === '[DONE]') { done = true; break; }
+          try {
+            var parsed = JSON.parse(payload);
+            var delta = parsed.choices && parsed.choices[0] && parsed.choices[0].delta;
+            var content = delta && delta.content ? delta.content : '';
+            if (content) {
+              fullReply += content;
+              streamBubble.innerHTML = escapeHtml(fullReply) + '<span class="stream-cursor"></span>';
+              scrollToBottom();
+            }
+          } catch(e) { /* skip malformed JSON lines */ }
+        }
+      }
+      if (done) break;
+    }
+    // Flush any remaining buffer
+    if (buffer.startsWith('data: ')) {
+      var payload = buffer.slice(6).trim();
+      if (payload !== '[DONE]') {
+        try {
+          var parsed = JSON.parse(payload);
+          var delta = parsed.choices && parsed.choices[0] && parsed.choices[0].delta;
+          var content = delta && delta.content ? delta.content : '';
+          if (content) { fullReply += content; }
+        } catch(e) {}
+      }
+    }
+
+    if (!fullReply) {
+      showBanner('error', '模型返回为空，请重试。');
+      div.remove(); conversation.pop();
+      isLoading = false; sendBtn.disabled = false; return;
+    }
+
+    // Remove cursor, set final content
+    streamBubble.innerHTML = escapeHtml(fullReply);
+    streamBubble.classList.remove('stream-cursor');
+    conversation.push({ role: 'assistant', content: fullReply });
+    saveConversation();
+    scrollToBottom();
+  } catch (e) {
+    removeTyping();
+    showBanner('error', '网络连接异常，请稍后再试。');
+    conversation.pop();
+  }
+  isLoading = false; sendBtn.disabled = false; inputEl.focus();
+}
+function askHint(btn) { inputEl.value = btn.textContent; sendMessage(); }
+function startChat(temp) {
+  talkTemp = temp;
+  localStorage.setItem('winnicott_temp', temp);
+  document.getElementById('tempSlider').value = temp;
+  updateTemp(temp);
+  loadSystemPrompt();
+  document.getElementById('intro').style.display = 'none';
+  inputEl.focus();
+}
+function updateTemp(val) {
+  var old = talkTemp;
+  talkTemp = parseInt(val);
+  localStorage.setItem('winnicott_temp', talkTemp);
+  document.getElementById('tempLabel').textContent = talkTemp;
+  var pct = talkTemp + '%';
+  document.getElementById('tempSlider').style.background = 'linear-gradient(to right, #a6845b ' + pct + ', #e5d9c8 ' + pct + ')';
+  // Reload knowledge base if crossing threshold
+  var oldZone = old < 20 ? 0 : old <= 80 ? 1 : 2;
+  var newZone = talkTemp < 20 ? 0 : talkTemp <= 80 ? 1 : 2;
+  if (oldZone !== newZone) loadSystemPrompt();
+}
+function showChangelog() {
+  var el = document.getElementById('changelogContent');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+async function resetConversation() {
+  if (conversation.length === 0) return;
+  var ok = await showConfirm('新对话', '确定开始新对话？当前聊天记录将被清除。');
+  if (!ok) return;
+  conversation = [];
+  localStorage.removeItem('winnicott_conversation');
+  messagesEl.querySelectorAll('.msg').forEach(function(el){el.remove();});
+  document.getElementById('intro').style.display = 'block';
+  updateCtxBar();
+  showBanner('info', '已开始新对话 ✨');
+  inputEl.focus();
+}
+function exportConversation() {
+  if (conversation.length === 0) { showBanner('error', '暂无对话可导出'); return; }
+  var lines = ['# 与温尼科特对话记录', '', '---', ''];
+  for (var i = 0; i < conversation.length; i++) {
+    var msg = conversation[i];
+    var name = msg.role === 'user' ? '我' : '温尼科特';
+    lines.push('### ' + name);
+    lines.push('');
+    lines.push(msg.content);
+    lines.push('');
+    lines.push('---');
+    lines.push('');
+  }
+  lines.push('_导出时间: ' + new Date().toLocaleString() + '_');
+  var text = lines.join('\n');
+  var blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'winnicott-conversation-' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showBanner('info', '对话已导出 📥');
+}
+inputEl.addEventListener('input', function(){ inputEl.style.height = 'auto'; inputEl.style.height = Math.min(inputEl.scrollHeight, 180) + 'px'; });
+</script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</body>
+</html>
