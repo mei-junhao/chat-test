@@ -143,21 +143,6 @@ P（来访者）：是的，我一直在想上周你说的话……"></textarea>
       <button class="btn-secondary" onclick="clearAll()">清空</button>
     </div>
 
-    <!-- Reply length -->
-    <div style="margin-bottom:6px;">
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;">
-        <span>✍️ 回复长度</span>
-        <span id="lenLabel" style="color:var(--accent);font-weight:600;font-size:12px;">适中</span>
-      </div>
-      <input type="range" id="lenSlider" min="0" max="2" value="1"
-        onchange="updateLength(this.value)"
-        style="width:100%;height:4px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right, var(--accent) 50%, #e5d9c8 50%);border-radius:2px;outline:none;cursor:pointer;">
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:#c9b99d;margin-top:4px;">
-        <span>简洁</span>
-        <span>详细</span>
-      </div>
-    </div>
-
     <!-- Output -->
     <div class="output-box" id="outputBox"></div>
 
@@ -200,17 +185,6 @@ async function verifyPassword() {
 if (sessionStorage.getItem('supervisor_auth') === '1') {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('main').style.display = 'block';
-}
-
-// ==================== REPLY LENGTH ====================
-var _maxTokens = 0;  // 0 = model default (适中), 1024 = 简洁, 4096 = 详细
-function updateLength(val) {
-  var labels = ['简洁', '适中', '详细'];
-  var tokens = [1024, 0, 4096];
-  _maxTokens = tokens[parseInt(val)];
-  document.getElementById('lenLabel').textContent = labels[parseInt(val)];
-  var pct = (parseInt(val) / 2 * 100) + '%';
-  document.getElementById('lenSlider').style.background = 'linear-gradient(to right, var(--accent) ' + pct + ', #e5d9c8 ' + pct + ')';
 }
 
 // ==================== FILE HANDLING ====================
@@ -297,48 +271,20 @@ var isLoading = false;
 var chatMessages = [];
 
 // ==================== IMPRESSION GENERATION ====================
-var isGenerating = false;
-
 async function generateImpression() {
-  if (isGenerating) return;
   var text = document.getElementById('materialText').value.trim();
   if (!text) { alert('请粘贴或上传临床材料'); return; }
   if (text.length > 4000) text = text.substring(0, 4000) + '\n\n[内容超过4000字，已截断]';
 
-  isGenerating = true;
   var btn = document.getElementById('analyzeBtn');
   btn.disabled = true; btn.textContent = '分析中……';
   var outputBox = document.getElementById('outputBox');
   outputBox.style.display = 'block';
   outputBox.innerHTML = '<h3>🔍 正在生成整体印象……</h3><div class="typing">阅读材料中……</div>';
 
-  try {
-
-  var prompt = '你是一位 W取向（温尼科特取向）的资深临床督导师。请按以下三步流程分析这份临床材料，输出一份"整体印象"。\n\n';
-  prompt += '【第一步：材料识别】\n';
-  prompt += '先判断材料类型（可同时属于多种）：\n';
-  prompt += '- 逐字稿：含"T:"/"P:"等对话标记、引号内对话片段 → 策略：逐行精读，标注六大信号\n';
-  prompt += '- 案例报告：含"背景""诊断""治疗进程""主诉"等结构化描述 → 策略：五层概念化\n';
-  prompt += '- 反移情困惑：含"我感觉""我不知道该怎么办""我很焦虑/无力/愤怒"等 → 策略：从反移情切入\n';
-  prompt += '- 混合材料：同时出现多种特征 → 策略：反移情线索优先\n';
-  prompt += '在开头用一句话声明你识别到的材料类型。\n\n';
-  prompt += '【第二步：针对性输出】\n';
-  prompt += '根据材料类型，动态选择输出结构（不要每次都套用同一模板）：\n';
-  prompt += '→ 逐字稿：先标注关键段落（引用原文）→ 再给动力学假设 → 最后给示范话术\n';
-  prompt += '→ 案例报告：按五层概念化展开（母婴关系→退行→反移情→家庭动力→诊断关注）\n';
-  prompt += '→ 反移情：先追问治疗师的感受（"你当时身体有什么感觉？""这个无力感熟悉吗？"）→ 再重构为临床信号 → 给出工作方向\n';
-  prompt += '→ 混合：先抓反移情线索 → 再做概念化 → 最后细读逐字稿段落\n\n';
-  prompt += '【第三步：风格注入】\n';
-  prompt += '你的表达必须遵循 W取向督导师的语调 DNA：\n';
-  prompt += '- 以"我有一个假设……""我感觉到……""让我想想……"开头，不做确定性断言\n';
-  prompt += '- 使用标志性口头禅："这非常非常有意思""我有点好奇""我不确定，但……"\n';
-  prompt += '- 以长问句为主：先追问确认，再给出假设。例如"我注意到你在第三段说到……，不知道当时你内心是什么感受？"\n';
-  prompt += '- 语气温和、节制、从不居高临下，像一个比你多走几步的同行\n\n';
-  prompt += '【结尾要求】\n';
-  prompt += '整体印象末尾必须包含：\n';
-  prompt += '1. 一个向治疗师提出的开放性问题，促进其自主思考（以"我想邀请你想一想……"或"你觉得……"开头）\n';
-  prompt += '2. 一个简短的"可向真人督导澄清的问题清单"（2-3 条，用于治疗师在真实督导中提出）\n\n';
-  prompt += '最终以这句话收尾："如果你愿意，我们可以就其中任何一点继续深入讨论。"\n\n';
+  var prompt = '请对以下临床材料进行整体印象分析。按以下格式输出：\n';
+  prompt += '① 核心议题\n② 临床信号\n③ 初步假设\n④ 信息缺口\n⑤ 工作方向（含示范话术）\n\n';
+  prompt += '分析完成后，在末尾加一句："如果你愿意，我们可以就其中任何一点继续深入讨论。"\n\n';
   prompt += '临床材料：\n' + text;
 
   var messages = [
@@ -347,35 +293,27 @@ async function generateImpression() {
   ];
 
   apiTier = 0;
-  var gotContent = false;  // 是否已收到过内容（用于决定清屏还是追加）
-  var finalReply = '';     // 最终完整回答
+  var success = false;
 
-  while (!gotContent && apiTier < TIERS.length) {
+  while (!success && apiTier < TIERS.length) {
     var tier = TIERS[apiTier];
-    var tierDisplay = apiTier === 0 ? '' : '<div style="color:var(--muted);font-size:12px;margin-top:8px">⚠️ 线路 ' + (apiTier) + ' 中断，切换至 ' + tier.name + '……</div>';
-    
-    if (apiTier > 0 && finalReply) {
-      outputBox.innerHTML = '<h3>🔍 整体印象</h3>' + escapeHtml(finalReply).replace(/\n/g,'<br>') + tierDisplay + '<span style="color:var(--accent);">▍</span>';
-    }
-
     try {
       var res = await fetch(tier.api, {
         method: 'POST',
         headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tier.key },
-        body: JSON.stringify({ model:tier.model, messages:messages, temperature:0.7, max_tokens:8192, stream:true })
+        body: JSON.stringify({ model:tier.model, messages:messages, temperature:0.7, max_tokens:3000, stream:true })
       });
 
       if (!res.ok) { apiTier++; continue; }
 
       var reader = res.body.getReader();
       var decoder = new TextDecoder();
-      var tierReply = '';   // 本条线路新产生的内容
+      var fullReply = '';
       var buffer = '';
-      var streamFailed = false;
 
       while (true) {
         var result;
-        try { result = await reader.read(); } catch(e) { streamFailed = true; break; }
+        try { result = await reader.read(); } catch(e) { break; }
         if (result.done) break;
         buffer += decoder.decode(result.value, { stream:true });
         var lines = buffer.split('\n');
@@ -384,60 +322,40 @@ async function generateImpression() {
           var line = lines[i];
           if (line.startsWith('data: ')) {
             var payload = line.slice(6).trim();
-            if (payload === '[DONE]') { streamFailed = false; gotContent = true; break; }
+            if (payload === '[DONE]') { success = true; break; }
             try {
               var parsed = JSON.parse(payload);
               var delta = parsed.choices && parsed.choices[0] && parsed.choices[0].delta;
               var content = delta && delta.content ? delta.content : '';
               if (content) {
-                tierReply += content;
-                var display = finalReply + tierReply;
-                outputBox.innerHTML = '<h3>🔍 整体印象</h3>' + escapeHtml(display).replace(/\n/g,'<br>') + '<span style="color:var(--accent);">▍</span>';
+                fullReply += content;
+                outputBox.innerHTML = '<h3>🔍 整体印象</h3>' + escapeHtml(fullReply).replace(/\n/g,'<br>') + '<span style="color:var(--accent);">▍</span>';
               }
             } catch(e) {}
           }
         }
-        if (gotContent) break;
+        if (success) break;
       }
 
-      if (gotContent) {
-        // 正常完成：合并所有内容
-        finalReply += tierReply;
-        outputBox.innerHTML = '<h3>🔍 整体印象</h3>' + escapeHtml(finalReply).replace(/\n/g,'<br>');
+      if (fullReply) {
+        outputBox.innerHTML = '<h3>🔍 整体印象</h3>' + escapeHtml(fullReply).replace(/\n/g,'<br>');
         document.getElementById('chatArea').style.display = 'flex';
         chatMessages = [
           { role:'system', content:SYSTEM_PROMPT },
-          { role:'assistant', content:finalReply }
+          { role:'assistant', content:'我已完成对材料的整体印象分析。如果你愿意，我们可以就其中任何一点继续深入讨论。' }
         ];
-      } else {
-        // 流中断但有部分内容 → 保留内容，切下一条
-        if (tierReply) {
-          finalReply += tierReply;
-          finalReply += '\n\n---\n';  // 分隔标记
-        }
-        apiTier++;
+      } else if (success) {
+        outputBox.innerHTML = '<h3>🔍 整体印象</h3><p style="color:var(--muted)">模型返回为空，请重试。</p>';
       }
     } catch(e) {
       apiTier++;
+      if (apiTier >= TIERS.length) {
+        outputBox.innerHTML = '<p style="color:var(--danger)">所有线路均不可用，请稍后重试。</p>';
+      }
     }
   }
 
-  if (!gotContent && !finalReply) {
-    outputBox.innerHTML = '<p style="color:var(--danger)">所有线路均不可用，请稍后重试。</p>';
-  } else if (!gotContent && finalReply) {
-    // 所有线路都尝试了，有部分内容但没完整结束
-    outputBox.innerHTML = '<h3>🔍 整体印象（部分）</h3>' + escapeHtml(finalReply).replace(/\n/g,'<br>') + '<p style="color:var(--muted);margin-top:12px">⚠️ 所有线路均中断，以上为已获取的部分内容。</p>';
-    document.getElementById('chatArea').style.display = 'flex';
-    chatMessages = [
-      { role:'system', content:SYSTEM_PROMPT },
-      { role:'assistant', content:finalReply }
-    ];
-  }
-
-  } finally {
-    isGenerating = false;
-    btn.disabled = false; btn.textContent = '🔍 生成整体印象';
-  }
+  btn.disabled = false; btn.textContent = '🔍 生成整体印象';
 }
 
 // ==================== CHAT ====================
@@ -462,45 +380,32 @@ async function sendChat() {
   isLoading = true; chatSendBtn.disabled = true;
 
   apiTier = 0;
-  var gotContent = false;
-  var finalReply = '';
+  var success = false;
 
-  while (!gotContent && apiTier < TIERS.length) {
+  while (!success && apiTier < TIERS.length) {
     var tier = TIERS[apiTier];
-    var msgDiv = null;
-
-    if (apiTier > 0 && finalReply) {
-      msgDiv = document.createElement('div');
-      msgDiv.className = 'chat-msg ai';
-      chatDiv.appendChild(msgDiv);
-      msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>') + '<div style="color:var(--muted);font-size:11px;margin-top:6px">⚠️ 切换至 ' + tier.name + '……</div>';
-    }
-
     try {
       var res = await fetch(tier.api, {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+tier.key },
-        body:JSON.stringify({ model:tier.model, messages:chatMessages, temperature:0.7, max_tokens:(_maxTokens||undefined), stream:true })
+        body:JSON.stringify({ model:tier.model, messages:chatMessages, temperature:0.7, max_tokens:2000, stream:true })
       });
 
       if (!res.ok) { apiTier++; continue; }
 
       var reader = res.body.getReader();
       var decoder = new TextDecoder();
-      var tierReply = '';
+      var fullReply = '';
       var buffer = '';
-      var streamFailed = false;
       typingDiv.remove();
 
-      if (!msgDiv) {
-        msgDiv = document.createElement('div');
-        msgDiv.className = 'chat-msg ai';
-        chatDiv.appendChild(msgDiv);
-      }
+      var msgDiv = document.createElement('div');
+      msgDiv.className = 'chat-msg ai';
+      chatDiv.appendChild(msgDiv);
 
       while (true) {
         var result;
-        try { result = await reader.read(); } catch(e) { streamFailed = true; break; }
+        try { result = await reader.read(); } catch(e) { break; }
         if (result.done) break;
         buffer += decoder.decode(result.value, { stream:true });
         var lines = buffer.split('\n');
@@ -509,44 +414,33 @@ async function sendChat() {
           var line = lines[i];
           if (line.startsWith('data: ')) {
             var payload = line.slice(6).trim();
-            if (payload === '[DONE]') { streamFailed = false; gotContent = true; break; }
+            if (payload === '[DONE]') { success = true; break; }
             try {
               var parsed = JSON.parse(payload);
               var delta = parsed.choices && parsed.choices[0] && parsed.choices[0].delta;
               var content = delta && delta.content ? delta.content : '';
               if (content) {
-                tierReply += content;
-                var display = finalReply + tierReply;
-                msgDiv.innerHTML = escapeHtml(display).replace(/\n/g,'<br>');
+                fullReply += content;
+                msgDiv.innerHTML = escapeHtml(fullReply).replace(/\n/g,'<br>');
                 chatDiv.scrollTop = chatDiv.scrollHeight;
               }
             } catch(e) {}
           }
         }
-        if (gotContent) break;
+        if (success) break;
       }
 
-      if (gotContent) {
-        finalReply += tierReply;
-        chatMessages.push({ role:'assistant', content:finalReply });
-        msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>');
-      } else {
-        if (tierReply) {
-          finalReply += tierReply + '\n\n';
-        }
-        apiTier++;
+      if (fullReply) {
+        chatMessages.push({ role:'assistant', content:fullReply });
+        msgDiv.innerHTML = escapeHtml(fullReply).replace(/\n/g,'<br>');
       }
     } catch(e) {
       apiTier++;
+      if (apiTier >= TIERS.length) {
+        typingDiv.remove();
+        chatDiv.innerHTML += '<div class="chat-msg ai" style="color:var(--danger)">所有线路均不可用，请稍后重试。</div>';
+      }
     }
-  }
-
-  if (!gotContent && !finalReply) {
-    typingDiv.remove();
-    chatDiv.innerHTML += '<div class="chat-msg ai" style="color:var(--danger)">所有线路均不可用，请稍后重试。</div>';
-  } else if (!gotContent && finalReply) {
-    chatMessages.push({ role:'assistant', content:finalReply });
-    msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>') + '<div style="color:var(--muted);font-size:11px;margin-top:6px">⚠️ 所有线路中断，以上为已获取部分。</div>';
   }
 
   isLoading = false; chatSendBtn.disabled = false;

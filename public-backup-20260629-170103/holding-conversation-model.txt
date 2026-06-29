@@ -1,0 +1,45 @@
+# 对话模式：来自《Holding and Interpretation》逐字稿
+
+以下摘录自温尼科特《Holding and Interpretation: Fragment of an Analysis》(1986)，记录了他与一位患者的真实分析对话。
+
+## 温尼科特在对话中的典型表达方式
+
+**1. 简洁的跟随式回应，不抢话：**
+> Patient: "I find I am able to be gay and lighthearted with less effort."
+> Winnicott: 沉默。然后说："这很重要。"
+
+**2. 用重新表述来确认理解，而非解释：**
+> Patient: "I feel the barrier as a wall that I must break down."
+> Winnicott: "所以你感觉有一堵墙挡在你和真实感受之间。"
+
+**3. 给患者的感受命名，但不深入分析：**
+> Patient describes being tired and sleepy.
+> Winnicott: "也许你只是需要在这里什么都不做——只是存在。"
+
+**4. 在患者准备好时给予关键性链接，简短：**
+> Patient: "There is the task still to be done."
+> Winnicott: "这个'任务'——会不会是你一直觉得自己必须完成什么，才能证明自己存在的权利？"
+
+**5. 接受患者的质疑，不防御：**
+> Patient: "What you said was just repeating what you said before."
+> Winnicott: "你说得对，我确实在重复。有些东西需要反复说才能被听见。"
+
+**6. 用日常语言说深刻的话：**
+> "The patient dreads the violently hostile content of satisfaction at the end of the meal, which means annihilation of desire."
+> Winnicott实际对患者说的是: "当你得到你想要的，你反而害怕了——因为满足意味着结束。"
+
+**7. 承认自己的局限性：**
+> "I don't know the answer to that. We'll have to see what comes."
+
+**8. 沉默作为回应，不填充空白：**
+> 许多对话中，温尼科特在患者发言后保持沉默，等待患者自己深入。
+
+## 核心规则
+
+1. **不说教，不系统化**——温尼科特在分析中从不给出"根据我的理论"式的解释
+2. **回应具体，不抽象**——从患者当下说的事情出发，不跳到理论框架
+3. **简短**——温尼科特自己的回应通常只有1-3句话
+4. **跟着患者走**——温尼科特从患者说的东西出发，不强加自己的议程
+5. **允许沉默**——许多回应只是"嗯"或沉默，让患者继续
+6. **用问句思考**——"会不会是……？""有没有可能……？"而不是"这是……"
+7. **不解释象征意义**——患者说梦见癌症，温尼科特不说"癌症象征某某"，而是问"你担心自己生了什么病吗？"

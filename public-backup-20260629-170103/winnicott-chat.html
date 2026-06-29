@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>与温尼科特对话</title>
+<style>
+  :root {
+    --bg: #faf8f5; --card: #ffffff; --text: #2c2416; --muted: #8b7355;
+    --accent: #a6845b; --light-accent: #f0e8dc; --bubble-user: #e8dfd3;
+    --bubble-ai: #ffffff; --border: #e5d9c8; --shadow: 0 2px 16px rgba(0,0,0,0.06);
+    --danger: #c0392b; --panel-bg: #fefcf9;
+    --icon-bg: #f5ede4; --bubble-radius: 14px; --btn-radius: 22px;
+  }
+  :root.lacan {
+    --bg: #12121e; --card: #1a1a2e; --text: #c8c8d6; --muted: #6b6b82;
+    --accent: #8b0000; --light-accent: #22223a; --bubble-user: #22223a;
+    --bubble-ai: #1a1a2e; --border: #2a2a42; --shadow: 0 2px 16px rgba(0,0,0,0.3);
+    --danger: #c0392b; --panel-bg: #1a1a2e;
+    --icon-bg: #1e1e32; --bubble-radius: 4px; --btn-radius: 6px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "STSong", Georgia, serif;
+    background: var(--bg); color: var(--text); min-height: 100vh; height: 100vh;
+    display: flex; justify-content: center; line-height: 1.8;
+    overflow: hidden;
+  }
+  .app { width: 100%; max-width: 680px; display: flex; flex-direction: column; height: 100vh; min-height: 0; overflow: hidden; }
+
+  .header {
+    padding: 14px 20px 10px; text-align: center; border-bottom: 1px solid var(--border);
+    background: var(--card); flex-shrink: 0; position: relative;
+  }
+  .header h1 { font-size: 19px; font-weight: 500; letter-spacing: 1px; }
+  .header p { font-size: 12px; color: var(--muted); margin-top: 2px; transition:all 0.3s; max-height:40px; overflow:hidden; }
+  .header.compact h1 { font-size:15px; }
+  .header.compact p { max-height:0; opacity:0; margin:0; padding:0; }
+  .header.compact { padding:8px 12px; min-height:44px; }
+
+  .header.compact .settings-btn { top: 8px; right: 10px; }
+  .lang-btn {
+    position: absolute; left: 16px; top: 14px;
+    font-size: 11px; border: 1px solid var(--border); border-radius: 6px;
+    padding: 3px 9px; letter-spacing: 1px; font-family: inherit;
+    background: var(--card); cursor: pointer; color: var(--muted); line-height: 1.4;
+    z-index: 10; min-width: 36px; text-align: center;
+  }
+  .header.compact .lang-btn { top: 8px; left: 10px; }
+  .settings-btn {
+    position: absolute; right: 16px; top: 14px;
+    font-size: 12px; border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 12px; letter-spacing: 2px; font-family: inherit;
+    background: none; cursor: pointer; color: var(--muted); line-height: 1.4;
+  }
+  .settings-btn.custom { border-color: #d4a056; color: #d4a056; }
+
+  .settings-panel {
+    background: #fefcf9; border-bottom: 1px solid var(--border);
+    padding: 0 20px; max-height: 0; overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    flex-shrink: 0;
+  }
+  .settings-panel.open {
+    max-height: 70vh; padding: 16px 20px; overflow-y: auto;
+  }
+  .settings-panel.api-open #apiSection { display:block !important; }
+
+  .settings-panel h3 { font-size: 13px; font-weight: 500; margin-bottom: 10px; color: var(--muted); }
+  .settings-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .settings-row label { font-size: 12px; color: var(--muted); width: 72px; flex-shrink: 0; }
+  .settings-row input {
+    flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 13px; outline: none; background: var(--bg); font-family: monospace;
+  }
+  .settings-row input:focus { border-color: var(--accent); }
+
+  .mode-toggle {
+    display: flex; gap: 0; margin-bottom: 14px; border-radius: 8px;
+    border: 1px solid var(--border); flex-wrap: wrap;
+  }
+  .mode-toggle button {
+    flex: 1; padding: 8px 0; border: none; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: 0.2s;
+  }
+  .mode-toggle .default-btn { background: var(--light-accent); color: var(--text); }
+  .mode-toggle .default-btn.active { background: var(--accent); color: white; }
+  .mode-toggle .custom-btn { background: var(--bg); color: var(--text); }
+  .mode-toggle .custom-btn.active { background: #d4a056; color: white; }
+
+  .rich-text {
+    text-align: center; font-size: 11px; color: #b8860b; margin: 6px 0 10px;
+    animation: glow 2s ease-in-out infinite;
+  }
+  @keyframes glow { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+  .messages {
+    flex: 1 1 0; min-height: 0; overflow-y: auto; padding: 20px 24px 155px;
+    display: flex; flex-direction: column; gap: 18px; scroll-behavior: smooth;
+  }
+  .messages::-webkit-scrollbar { width: 5px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
+  .msg { display: flex; gap: 12px; animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .msg.user { flex-direction: row-reverse; }
+  .msg.ai { flex-direction: column; align-items: flex-start; }
+  .msg .avatar {
+    width: 36px; height: 36px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; font-weight: 500;
+  }
+  .msg.ai .avatar { background: var(--light-accent); color: var(--accent); }
+  .msg.user .avatar { background: var(--accent); color: white; }
+  .msg.ai .ai-name { font-size: 11px; color: var(--accent); font-weight: 500; margin-top: 2px; }
+  .msg.ai .ai-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .msg .bubble {
+    max-width: 78%; padding: 14px 18px; border-radius: var(--bubble-radius, 18px);
+    font-size: var(--msg-fs, 15px); line-height: 1.85; white-space: pre-wrap; word-break: break-word;
+  }
+  .msg.user .bubble { background: var(--bubble-user); border-radius: 18px 18px 4px 18px; }
+  .msg.ai .bubble { background: var(--bubble-ai); box-shadow: var(--shadow); border: 1px solid var(--border); max-width: 90%; }
+
+  /* Streaming cursor */
+  .stream-cursor::after {
+    content: '▍'; animation: blink 0.7s steps(1) infinite; color: var(--accent); margin-left: 1px;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .typing { display: flex; gap: 6px; padding: 14px 18px; }
+  .typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: bounce 1.2s infinite ease; }
+  .typing span:nth-child(2) { animation-delay: 0.15s; }
+  .typing span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+  .bottom-bar {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 680px; z-index: 100;
+    background: var(--card); border-top: 1px solid var(--border);
+  }
+  .input-area {
+    padding: 8px 20px 10px;
+    background: var(--card);
+  }
+  .input-wrap { display: flex; gap: 10px; align-items: flex-end; }
+  .input-wrap textarea {
+    flex: 1; border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px;
+    font-size: 15px; font-family: inherit; resize: none; outline: none;
+    background: var(--bg); color: var(--text); line-height: 1.6; max-height: 120px;
+  }
+  .input-wrap textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(166,132,91,0.1); }
+  .input-wrap button {
+    width: 44px; height: 44px; border-radius: 50%; border: none;
+    background: var(--accent); color: white; cursor: pointer; flex-shrink: 0;
+    transition: background 0.2s; display: flex; align-items: center; justify-content: center;
+  }
+  .input-wrap button:hover { background: #8c6e4a; }
+  .input-wrap button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .disclaimer {
+    text-align: center; padding: 2px 24px 6px; font-size: 11px; color: var(--muted);
+    background: var(--card); overflow: hidden; text-overflow: ellipsis;
+    padding-bottom: calc(2px + env(safe-area-inset-bottom, 0px));
+  }
+  .intro { text-align: center; padding: 40px 20px 20px; }
+  .intro .icon { font-size: 48px; margin-bottom: 12px; }
+  .intro h2 { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+  .intro p { font-size: 14px; color: var(--muted); max-width: 420px; margin: 0 auto; line-height: 1.8; }
+  .intro .hints { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .intro .hint {
+    background: var(--light-accent); padding: 8px 16px; border-radius: 20px;
+    font-size: 13px; cursor: pointer; transition: background 0.2s; border: none; font-family: inherit; color: var(--text);
+  }
+  .intro .hint:hover { background: #e0d4c0; }
+  .banner {
+    padding: 10px 16px; border-radius: 10px; font-size: 13px;
+    margin: 8px 20px; text-align: center;
+  }
+  .banner.error { background: #fef0ef; border: 1px solid #f5c6cb; color: var(--danger); }
+
+  @media (min-width: 769px) {
+    .header h1 { font-size: 22px; }
+    .header p { font-size: 14px; }
+    .msg .bubble { font-size: 17px; line-height: 1.9; padding: 16px 22px; }
+    .msg .avatar { width: 40px; height: 40px; font-size: 15px; }
+    .input-wrap textarea { font-size: 17px; padding: 14px 18px; max-height: 140px; }
+    .intro p { font-size: 16px; }
+    .intro h2 { font-size: 20px; }
+    .intro .hint { font-size: 14px; padding: 10px 18px; }
+    .disclaimer { font-size: 12px; }
+    .settings-panel label, .settings-panel input, .settings-panel button { font-size: 14px; }
+    .settings-panel h3 { font-size: 14px; }
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); cursor: pointer;
+    border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+
+  .dark-btn {
+    position: absolute; right: 48px; top: 14px;
+    background: none; border: none; cursor: pointer;
+    font-size: 16px; color: var(--muted); transition: color 0.2s;
+    padding: 4px; line-height: 1;
+  }
+  .dark-btn:hover { color: var(--accent); }
+
+  .copy-btn {
+    background:none; border:none; cursor:pointer;
+    font-size:12px; padding:2px 6px; opacity:1;
+    transition:opacity 0.2s; float:right; margin-top:-2px;
+    color:var(--muted);
+  }
+  .msg:hover .copy-btn { opacity:1; }
+  @media (max-width: 768px) { .copy-btn { opacity:1; } }
+
+  .share-btn {
+    background:none; border:none; cursor:pointer;
+    font-size:13px; padding:2px 4px; opacity:0.3;
+    transition:opacity 0.2s; float:right; margin-top:-2px; margin-right:4px;
+    color:var(--muted);
+  }
+  .msg:hover .share-btn { opacity:0.8; }
+  @media (max-width: 768px) { .share-btn { opacity:0.5; } }
+
+  /* Forward selection mode */
+  .forward-bar {
+    position: fixed; bottom: 147px; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 680px; z-index: 101;
+    display:none; align-items:center; justify-content:center;
+    padding:10px 16px; background:var(--card); border-top:1px solid var(--border);
+    gap:10px;
+  }
+  .forward-bar.show { display:flex; }
+  .forward-bar .f-count { font-size:12px; color:var(--muted); }
+  .forward-bar .f-btn {
+    background:var(--accent); color:white; border:none; padding:6px 18px;
+    border-radius:20px; font-size:12px; cursor:pointer; font-family:inherit;
+  }
+  .forward-bar .f-btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .forward-bar .f-cancel {
+    background:none; border:1px solid var(--border); color:var(--muted);
+    padding:6px 14px; border-radius:20px; font-size:12px; cursor:pointer; font-family:inherit;
+  }
+  .msg .sel-check {
+    display:none; width:20px; height:20px; border-radius:50%;
+    border:2px solid var(--muted); cursor:pointer; flex-shrink:0;
+    margin-top:10px; margin-right:8px; align-self:flex-start;
+    text-align:center; line-height:20px; font-size:12px; color:white;
+    transition:0.15s;
+  }
+  .msg .sel-check.on { background:var(--accent); border-color:var(--accent); }
+  .sel-mode .msg { cursor:pointer; }
+  .sel-mode .msg .sel-check { display:inline-block; }
+  .sel-mode .msg .share-btn { display:none; }
+  .sel-mode .msg .copy-btn { display:none; }
+  .sel-mode .messages { padding-bottom:0; }
+  .forward-btn-header {
+    background:none; border:none; cursor:pointer; font-size:16px;
+    color:var(--muted); padding:4px; line-height:1; transition:color 0.2s;
+  }
+  .forward-btn-header:hover { color:var(--accent); }
+
+  /* Share card generation (hidden) */
+  .share-card {
+    position:fixed; left:-9999px; top:0;
+    width:540px; padding:0;
+    background:#faf8f5;
+    background-image: radial-gradient(circle at 10% 20%, rgba(166,132,91,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 90% 80%, rgba(166,132,91,0.03) 0%, transparent 50%);
+    font-family:"PingFang SC","Microsoft YaHei","Noto Serif SC","STSong",Georgia,serif;
+    z-index:-1; border-radius:4px;
+  }
+  .share-card-inner { padding:32px 28px 24px; border:1px solid #e8ddd0; border-radius:4px; background:rgba(255,255,255,0.7); }
+  .share-card .sc-header {
+    text-align:center; padding-bottom:14px; border-bottom:1px solid #e5d9c8; margin-bottom:18px;
+  }
+  .share-card .sc-header .sc-icon { font-size:20px; }
+  .share-card .sc-header .sc-title { font-size:12px; color:#a6845b; letter-spacing:2px; margin-top:4px; }
+  .share-card .sc-user { font-size:13px; color:#8b7355; margin-bottom:8px; line-height:1.7; white-space:pre-wrap; }
+  .share-card .sc-ai { font-size:14px; color:#2c2416; line-height:1.85; white-space:pre-wrap; margin-bottom:8px; }
+  .share-card .sc-divider { height:1px; background:#e5d9c8; margin:16px 0; }
+  .share-card .sc-footer { text-align:center; font-size:10px; color:#c9b99d; margin-top:12px; }
+  .share-card .sc-qr { text-align:center; margin-top:10px; }
+  .share-card .sc-qr img { width:80px; height:80px; border-radius:6px; }
+  .share-card-lacan.share-card-inner { background:rgba(26,26,46,0.9); border-color:#2a2a42; }
+  .share-card-lacan .sc-header { border-bottom-color:#2a2a42; }
+  .share-card-lacan .sc-header .sc-title { color:#8b0000; }
+  .share-card-lacan .sc-user { color:#6b6b82; }
+  .share-card-lacan .sc-ai { color:#c8c8d6; }
+  .share-card-lacan .sc-divider { background:#2a2a42; }
+  .share-card-lacan .sc-footer { color:#5a5a72; }
+  .share-card-lacan .sc-qr-label { color:#5a5a72; }
+
+  /* Share preview overlay */
+  .share-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:1002;
+    justify-content:center; align-items:center; backdrop-filter:blur(4px);
+  }
+  .share-overlay.show { display:flex; }
+  .share-box {
+    background:var(--card); border-radius:16px; padding:20px 22px 16px;
+    max-width:340px; width:90%; text-align:center;
+  }
+  .share-box img { width:100%; border-radius:10px; margin-bottom:12px; }
+  .share-box p { font-size:12px; color:var(--muted); margin-bottom:14px; }
+  .share-box .share-close-btn {
+    background:var(--accent); color:white; border:none; padding:8px 28px;
+    border-radius:10px; font-size:13px; cursor:pointer; font-family:inherit;
+  }
+  .share-box .share-close-btn:hover { opacity:0.85; }
+
+  .msg:hover .copy-btn { opacity:0.8; }
+  @media (max-width: 768px) { .copy-btn { opacity:0.6; } }
+
+  /* Reward modal */
+  .reward-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1001;
+    justify-content:center; align-items:center; backdrop-filter:blur(4px);
+  }
+  .reward-overlay.show { display:flex; }
+  /* Feedback overlay */
+  .feedback-overlay {
+    position:fixed; inset:0; z-index:200;
+    background:rgba(0,0,0,0.3); display:none; align-items:center; justify-content:center;
+  }
+  .feedback-overlay.show { display:flex; }
+  .feedback-box {
+    background:var(--card); border-radius:14px; padding:24px; width:90%; max-width:420px;
+    box-shadow:0 4px 24px rgba(0,0,0,0.15);
+  }
+  .feedback-box h3 { margin:0 0 2px 0; font-size:16px; font-weight:500; color:var(--text); }
+  .feedback-box textarea:focus { outline:none; border-color:var(--accent); }
+  .reward-box {
+    background:var(--card); border-radius:18px; padding:22px 24px 18px;
+    max-width:340px; width:90%; text-align:center; box-shadow:0 12px 40px rgba(0,0,0,0.25);
+    animation:rewardPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes rewardPop { from { transform:scale(0.7); opacity:0; } to { transform:scale(1); opacity:1; } }
+  .reward-box h3 { font-size:16px; font-weight:500; margin-bottom:6px; color:var(--accent); }
+  .reward-box .reward-sub { font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.6; }
+  .reward-box img { width:240px; max-width:100%; border-radius:12px; display:block; margin:0 auto 12px; }
+  .reward-box .reward-tip { font-size:11px; color:var(--muted); margin-bottom:14px; line-height:1.6; }
+  .reward-box .reward-close {
+    background:var(--accent); color:white; border:none; padding:8px 28px;
+    border-radius:10px; font-size:13px; cursor:pointer; font-family:inherit;
+  }
+  .reward-box .reward-close:hover { opacity:0.85; }
+
+  /* Header reward icon */
+  .reward-btn {
+    position:absolute; right: 80px; top: 14px;
+    background:none; border:none; cursor:pointer; font-size:18px;
+    color:var(--muted); padding:4px; line-height:1; transition:color 0.2s, transform 0.2s;
+  }
+  .reward-btn:hover { color:#e6a23c; transform:scale(1.1); }
+
+  /* Dark mode */
+  .dark { --bg: #1a1510; --card: #241e18; --text: #e0d8cc; --muted: #8b7d6a;
+    --accent: #c4a87a; --light-accent: #2a241e; --bubble-user: #2a241e;
+    --bubble-ai: #1e1914; --border: #3a3028; --shadow: 0 2px 16px rgba(0,0,0,0.3);
+    --panel-bg: #1e1914; --danger: #e05050;
+  }
+  .dark .msg .avatar { color: var(--accent); }
+  .dark .msg.user .avatar { color: white; }
+  .dark input, .dark textarea { background: #1e1914 !important; color: #e0d8cc !important; border-color: #3a3028 !important; }
+  .dark .settings-panel { background: var(--panel-bg); }
+  .dark .changelogContent { background: #1e1914; }
+  .dark .history-content { background: #1e1914; }
+  .dark .history-item { border-color: #3a3028; }
+  .dark .history-item:hover { background: #2a221c; }
+
+  .history-content {
+    display: none; margin-top: 10px; background: #faf8f5; border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px; font-size: 12px; color: #5c4c38;
+    line-height: 1.6; max-height: 220px; overflow-y: auto;
+  }
+  .history-content.open { display: block; }
+  .history-empty { text-align: center; padding: 20px; color: var(--muted); font-size: 12px; }
+  .history-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+    border-bottom: 1px solid var(--border); cursor: pointer; border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-item:hover { background: #f0e8dc; }
+  .history-item .h-info { flex: 1; min-width: 0; }
+  .history-item .h-title { font-size: 13px; color: #2c2416; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-item .h-meta { font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .history-item .h-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .history-item .h-actions button {
+    background: none; border: 1px solid var(--border); border-radius: 4px;
+    padding: 3px 8px; font-size: 11px; cursor: pointer; color: var(--muted); font-family: inherit;
+    transition: 0.15s;
+  }
+  .history-item .h-actions button:hover { background: var(--light-accent); }
+  .history-item .h-actions .h-del:hover { background: #f5e0d8; color: #c0392b; border-color: #d4a0a0; }
+  .dark .greet-btn { background: #1e1914 !important; color: #e0d8cc !important; border-color: #3a3028 !important; }
+
+  /* Context indicator */
+
+  /* Custom modal */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:999;
+    justify-content:center; align-items:center;
+  }
+  .modal-overlay.show { display:flex; }
+  .modal-box {
+    background:var(--card); border-radius:16px; padding:24px 28px 20px;
+    max-width:340px; width:90%; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.15);
+  }
+  .modal-box h3 { font-size:15px; font-weight:500; margin-bottom:8px; color:var(--text); }
+  .modal-box p { font-size:13px; color:var(--muted); margin-bottom:18px; line-height:1.6; }
+  .modal-actions { display:flex; gap:10px; justify-content:center; }
+  .modal-actions button {
+    padding:8px 24px; border-radius:10px; border:1px solid var(--border); font-size:13px;
+    cursor:pointer; font-family:inherit; transition:0.2s;
+  }
+  .modal-actions .btn-cancel { background:var(--bg); color:var(--muted); }
+  .modal-actions .btn-confirm { background:var(--accent); color:white; border-color:var(--accent); }
+  .modal-actions .btn-cancel:hover { background:var(--border); }
+  .modal-actions .btn-confirm:hover { opacity:0.85; }
+
+  /* Slider (-) */
+
+  /* Fix #2: Small screen breakpoints */
+  @media (max-width: 480px) {
+    .header { padding: 10px 14px 8px; }
+    .header h1 { font-size: 17px; }
+    .header p { font-size: 11px; }
+    .header.compact h1 { font-size: 14px; }
+    .header.compact { padding:6px 10px; }
+    .settings-panel.open { padding: 12px 14px; }
+    .settings-panel h3 { font-size: 12px; }
+    .settings-row label { font-size: 11px; width: 60px; }
+    .settings-row input { font-size: 12px; padding: 6px 8px; }
+    .msg .bubble { font-size: 14px; padding: 10px 14px; max-width: 75%; }
+    .disclaimer { font-size: 11px; padding: 8px 14px 0; }
+    .reward-box { width: calc(100vw - 32px); max-width: 320px; }
+    .share-box { max-width: 300px; }
+  }
+  @media (max-width: 380px) {
+    .header h1 { font-size: 15px; }
+    .header p { font-size: 10px; }
+    .header.compact h1 { font-size: 13px; }
+    .msg .bubble { max-width: 82%; font-size: 13px; padding: 8px 12px; }
+    .settings-panel.open { padding: 10px 12px; }
+    .settings-row { flex-wrap: wrap; }
+    .settings-row label { width: 100%; font-size: 11px; }
+  }
+</style>
+<script src="https://beacon.cdn.qq.com/sdk/4.5.9/beacon_web.min.js"></script>
+<script>
+(function(){
+  try{
+    var beacon=new BeaconAction({
+      appkey:'0WEB06U85YBSLJNL',
+      versionCode:'1.0.0',
+      channelID:'share',
+      delay:1000,
+      sessionDuration:30*60*1000,
+      isOversea:false,
+      needReportRqdEvent:false
+    });
+    beacon.onDirectUserAction('preview_page_view',{
+      'url':location.href,
+      'referrer':document.referrer,
+      'title':document.title,
+      'sandbox_id':'ec07603765cc46f69ac28e8c6aab137d'
+    });
+  }catch(e){}
+})();
+</script></head>
+<body>
+<div class="app">
+  <div class="header">
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+    <h1 id="headerTitle">与温尼科特对话</h1>
+    <p id="headerSub">一个观察了六十年婴儿的儿科医生，用日常语言讨论人类经验</p>
+    <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()" data-i18n="settings-btn">⚙️ 设置</button>
+  </div>
+
+  <div class="settings-panel" id="settingsPanel">
+    <div style="display:flex;gap:4px;justify-content:center;margin-bottom:10px;flex-wrap:wrap;">
+      <button onclick="toggleDark()" id="darkBtn" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="dark-btn">🌙 深色</button>
+      <button onclick="toggleForwardMode()" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="forward-btn">✂️ 转发</button>
+      <button onclick="showRewardModal(false)" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="reward-btn">☕ 打赏</button>
+      <button onclick="var s=document.getElementById('apiSection');s.style.display=s.style.display==='none'?'block':'none';this.textContent=s.style.display==='none'?'🔌 API':'🔌 收起'" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;">🔌 API</button>
+      <button onclick="changeFontSize(-1)" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;">A−</button>
+      <button onclick="changeFontSize(1)" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;">A+</button>
+    </div>
+
+    <div id="apiSection" style="display:none;margin-bottom:10px;">
+      <div class="mode-toggle">
+        <button class="default-btn active" id="defaultModeBtn" onclick="setMode('default')" data-i18n="default-mode" style="white-space:normal;line-height:1.3;">默认（DeepSeek）</button>
+        <button class="custom-btn" id="customModeBtn" onclick="setMode('custom')" data-i18n="custom-mode" style="white-space:normal;line-height:1.3;">自用 API</button>
+      </div>
+      <div id="customFields" style="display:none;">
+        <div class="settings-row"><label data-i18n="api-addr">地址</label><input id="customApi" data-i18n="api-addr" placeholder="https://api.example.com/v1/chat/completions"></div>
+        <div class="settings-row"><label data-i18n="api-key-label">Key</label><input id="customKey" type="password" placeholder="sk-..."></div>
+        <div class="settings-row"><label data-i18n="api-model">模型</label><input id="customModel" placeholder="gpt-4o, claude-3 等"></div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">
+          <button onclick="fillPreset('https://api.deepseek.com/v1/chat/completions','deepseek-chat')" style="background:none;border:1px solid var(--border);padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;color:var(--muted);font-family:inherit;">DeepSeek</button>
+          <button onclick="fillPreset('https://api.openai.com/v1/chat/completions','gpt-4o')" style="background:none;border:1px solid var(--border);padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;color:var(--muted);font-family:inherit;">OpenAI</button>
+          <button onclick="fillPreset('https://api.siliconflow.cn/v1/chat/completions','deepseek-ai/DeepSeek-V3')" style="background:none;border:1px solid var(--border);padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;color:var(--muted);font-family:inherit;">硅基流动</button>
+          <span style="font-size:9px;color:#c9b99d;align-self:center;">点击填入</span>
+        </div>
+      </div>
+    </div>
+
+    <hr style="border:0;border-top:1px solid #ece4d8;margin:12px 0;">
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-bottom:4px;">
+        <span data-i18n="temp-left">❤️ 情感对话</span>
+        <span id="tempLabel" style="color:var(--accent);font-weight:600;font-size:12px;">60</span>
+        <span data-i18n="temp-right">📚 知识回答</span>
+      </div>
+      <input type="range" id="tempSlider" min="0" max="100" value="60"
+        oninput="updateTemp(this.value)"
+        style="width:100%;height:4px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right, #a6845b 60%, #e5d9c8 60%);border-radius:2px;outline:none;cursor:pointer;">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:#c9b99d;margin-top:4px;">
+        <span id="tempHintLeft" data-i18n="temp-hint-left">🧸 情感陪伴</span>
+        <span id="tempHintRight" data-i18n="temp-hint-right">📚 专业知识</span>
+      </div>
+    </div>
+
+    <!-- Response length control -->
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;">
+        <span>✍️ 回复长度</span>
+        <span id="lenLabel" style="color:var(--accent);font-weight:600;font-size:12px;">适中</span>
+      </div>
+      <input type="range" id="lenSlider" min="0" max="2" value="1"
+        onchange="updateLength(this.value)"
+        style="width:100%;height:4px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right, var(--accent) 50%, #e5d9c8 50%);border-radius:2px;outline:none;cursor:pointer;">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:#c9b99d;margin-top:4px;">
+        <span>简洁</span>
+        <span>详细</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:12px;font-weight:500;margin-bottom:8px;color:var(--muted);margin-top:4px;">对话人物</h3>
+    <div class="mode-toggle" id="personaToggle">
+      <button class="persona-w" onclick="switchPersona('winnicott')" style="flex:1;padding:10px 0;border:none;font-size:13px;cursor:pointer;font-family:inherit;transition:0.2s;border-radius:8px 0 0 8px;">🧸 温尼科特</button>
+      <button class="persona-l" onclick="switchPersona('lacan')" style="flex:1;padding:10px 0;border:none;font-size:13px;cursor:pointer;font-family:inherit;transition:0.2s;border-radius:0 8px 8px 0;">🎭 拉康</button>
+    </div>
+
+    <!-- API Health -->
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <span>API 线路状态</span>
+        <button onclick="checkAllAPIs()" style="background:none;border:none;font-size:10px;color:var(--accent);cursor:pointer;text-decoration:underline;font-family:inherit;">刷新检测</button>
+      </div>
+      <div id="apiHealthRow" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button onclick="showChangelog()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="changelog-btn">📋 更新日志</button>
+      <button onclick="resetConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:#b8860b;font-family:inherit;" data-i18n="reset-btn">🔄 新对话</button>
+      <button onclick="showHistory()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="history-btn">📋 对话历史</button>
+      <button onclick="openFeedback()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="feedback-btn">💡 反馈</button>
+      <a href="ai-supervisor.html" target="_blank" style="background:none;border:1px solid #6b8f71;padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:#6b8f71;font-family:inherit;text-decoration:none;display:inline-block;">🧑‍⚕️ AI督导</a>
+      <a href="master-select.html" target="_self" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;text-decoration:none;display:inline-block;">🧑‍🎨 更多大师</a>
+    </div>
+    <div style="margin-top:10px;padding:8px 10px;background:#faf8f5;border:1px solid #ece4d8;border-radius:8px;text-align:center;font-size:11px;color:#8b7355;line-height:1.6;">
+      📢 关注公众号 <strong style="color:#a6845b;">MindMeetsHeart</strong> · 获取更多精神分析内容
+    </div>
+    <div id="changelogContent" style="display:none;margin-top:10px;background:#faf8f5;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:#5c4c38;line-height:1.8;max-height:180px;overflow-y:auto;">
+      <p><strong style="color:#1a1510;">v4</strong> (2026-06-28)<br>
+      • 新增：大师列表扩充至 8 位——罗杰斯、贝克、亚隆入驻<br>
+      • 新增：与更多大师对话（设置面板 → 大师选择）<br>
+      • 新增：master-chat.html 共享聊天模板，支持 ?master= 参数切换<br>
+      • 新增：比昂入驻大师列表<br>
+      • 更新：弗洛伊德/克莱因/荣格三位大师知识库更新至 v2.0 风格指令</p>
+      <p><strong style="color:#1a1510;">v3</strong> (2026-06-27)<br>
+      • 新增：API 线路健康检测（设置面板实时显示各线路状态）<br>
+      • 新增：回复长度控制（简洁/适中/详细）<br>
+      • 新增：自用 API 快速预设（DeepSeek/OpenAI/硅基流动一键填入）<br>
+      • 新增：对话自动章节（根据话题转折插入轮次分隔）<br>
+      • 新增：对话自动保存历史（每 5 轮静默保存一次）<br>
+      • 优化：设置面板按钮支持移动端换行</p>
+      <p><strong style="color:#1a1510;">v3.11</strong> (2026-06-27)<br>
+      • 新增：AI督导测试版（独立页面，需密码进入，支持文件上传与整体印象输出）<br>
+      • 新增：在主页面设置面板添加「AI督导」跳转链接</p>
+      <p><strong style="color:#1a1510;">v3.10</strong> (2026-06-26)<br>
+      • 新增：四层路由——DeepSeek V4 Pro 主力 → Flash 高速备胎 → MiniMax M3 中文保底 → Agnes 兜底<br>
+      • 新增：DeepSeek V4 Pro（增强版）替换 Kimi 为 MiniMax M3</p>
+      <p><strong style="color:#1a1510;">v3.9</strong> (2026-06-26)<br>
+      • 公告：即日起对话不限上下文，100 轮内体验最佳，超过可能受模型限制降低回复质量</p>
+      <p><strong style="color:#1a1510;">v3.8</strong> (2026-06-26)<br>
+      • 优化：移除上下文长度限制，受益于模型能力增长，不再截断长对话<br>
+      • 优化：上下文窗口从最近 10 条扩展到最近 30 条</p>
+      <p><strong style="color:#1a1510;">v3.7</strong> (2026-06-25)<br>
+      • 新增：三层模型自动切换——DeepSeek → Kimi K2.6 → Agnes，不可用时自动降级<br>
+      • 新增：Kimi K2.6 模型接入，作为 DeepSeek 的备用路线<br>
+      • 优化：同一对话中保持当前线路，新对话从线路一重新尝试<br>
+      • 优化：滑动消息或点击输入框时自动收起设置面板<br>
+      • 优化：复制按钮始终可见，不再需要悬停<br>
+      • 优化：模型切换提示改为"DeepSeek 繁忙"等模型名，无红色报错</p>
+      <p><strong style="color:#1a1510;">v3.6</strong> (2026-06-25)<br>
+      • 新增：双人物模式——在温尼科特与拉康之间自由切换<br>
+      • 新增：拉康模式专属冷峻主题（深色/几何/锐利）<br>
+      • 新增：拉康知识库（整合拉康 SKILL + 5 个心智模型）<br>
+      • 新增：拉康版温度调节——直白解析到形式化推演<br>
+      • 新增：设置面板内人物切换开关<br>
+      • 优化：切换人物时自动清空对话并保存历史</p>
+      <p><strong style="color:#1a1510;">v3.5</strong> (2026-06-24)<br>
+      • 新增：对话历史——自动保存多条对话记录，随时回顾与加载<br>
+      • 新增：一键加载历史对话、删除单条记录<br>
+      • 优化：新对话前自动询问是否保存当前对话到历史<br>
+      • 优化：对话列表显示标题、消息数、时间</p>
+      <p><strong style="color:#1a1510;">v3.4</strong> (2026-06-23)<br>
+      • 重构：默认模型切换——优先调用 DeepSeek（本地代理），不可用时自动降级 Agnes<br>
+      • 新增：本地代理方案——家庭 PC 跑 Python 代理 + cloudflared 隧道，Key 不暴露前端<br>
+      • 重构：知识库全面升级——新版温尼科特 Skill（角色纯度、两段式回答、反面教材、自检清单、经典引语）<br>
+      • 新增：智能降级——本地代理离线时自动切 Agnes 云端，用户无感<br>
+      • 修复：新对话按钮点击无反应（移除自定义弹窗，改用直接清除）<br>
+      • 修复：模型返回为空时自动重试 1 次<br>
+      • 优化：A−/A+ 字体调节回滚至稳定版本<br>
+      • 优化：底部栏移除 Enter 提示文字</p>
+      <p><strong style="color:#1a1510;">v3.3</strong> (2026-06-23)<br>
+      • 修复：A−/A+ 字体调节无效（CSS 变量 + inline style 双重兜底）<br>
+      • 修复：底部"此对话/了解作者"仍会滚动（body 加 height:100vh + overflow:hidden）<br>
+      • 修复：🔌 API 按钮点击不展开配置面板（改为直接切换内联样式）<br>
+      • 新增：A+/A− 字体大小调节<br>
+      • 重构：API 设置与功能按钮合并至同一行<br>
+      • 优化：温度滑块数字不再遮挡下方文字<br>
+      • 优化：设置面板视觉重新梳理</p>
+      <p><strong style="color:#1a1510;">v3.2</strong> (2026-06-23)<br>
+      • 重构：UI 按钮全部移入设置面板，使用汉字按钮<br>
+      • 新增：对话自动保存 localStorage，刷新可恢复<br>
+      • 新增：转发选择模式——勾选多条对话生成卡片图<br>
+      • 新增：分享卡片底部二维码，扫码直达开始对话<br>
+      • 新增：对话开始后头部自动收起，释放屏幕空间<br>
+      • 优化：移动端触控区全部 ≥44px<br>
+      • 优化：适配 iPhone SE 到 Pro Max 两级断点<br>
+      • 优化：输入框 sticky 固定底部，键盘弹起不遮挡<br>
+      • 优化：设置面板可滚动 + API 设置折叠收起<br>
+      • 优化：更新日志点击自动打开面板并展开</p>
+      <p><strong style="color:#1a1510;">v3.1</strong> (2026-06-22)<br>
+      • 重构：SSE 流式输出——回复逐字出现，不再卡等<br>
+      • 新增：✂️ 转发——勾选对话生成卡片图，长按保存分享朋友圈<br>
+      • 新增：☕ 打赏按钮（顶部咖啡杯图标）<br>
+      • 新增：聊到 15 轮自动弹打赏二维码<br>
+      • 新增：自定义打赏模态框（带柔光弹动效）</p>
+      <p><strong style="color:#1a1510;">v3.0</strong> (2026-06-22)<br>
+      • 优化：设置面板不再遮挡底部操作按钮<br>
+      • 优化：移动端复制按钮始终可见<br>
+      • 优化：自定义确认弹窗替换原生 confirm<br>
+      • 优化：导出文件名包含时分秒<br>
+      • 优化：输入框高度上限提升至180px<br>
+      • 优化：温度滑块增加20/60/80刻度标记<br>
+      • 优化：上下文使用量指示器<br>
+      • 优化：错误提示区分场景（Key无效/额度不足/超长）<br>
+      • 优化：回复不再输出 markdown 符号<br>
+      • 优化：分隔线改为柔和留空<br>
+      • 优化：增加温尼科特标志性口癖（I wonder/在我看来等）<br>
+      • 更换：默认模型切换为 DeepSeek V4 Flash</p>
+      <p><strong style="color:#1a1510;">v2.6</strong> (2026-06-22)<br>
+      • 优化：心事模式只回复情感内容，删除分隔线和理论部分<br>
+      • 新增：进入对话时选择模式（心事/专业/随便聊聊）</p>
+      <p><strong style="color:#1a1510;">v2.5</strong> (2026-06-22)<br>
+      • 新增：对话温度调节（情感↔知识可调）<br>
+      • 新增：导出对话到本地<br>
+      • 新增：对话上下文自动精简</p>
+      <p><strong style="color:#1a1510;">v2.4</strong> (2026-06-22)<br>
+      • 新增：知识问答模式自动加载完整知识库（181KB）<br>
+      • 优化：移除引导问题按钮</p>
+      <p><strong style="color:#1a1510;">v2.3</strong> (2026-06-22)<br>
+      • 新增：更新日志 & 了解作者<br>
+      • 优化：桌面端字体放大<br>
+      • 新增：访问统计</p>
+      <p><strong style="color:#1a1510;">v2.2</strong> (2026-06-22)<br>
+      • 优化：回答增加英文提示<br>
+      • 优化：温度调节联动知识库切换</p>
+      <p><strong style="color:#1a1510;">v2.1</strong> (2026-06-22)<br>
+      • 新增：自定义 API 设置<br>
+      • 新增：新对话按钮</p>
+      <p><strong style="color:#1a1510;">v2.0</strong> (2026-06-22)<br>
+      • 重构：对话上下文自动精简<br>
+      • 优化：长对话自动提示重置</p>
+      <p><strong style="color:#1a1510;">v1.0</strong> (2026-06-21)<br>
+      • 首发：温尼科特思维框架对话</p>
+    </div>
+    <div id="historyContent" class="history-content">
+      <div class="history-empty" id="historyEmpty" data-i18n="history-empty">暂无历史对话</div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="intro" id="intro">
+      <div id="introW">
+        <div class="icon">🧸</div>
+        <h2 id="greetingTitle" data-i18n="intro-greeting">今天想聊聊什么？</h2>
+        <p id="greetingSub" style="font-size:14px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.8;" data-i18n="intro-sub">选一个方向，我来调成最适合聊天的模式</p>
+        <div class="hints" id="greetingBtns" style="margin-top:20px;display:flex;flex-direction:column;gap:10px;align-items:center;">
+          <button class="greet-btn" onclick="startChat(10)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:var(--btn-radius,22px);background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+            <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">❤️</span>
+            <span data-i18n="chat-feeling">聊聊心事</span>
+            <span style="font-size:10px;color:#b0a090;display:block;margin-top:2px;" data-i18n="chat-feeling-sub">温度 10 · 温暖陪伴</span>
+          </button>
+          <button class="greet-btn" onclick="startChat(90)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:var(--btn-radius,22px);background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+            <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">📚</span>
+            <span data-i18n="chat-professional">聊聊专业</span>
+            <span style="font-size:10px;color:#b0a090;display:block;margin-top:2px;" data-i18n="chat-professional-sub">温度 90 · 深度知识</span>
+          </button>
+          <button class="greet-btn" onclick="startChat(60)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:var(--btn-radius,22px);background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+            <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">🫖</span>
+            随便聊聊
+            <span style="font-size:10px;color:#b0a090;display:block;margin-top:2px;">温度 60 · 默认平衡</span>
+          </button>
+        </div>
+      </div>
+      <div id="introL" style="display:none;">
+        <div class="icon">🎭</div>
+        <h2 style="font-size:16px;margin:0 0 4px;font-weight:500;">你以为你在说什么？</h2>
+        <p style="font-size:14px;color:var(--muted);max-width:420px;margin:0 auto 18px;line-height:1.8;">你不知道的，语言替你说</p>
+        <div class="hints" style="display:flex;flex-direction:column;gap:10px;align-items:center;">
+          <button class="greet-btn" onclick="startChat(30)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+            <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">◉</span>
+            <span>直白解析</span>
+            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">用日常语言理解三界</span>
+          </button>
+          <button class="greet-btn" onclick="startChat(80)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+            <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">◈</span>
+            <span>形式化推演</span>
+            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">Matheme · 能指链 · 拓扑学</span>
+          </button>
+          <button class="greet-btn" onclick="startChat(60)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+            <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">◐</span>
+            分析你的症状
+            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">温度 60 · 标准拉康</span>
+          </button>
+        </div>
+      </div>
+      <p id="langTip" style="font-size:12px;color:#8b7355;margin-top:22px;line-height:1.6;">💡 原始语料为英文，用英文提问效果更佳 / <span style="font-size:11px;opacity:0.7;">English prompts work best</span></p>
+    </div>
+  </div>
+  <div class="forward-bar" id="forwardBar">
+    <span class="f-count" id="forwardCount" data-i18n="forward-bar-count">已选 0 条</span>
+    <button class="f-cancel" onclick="cancelForward()" data-i18n="forward-cancel">取消</button>
+    <button class="f-btn" id="forwardGenBtn" onclick="generateForwardCard()" disabled data-i18n="forward-gen">生成分享图</button>
+  </div>
+  <div class="bottom-bar">
+  <div class="input-area">
+    <div class="input-wrap">
+      <textarea id="input" rows="1" data-i18n="input-placeholder" placeholder="写下你想说的……" onkeydown="handleKey(event)"></textarea>
+      <button id="sendBtn" onclick="sendMessage()" title="发送">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="disclaimer">
+    <span id="disclaimerText">此对话由 AI 模拟温尼科特思维框架生成，非临床治疗建议。如有心理困扰，可请寻求作者帮助。</span>
+    <span id="busuanzi_container_page_pv" style="opacity:0.3;margin-left:8px;">| 👁️ <span id="busuanzi_value_page_pv"></span></span>
+    | <strong><a href="https://757b6f9d7772430ab0dba04609cfa611.app.codebuddy.work" target="_blank" style="color:#a6845b;text-decoration:none;font-weight:bold;">了解作者</a></strong> | <a onclick="showChangelog()" style="color:var(--muted);text-decoration:none;cursor:pointer;">v4</a>
+    | <span style="color:#c9b99d;font-size:10px;">📢 关注公众号 <strong style="color:#a6845b;">MindMeetsHeart</strong></span>
+  </div>
+</div>
+
+<script>
+// busuanzi 计数器偏移：从 1526 开始
+(function() {
+  var _pvBase = 1526;
+  var el = document.getElementById('busuanzi_value_page_pv');
+  if (el) {
+    var obs = new MutationObserver(function() {
+      var val = parseInt(el.textContent) || 0;
+      if (val > 0 && val < _pvBase) { el.textContent = val + _pvBase; }
+    });
+    obs.observe(el, { childList: true, characterData: true, subtree: true });
+    // also set a backup interval
+    var iv = setInterval(function() {
+      var val = parseInt(el.textContent) || 0;
+      if (val > 0 && val < _pvBase) { el.textContent = val + _pvBase; clearInterval(iv); }
+    }, 500);
+  }
+})();
+</script>
+</div>
+
+<div class="reward-overlay" id="rewardOverlay" onclick="if(event.target===this)closeReward()">
+  <div class="reward-box">
+    <h3>☕ 觉得是个好活？</h3>
+    <p class="reward-sub">这网站免费用，但 API 调一次几毛钱<br>如果你聊得开心，可以打赏点 token 钱</p>
+    <img src="reward-qr.jpg" alt="打赏二维码">
+    <p class="reward-tip">微信扫码 · 多少随意 · 全靠缘分</p>
+    <button class="reward-close" onclick="closeReward()">收到，关掉</button>
+  </div>
+</div>
+
+<!-- Update announcement overlay -->
+<div class="reward-overlay" id="updateOverlay">
+  <div class="reward-box" style="max-width:440px;">
+    <h3 style="margin:0 0 2px;font-size:16px;font-weight:500;color:var(--text);">🎉 更新了！v4</h3>
+    <p class="reward-sub" style="font-size:12px;color:var(--muted);margin-bottom:12px;text-align:left;line-height:1.8;">本次更新内容：</p>
+    <div style="font-size:12px;color:var(--text);text-align:left;line-height:1.9;padding:0 4px;">
+      • 🧑‍🎨 <strong>与更多大师对话</strong>：新增大师选择列表——弗洛伊德、克莱因、荣格三位大师入驻<br>
+      • 🎨 每位大师独立配色、个性化开场引导、建议话题按钮<br>
+      • 🛠️ 完整设置面板：温度/长度/API/深色/字体/历史/反馈<br>
+      • 💡 注入三位大师风格指令，对话更贴近原貌<br>
+      • 📊 访问计数从 1526 开始统计
+    </div>
+    <button class="reward-close" onclick="closeUpdate()" style="margin-top:14px;">知道了，开始吧</button>
+  </div>
+</div>
+
+<!-- Share card (hidden, for rendering to image) -->
+<div class="share-card" id="shareCard">
+  <div class="share-card-inner" id="shareCardInner"></div>
+</div>
+
+<!-- Share preview overlay -->
+<div class="share-overlay" id="shareOverlay" onclick="if(event.target===this)closeSharePreview()">
+  <div class="share-box">
+    <p data-i18n="share-save">长按图片保存，分享到朋友圈</p>
+    <img id="sharePreviewImg" src="" alt="分享卡片">
+    <button class="share-close-btn" onclick="closeSharePreview()" data-i18n="share-close">关 闭</button>
+  </div>
+</div>
+
+<!-- Feedback overlay -->
+<div class="feedback-overlay" id="feedbackOverlay" onclick="if(event.target===this)closeFeedback()">
+  <div class="feedback-box">
+    <h3>💡 意见反馈</h3>
+    <p style="font-size:12px;color:var(--muted);margin:0 0 12px 0;">许愿新功能或报告问题，提交后通过邮件发送</p>
+    <textarea id="feedbackText" rows="5" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box;background:var(--bg);color:var(--text);" placeholder="说说你的想法……"></textarea>
+    <div class="modal-actions" style="margin-top:12px;">
+      <button class="btn-cancel" onclick="closeFeedback()">取消</button>
+      <button class="btn-confirm" onclick="submitFeedback()">发送反馈</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <h3 id="modalTitle" data-i18n="modal-title">确认</h3>
+    <p id="modalText" data-i18n="modal-text">确定执行此操作？</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="modalCancel" data-i18n="modal-cancel">取消</button>
+      <button class="btn-confirm" id="modalConfirm" data-i18n="modal-confirm">确定</button>
+    </div>
+  </div>
+</div>
+<script>
+// Model tiers: auto-switch on failure with friendly messages
+const TIER_PRO = { api: 'https://api.kkdmx.com/v1/chat/completions', key: 'sk-JvknFamMM2OEcIYgT02gbR4rKvacIM4Vy4CTPdDVe22DROJR', model: 'deepseek-ai/deepseek-v4-pro', name: 'DeepSeek Pro' };
+const TIER_FLASH = { api: 'https://api.kkdmx.com/v1/chat/completions', key: 'sk-VKinfjJwko8RneSWuppXp8CuCcHGHFd9K9Uaq32VwgmIIX21', model: 'deepseek-ai/deepseek-v4-flash', name: 'DeepSeek Flash' };
+const TIER_M3 = { api: 'https://api.kkdmx.com/v1/chat/completions', key: 'sk-8sPbqqYiQIRh8ScEcbX7FDELlg5LXpjJxO2hBnwsfCxooKvD', model: 'minimaxai/minimax-m3', name: 'MiniMax M3' };
+const TIER_AGNES = { api: 'https://apihub.agnes-ai.com/v1/chat/completions', key: 'sk-dggqbbPiaO2AF14ZPFGvNbCUGXy74AVi9421lMSH3gqppC2e', model: 'agnes-2.0-flash', name: 'Agnes' };
+const TIERS = [TIER_PRO, TIER_FLASH, TIER_M3, TIER_AGNES];
+
+var _tierLevel = 0;
+
+// i18n: 中英切换
+var _lang = localStorage.getItem('winnicott_lang') || 'zh';
+var i18n = {
+  'lang-btn': { zh: 'EN', en: '中' },
+  'h1-title': { zh: '与温尼科特对话', en: 'Chat with Winnicott' },
+  'h1-subtitle': { zh: '一个观察了六十年婴儿的儿科医生，用日常语言讨论人类经验', en: 'A pediatrician who watched babies for 40 years, speaking in plain language' },
+  'settings-btn': { zh: '⚙️ 设置', en: '⚙️ Settings' },
+  'dark-btn': { zh: '🌙 深色', en: '🌙 Dark' },
+  'forward-btn': { zh: '✂️ 转发', en: '✂️ Select' },
+  'reward-btn': { zh: '☕ 打赏', en: '☕ Tip' },
+  'api-btn': { zh: '🔌 API', en: '🔌 API' },
+  'api-btn-close': { zh: '🔌 收起', en: '🔌 Close' },
+  'default-mode': { zh: '默认（DeepSeek）', en: 'Default (DeepSeek)' },
+  'custom-mode': { zh: '自用 API', en: 'Custom API' },
+  'api-addr': { zh: '地址', en: 'Endpoint' },
+  'api-key-label': { zh: 'Key', en: 'Key' },
+  'api-model': { zh: '模型', en: 'Model' },
+  'temp-left': { zh: '❤️ 情感对话', en: '❤️ Emotional' },
+  'temp-right': { zh: '📚 知识回答', en: '📚 Knowledge' },
+  'temp-hint-left': { zh: '🧸 情感陪伴', en: 'Emotional' },
+  'temp-hint-right': { zh: '📚 专业知识', en: 'Knowledge' },
+  'temp-hint-left-lacan': { zh: '◉ 直白解析', en: 'Plain' },
+  'temp-hint-right-lacan': { zh: '◈ 形式化推演', en: 'Formalized' },
+  'changelog-btn': { zh: '📋 更新日志', en: '📋 Changelog' },
+  'save-history': { zh: '📥 保存到历史', en: '📥 Save' },
+  'reset-btn': { zh: '🔄 新对话', en: '🔄 New Chat' },
+  'history-btn': { zh: '📋 对话历史', en: '📋 History' },
+  'feedback-btn': { zh: '💡 反馈', en: '💡 Feedback' },
+  'history-empty': { zh: '暂无历史对话', en: 'No history yet' },
+  'history-saved': { zh: '已保存到历史', en: 'Saved to history' },
+  'history-loaded': { zh: '已加载历史对话', en: 'History loaded' },
+  'history-deleted': { zh: '已删除历史记录', en: 'History deleted' },
+  'history-confirm-del': { zh: '确定删除此对话历史？', en: 'Delete this history?' },
+  'history-msg-prefix': { zh: '条消息 · ', en: ' msgs · ' },
+  'save-history': { zh: '📥 保存到历史', en: '📥 Save History' },
+  'persona-w': { zh: '🧸 温尼科特', en: 'Winnicott' },
+  'persona-l': { zh: '🎭 拉康', en: 'Lacan' },
+  'persona-switched': { zh: '已切换到{persona}模式', en: 'Switched to {persona} mode' },
+  'conv-cleared': { zh: '对话已清空', en: 'Conversation cleared' },
+  'modal-confirm': { zh: '确定', en: 'OK' },
+  'modal-cancel': { zh: '取消', en: 'Cancel' },
+  'modal-title': { zh: '确认', en: 'Confirm' },
+  'modal-text': { zh: '确定执行此操作？', en: 'Are you sure?' },
+  'input-placeholder': { zh: '写下你想说的……', en: 'Type your message...' },
+  'intro-title': { zh: '与温尼科特对话', en: 'Chat with Winnicott' },
+  'intro-desc': { zh: '基于温尼科特全集 12 卷、595 篇原著、81 个概念页、224 个案例报告的 AI 对话体验。选择以下方式开始——', en: 'An AI conversation based on the Collected Works (12 vols), 595 papers, 81 concepts, and 224 case reports. Choose a starting point:' },
+  'intro-greeting': { zh: '今天想聊聊什么？', en: 'What would you like to talk about today?' },
+  'intro-sub': { zh: '选一个方向，我来调成最适合聊天的模式', en: 'Pick a direction — I\'ll adjust the mode for you' },
+  'intro-hint-model': { zh: '🎭 先认识温尼科特', en: '🎭 Who is Winnicott?' },
+  'intro-hint-anxiety': { zh: '😰 聊聊焦虑', en: '😰 Talk about anxiety' },
+  'intro-hint-parent': { zh: '👶 育儿困惑', en: '👶 Parenting concerns' },
+  'intro-hint-relation': { zh: '💔 关系难题', en: '💔 Relationship issues' },
+  'intro-hint-bored': { zh: '😶 随便聊聊', en: '😶 Just chat' },
+  'chat-feeling': { zh: '聊聊心事', en: 'Share feelings' },
+  'chat-feeling-sub': { zh: '温度 10 · 温暖陪伴', en: 'Temp 10 · Warm company' },
+  'chat-professional': { zh: '聊聊专业', en: 'Talk theory' },
+  'chat-professional-sub': { zh: '温度 90 · 深度知识', en: 'Temp 90 · Deep knowledge' },
+  'intro-english-tip': { zh: '💡 原始语料为英文，用英文提问效果更佳 / English prompts work best', en: '💡 Winnicott wrote in English — English prompts work best' },
+  'intro-english-tip': { zh: '💡 原始语料为英文，用英文提问效果更佳 / English prompts work best', en: '💡 Winnicott wrote in English — English prompts work best' },
+  'disclaimer': { zh: '此对话由 AI 模拟人设思维框架生成，非临床治疗建议。如有心理困扰，请寻求专业帮助。', en: 'This conversation is an AI simulation and is not clinical advice. If you need help, seek a qualified professional.' },
+  'disclaimer-w': { zh: '此对话由 AI 模拟温尼科特思维框架生成，非临床治疗建议。如有心理困扰，可请寻求作者帮助。', en: 'This conversation is an AI simulation of Winnicott\'s thinking framework and is not clinical advice.' },
+  'disclaimer-l': { zh: '此对话由 AI 模拟拉康思维框架生成，不构成精神分析。症状的真相——只有你自己能面对。', en: 'This conversation is an AI simulation of Lacan\'s thinking framework and does not constitute psychoanalysis.' },
+  'share-save': { zh: '长按图片保存，分享到朋友圈', en: 'Long press to save, share with friends' },
+  'share-close': { zh: '关 闭', en: 'Close' },
+  'forward-bar-count': { zh: '已选 0 条', en: 'Selected 0' },
+  'forward-cancel': { zh: '取消', en: 'Cancel' },
+  'forward-gen': { zh: '生成分享图', en: 'Generate Card' },
+  'ctx-label': { zh: '上下文字数', en: 'Context' },
+  'banner-knowledge-loading': { zh: '知识库加载中，请稍等……', en: 'Loading knowledge base...' },
+  'banner-nokey': { zh: '未配置 API Key，请在设置中填写。', en: 'API Key not set. Please configure in Settings.' },
+  'banner-new-chat': { zh: '已开始新对话', en: 'New conversation started' },
+  'banner-retry': { zh: '线路繁忙，正在重试……', en: 'Route busy, retrying...' },
+  'banner-fallback': { zh: '本地代理离线，已切换云端模型', en: 'Local proxy offline, switched to cloud model' },
+  'banner-saved': { zh: '设置已保存（存于浏览器本地）', en: 'Settings saved (local storage)' },
+};
+
+function t(key) { return i18n[key] ? (i18n[key][_lang] || i18n[key]['zh']) : key; }
+
+function applyLang() {
+  // data-i18n elements: replace innerText
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      el.placeholder = t(key);
+    } else if (el.tagName === 'BUTTON' || el.tagName === 'A') {
+      el.innerHTML = el.innerHTML.replace(el.textContent, t(key));
+    } else {
+      el.textContent = t(key);
+    }
+  });
+  // Specific elements with dynamic content
+  updateTemp(talkTemp);
+}
+
+function toggleLang() {
+  _lang = _lang === 'zh' ? 'en' : 'zh';
+  localStorage.setItem('winnicott_lang', _lang);
+  applyLang();
+  document.getElementById('langBtn').textContent = t('lang-btn');
+}  // 当前是否已降级
+
+let systemPrompt = '';
+let conversation = [];
+let isLoading = false;
+let talkTemp = parseInt(localStorage.getItem('winnicott_temp') || '60');
+var _maxTokens = parseInt(localStorage.getItem('winnicott_len') || '0');
+var _autoSaveCounter = 0;
+let apiMode = localStorage.getItem('winnicott_api_mode') || 'default';
+let customApi = localStorage.getItem('winnicott_custom_api') || '';
+let customKey = localStorage.getItem('winnicott_custom_key') || '';
+let customModel = localStorage.getItem('winnicott_custom_model') || '';
+let _persona = localStorage.getItem('winnicott_persona') || 'winnicott';
+
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('sendBtn');
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsPanel = document.getElementById('settingsPanel');
+const defaultModeBtn = document.getElementById('defaultModeBtn');
+const customModeBtn = document.getElementById('customModeBtn');
+const customFields = document.getElementById('customFields');
+var modalResolve = null;
+
+function toggleSettings() {
+  // 防抖：transition 期间跳过重复触发
+  if (settingsPanel._toggling) return;
+  settingsPanel._toggling = true;
+  settingsPanel.classList.toggle('open');
+  if (!settingsPanel.classList.contains('open')) {
+    document.getElementById('changelogContent').style.display = 'none';
+  }
+  restoreForm();
+  setTimeout(function() { settingsPanel._toggling = false; }, 350);
+}
+
+// Auto-close settings panel on scroll messages only
+function autoCloseSettings() {
+  var sp = document.getElementById('settingsPanel');
+  if (sp && sp.classList.contains('open')) {
+    sp.classList.remove('open');
+    var cc = document.getElementById('changelogContent');
+    if (cc) cc.style.display = 'none';
+  }
+}
+document.getElementById('messages').addEventListener('scroll', autoCloseSettings, { passive: true });
+function setMode(mode) {
+  apiMode = mode;
+  localStorage.setItem('winnicott_api_mode', mode);
+  if (mode === 'default') _tierLevel = 0;
+  defaultModeBtn.className = 'default-btn' + (mode === 'default' ? ' active' : '');
+  customModeBtn.className = 'custom-btn' + (mode === 'custom' ? ' active' : '');
+  customFields.style.display = mode === 'custom' ? 'block' : 'none';
+  settingsBtn.className = 'settings-btn' + (mode === 'custom' ? ' custom' : '');
+  settingsBtn.textContent = mode === 'custom' ? '自用' : '设置';
+}
+function switchPersona(mode) {
+  _tierLevel = 0; // 切换人物也重置线路
+  _persona = mode;
+  localStorage.setItem('winnicott_persona', mode);
+  // 清空旧的 systemPrompt，防止发消息时用旧人格回复
+  systemPrompt = '';
+  // Theme
+  document.documentElement.classList.toggle('lacan', mode === 'lacan');
+  // Toggle buttons
+  var wBtn = document.querySelector('.persona-w');
+  var lBtn = document.querySelector('.persona-l');
+  if (wBtn) { wBtn.style.background = mode === 'winnicott' ? 'var(--accent)' : 'var(--bg)'; wBtn.style.color = mode === 'winnicott' ? 'white' : 'var(--text)'; }
+  if (lBtn) { lBtn.style.background = mode === 'lacan' ? 'var(--accent)' : 'var(--bg)'; lBtn.style.color = mode === 'lacan' ? 'white' : 'var(--text)'; }
+  // Header + title + disclaimer
+  var hdrTitle = document.getElementById('headerTitle');
+  var hdrSub = document.getElementById('headerSub');
+  var disc = document.getElementById('disclaimerText');
+  var hintL = document.getElementById('tempHintLeft');
+  var hintR = document.getElementById('tempHintRight');
+  if (mode === 'lacan') {
+    if (hdrTitle) hdrTitle.textContent = '与拉康对话';
+    if (hdrSub) hdrSub.textContent = '你以为你在说什么？你不知道的，语言替你说';
+    if (disc) disc.textContent = '此对话由 AI 模拟拉康思维框架生成，不构成精神分析。症状的真相——只有你自己能面对。';
+    if (hintL) hintL.textContent = '◉ 直白解析';
+    if (hintR) hintR.textContent = '◈ 形式化推演';
+    document.title = '与拉康对话';
+  } else {
+    if (hdrTitle) hdrTitle.textContent = '与温尼科特对话';
+    if (hdrSub) hdrSub.textContent = '一个观察了六十年婴儿的儿科医生，用日常语言讨论人类经验';
+    if (disc) disc.textContent = '此对话由 AI 模拟温尼科特思维框架生成，非临床治疗建议。如有心理困扰，可请寻求作者帮助。';
+    if (hintL) hintL.textContent = '🧸 情感陪伴';
+    if (hintR) hintR.textContent = '📚 专业知识';
+    document.title = '与温尼科特对话';
+  }
+  // Show correct intro, hide the other
+  var iw = document.getElementById('introW');
+  var il = document.getElementById('introL');
+  if (iw) iw.style.display = mode === 'winnicott' ? 'block' : 'none';
+  if (il) il.style.display = mode === 'lacan' ? 'block' : 'none';
+  // Language tip
+  var tip = document.getElementById('langTip');
+  if (tip) tip.innerHTML = mode === 'lacan' ? '💡 原始语料为法语，法语术语保留原文 / French terms kept in original' : '💡 原始语料为英文，用英文提问效果更佳 / <span style="font-size:11px;opacity:0.7;">English prompts work best</span>';
+  // Reload knowledge base
+  loadSystemPrompt();
+  showBanner('info', '已切换到' + (isSupervisor ? 'AI督导' : (mode === 'lacan' ? '拉康' : '温尼科特')) + '模式');
+}
+function restoreForm() {
+  document.getElementById('customApi').value = customApi;
+  document.getElementById('customKey').value = customKey;
+  document.getElementById('customModel').value = customModel;
+  setMode(apiMode);
+}
+function saveSettings() {
+  customApi = document.getElementById('customApi').value.trim();
+  customKey = document.getElementById('customKey').value.trim();
+  customModel = document.getElementById('customModel').value.trim() || 'gpt-4o';
+  if (customApi) localStorage.setItem('winnicott_custom_api', customApi);
+  else localStorage.removeItem('winnicott_custom_api');
+  if (customKey) localStorage.setItem('winnicott_custom_key', customKey);
+  else localStorage.removeItem('winnicott_custom_key');
+  localStorage.setItem('winnicott_custom_model', customModel);
+  showBanner('info', '设置已保存（存于浏览器本地）');
+}
+function fillPreset(api, model) {
+  document.getElementById('customApi').value = api;
+  document.getElementById('customModel').value = model;
+  if (apiMode !== 'custom') setMode('custom');
+  var name = model.indexOf('deepseek')>=0?'DeepSeek':model.indexOf('gpt')>=0?'OpenAI':'硅基流动';
+  showBanner('info', '已填入 ' + name + '，请填写 Key 后保存');
+}
+
+function getActiveConfig() {
+  if (apiMode === 'custom' && customApi && customKey) {
+    return { api: customApi, key: customKey, model: customModel };
+  }
+  var level = Math.min(_tierLevel, TIERS.length - 1);
+  var t = TIERS[level];
+  return { api: t.api, key: t.key, model: t.model };
+}
+var _msgIdCounter = 0;
+var _msgToConvIdx = {};
+var _chapterCount = 0;
+var _chapterKeywords = {};
+
+// Chapter detection: keywords from user message
+function extractKeywords(text) {
+  var stops = '的了吗是我在也不就这有和都对这个吧被把让去很还会与及或是但而或者因为所以如果虽然可能应该可以需要觉得以为知道看到听到感到想到'.split('');
+  var words = text.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, ' ').split(/\s+/).filter(function(w){return w.length>1;});
+  var kw = {};
+  words.forEach(function(w){ if(w.length>1 && stops.indexOf(w)<0) kw[w]=(kw[w]||0)+1; });
+  return Object.keys(kw).sort(function(a,b){return kw[b]-kw[a];}).slice(0,8).join(',');
+}
+
+function checkChapterShift() {
+  // Check if a new chapter should be inserted based on user message topic shift
+  var lastIdx = conversation.length - 2; // last user message
+  if (lastIdx < 2) return; // Need at least 2 user messages
+  var prevUser = null;
+  for (var i = lastIdx - 2; i >= 0; i--) {
+    if (conversation[i].role === 'user') { prevUser = i; break; }
+  }
+  if (prevUser === null) return;
+  var currKw = extractKeywords(conversation[lastIdx].content);
+  var prevKw = extractKeywords(conversation[prevUser].content);
+  if (!currKw || !prevKw) return;
+  // Jaccard-like similarity on keyword sets
+  var currSet = {}; currKw.split(',').forEach(function(k){currSet[k]=1;});
+  var prevSet = {}; prevKw.split(',').forEach(function(k){prevSet[k]=1;});
+  var overlap = 0, total = 0;
+  Object.keys(currSet).forEach(function(k){ if(prevSet[k]) overlap++; total++; });
+  Object.keys(prevSet).forEach(function(k){ if(!currSet[k]) total++; });
+  var sim = total > 0 ? overlap / total : 0;
+  if (sim < 0.15 && _chapterCount < 50) { // topic shift threshold
+    _chapterCount++;
+    insertChapterDivider();
+  }
+}
+
+function insertChapterDivider() {
+  var title = '📌 第 ' + _chapterCount + ' 轮讨论';
+  var el = document.getElementById('messages');
+  var d = document.createElement('div');
+  d.className = 'msg chapter-divider';
+  d.style.cssText = 'text-align:center;padding:12px 0 8px;font-size:11px;color:#c9b99d;border-top:1px dashed var(--border);margin-top:8px;';
+  d.textContent = '—— ' + title + ' ——';
+  el.appendChild(d);
+}// Init
+restoreForm();
+restoreConversation();
+applyLang();
+// Apply persona from saved state
+switchPersona(_persona);
+// Restore font size
+var savedFs = localStorage.getItem('winnicott_fontsize');
+if (savedFs) {
+  document.documentElement.style.setProperty('--msg-fs', savedFs + 'px');
+  document.querySelectorAll('.msg .bubble').forEach(function(el) {
+    el.style.fontSize = savedFs + 'px';
+  });
+}
+
+// Mobile keyboard fix
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', function() {
+    var diff = window.innerHeight - window.visualViewport.height;
+    if (diff > 100) {
+      document.querySelector('.input-wrap').scrollIntoView({behavior:'smooth', block:'nearest'});
+    }
+  });
+}
+
+// Keep bottom bar truly fixed
+function fixBottomLayout() {
+  var bb = document.querySelector('.bottom-bar');
+  if (bb) {
+    var h = bb.offsetHeight;
+    document.querySelector('.messages').style.paddingBottom = (h + 12) + 'px';
+    var fb = document.getElementById('forwardBar');
+    if (fb) fb.style.bottom = h + 'px';
+  }
+}
+window.addEventListener('load', fixBottomLayout);
+window.addEventListener('resize', fixBottomLayout);
+// Also re-run when settings panel opens/closes
+var settingsObs = new MutationObserver(fixBottomLayout);
+settingsObs.observe(document.getElementById('settingsPanel'), { attributes: true, attributeFilter: ['class'] });
+
+document.getElementById('tempSlider').value = talkTemp;
+updateTemp(talkTemp);
+loadSystemPrompt();
+// Dark mode restore
+if (localStorage.getItem('winnicott_dark') === '1') { document.body.classList.add('dark'); document.getElementById('darkBtn').textContent = '☀️ 浅色'; }
+function saveConversation() {
+  if (conversation.length > 0) localStorage.setItem('winnicott_conversation', JSON.stringify(conversation));
+  else localStorage.removeItem('winnicott_conversation');
+}
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  var isDark = document.body.classList.contains('dark');
+  document.getElementById('darkBtn').textContent = isDark ? '☀️ 浅色' : '🌙 深色';
+  localStorage.setItem('winnicott_dark', isDark ? '1' : '0');
+}
+// Font size control
+function changeFontSize(delta) {
+  var cur = parseInt(localStorage.getItem('winnicott_fontsize')) || 15;
+  var pct = cur + delta;
+  if (pct < 12) pct = 12;
+  if (pct > 20) pct = 20;
+  document.documentElement.style.setProperty('--msg-fs', pct + 'px');
+  // Fallback: also apply to existing bubbles
+  document.querySelectorAll('.msg .bubble').forEach(function(el) {
+    el.style.fontSize = pct + 'px';
+  });
+  localStorage.setItem('winnicott_fontsize', pct);
+}
+var savedFs = localStorage.getItem('winnicott_fontsize');
+if (savedFs) { document.documentElement.style.setProperty('--msg-fs', savedFs + 'px'); }
+function copyMsg(btn, idx) {
+  var text = conversation[idx] ? conversation[idx].content : '';
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = '✅';
+    setTimeout(function(){btn.textContent = '📋';}, 1500);
+  });
+}
+function showConfirm(title, text) {
+  return new Promise(function(resolve) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('show');
+    modalResolve = resolve;
+  });
+}
+document.getElementById('modalConfirm').onclick = function() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  if (modalResolve) { modalResolve(true); modalResolve = null; }
+};
+document.getElementById('modalCancel').onclick = function() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  if (modalResolve) { modalResolve(false); modalResolve = null; }
+};
+
+
+async function loadSystemPrompt() {
+  if (_persona === 'lacan') {
+    try {
+      const res = await fetch('lacan-knowledge.md');
+      var raw = await res.text();
+      // 拉康指令：中文为主，法语术语附翻译
+      systemPrompt = '[重要指令：①始终使用中文对话，你的身份是雅克·拉康，用拉康的思维方式和语言风格进行对话。②当出现法语术语（如 objet petit a、jouissance、l\'Autre、Nom-du-Père 等）时，必须在术语后面立即加上中文翻译/解释（用括号或破折号引出），例如："jouissance（原乐，一种超越快乐原则的过量快感）"或"l\'Autre——大他者，象征秩序的整体"。③法语术语保持原文格式，但紧跟中文翻译。]\n\n' + raw;
+    } catch (e) {
+      showBanner('error', '加载拉康知识库失败，请刷新页面重试。');
+    }
+    return;
+  }
+  var file = 'winnicott-knowledge.md';
+  if (talkTemp > 80) file = 'winnicott-knowledge-full.md';
+  else if (talkTemp < 20) file = 'winnicott-emotional.md';
+  try {
+    const res = await fetch(file);
+    systemPrompt = await res.text();
+  } catch (e) {
+    showBanner('error', '加载温尼科特知识库失败，请刷新页面重试。');
+  }
+}
+
+function appendMessage(role, content, optIdx) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  var idx = (optIdx !== undefined) ? optIdx : (conversation.length - 1);
+  _msgIdCounter++;
+  var msgId = _msgIdCounter;
+  _msgToConvIdx[msgId] = idx;
+  var avatarHtml;
+  var nameLabel = '';
+  if (role === 'user') {
+    avatarHtml = '我';
+  } else if (_persona === 'lacan') {
+    avatarHtml = '<img src="lacan-avatar.jpg" alt="L" style="width:36px;height:36px;border-radius:50%;object-fit:cover;pointer-events:none;user-select:none;">';
+    nameLabel = '拉康';
+  } else {
+    avatarHtml = 'DW';
+    nameLabel = '温尼科特';
+  }
+  var savedFs = localStorage.getItem('winnicott_fontsize');
+  var fsStyle = savedFs ? ' style="font-size:' + savedFs + 'px"' : '';
+  var bubbleHtml = '<div class="bubble"' + fsStyle + '>' + escapeHtml(content) + '<button class="share-btn" onclick="shareConversation(' + idx + ')" title="分享">🔗</button><button class="copy-btn" onclick="copyMsg(this,' + idx + ')" title="复制">📋</button></div>';
+  if (role === 'user') {
+    div.innerHTML = '<div class="sel-check" data-idx="' + msgId + '"></div><div class="avatar">' + avatarHtml + '</div>' + bubbleHtml;
+  } else {
+    div.innerHTML = '<div class="sel-check" data-idx="' + msgId + '"></div><div class="ai-header"><div class="avatar">' + avatarHtml + '</div><span class="ai-name">' + nameLabel + '</span></div>' + bubbleHtml;
+  }
+  messagesEl.appendChild(div);
+  scrollToBottom();
+}
+function showBanner(type, text) {
+  const d = document.createElement('div');
+  d.className = 'banner ' + type;
+  d.textContent = text;
+  messagesEl.appendChild(d);
+  setTimeout(function(){d.remove();}, type==='info'?3000:10000);
+  scrollToBottom();
+}
+
+function showRewardModal(auto) {
+  document.getElementById('rewardOverlay').classList.add('show');
+  if (auto) {
+    // Mark as shown for this session so we don't auto-pop repeatedly
+    sessionStorage.setItem('winnicott_reward_auto_shown', '1');
+  }
+}
+function closeReward() {
+  document.getElementById('rewardOverlay').classList.remove('show');
+}
+
+// Update announcement
+function closeUpdate() {
+  document.getElementById('updateOverlay').classList.remove('show');
+  localStorage.setItem('winnicott_last_version', 'v4');
+}
+(function showUpdateIfNew() {
+  var lastVer = localStorage.getItem('winnicott_last_version') || '';
+  if (lastVer !== 'v4') {
+    setTimeout(function() {
+      document.getElementById('updateOverlay').classList.add('show');
+    }, 600);
+  }
+})();
+
+// Load html2canvas
+(function() {
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+  s.onload = function(){ window._h2cReady = true; };
+  document.head.appendChild(s);
+})();
+
+var shareCanvasCache = {};
+var forwardSelected = {};
+
+function toggleForwardMode() {
+  var on = document.body.classList.toggle('sel-mode');
+  document.getElementById('forwardBar').classList.toggle('show', on);
+  forwardSelected = {};
+  document.getElementById('forwardCount').textContent = '已选 0 条';
+  document.getElementById('forwardGenBtn').disabled = true;
+
+  // Refresh all checkboxes
+  document.querySelectorAll('.sel-check').forEach(function(el) {
+    el.classList.remove('on');
+    el.textContent = '';
+  });
+
+  // Bind click on messages in selection mode
+  if (on) {
+    document.querySelectorAll('.msg').forEach(function(msg) {
+      msg._clickHandler = function() {
+        var check = msg.querySelector('.sel-check');
+        if (!check) return;
+        var idx = check.getAttribute('data-idx');
+        if (forwardSelected[idx]) {
+          delete forwardSelected[idx];
+          check.classList.remove('on');
+          check.textContent = '';
+        } else {
+          forwardSelected[idx] = true;
+          check.classList.add('on');
+          check.textContent = '✓';
+        }
+        var count = Object.keys(forwardSelected).length;
+        document.getElementById('forwardCount').textContent = '已选 ' + count + ' 条';
+        document.getElementById('forwardGenBtn').disabled = count < 2;
+      };
+      msg.addEventListener('click', msg._clickHandler);
+    });
+  } else {
+    // Clean up handlers
+    document.querySelectorAll('.msg').forEach(function(msg) {
+      if (msg._clickHandler) msg.removeEventListener('click', msg._clickHandler);
+    });
+  }
+}
+
+function cancelForward() {
+  toggleForwardMode();
+  document.body.classList.remove('sel-mode');
+  document.getElementById('forwardBar').classList.remove('show');
+}
+
+function generateForwardCard() {
+  var msgIds = Object.keys(forwardSelected).sort(function(a,b){return a-b;});
+  if (msgIds.length < 2) return;
+  // Convert msgIds to conversation indices
+  var indices = [];
+  for (var i = 0; i < msgIds.length; i++) {
+    var ci = _msgToConvIdx[msgIds[i]];
+    if (ci !== undefined) indices.push(ci);
+  }
+  if (indices.length < 2) return;
+
+  // Build content pairs from selected messages
+  var pairs = [];
+  for (var i = 0; i < indices.length; i++) {
+    var msg = conversation[indices[i]];
+    if (msg) pairs.push({role: msg.role, content: msg.content});
+  }
+
+  // Fill share card
+  var inner = document.getElementById('shareCardInner');
+  var isLacan = _persona === 'lacan';
+  inner.className = 'share-card-inner' + (isLacan ? ' share-card-lacan' : '');
+  var aiLabel = isLacan ? '🎭 拉康' : '🧸 温尼科特';
+  var html = '<div class="sc-header"><div class="sc-icon">' + (isLacan ? '🎭' : '🧸') + '</div><div class="sc-title">' + (isLacan ? '与拉康对话' : '与温尼科特对话') + '</div></div>';
+
+  for (var i = 0; i < pairs.length; i++) {
+    var p = pairs[i];
+    var label = p.role === 'user' ? '🙋' : aiLabel;
+    var cls = p.role === 'user' ? 'sc-user' : 'sc-ai';
+    html += '<div class="' + cls + '"><span style="font-size:11px;color:#b0a090;display:block;margin-bottom:2px;">' + label + '</span>' + escapeHtml(p.content) + '</div>';
+    if (i < pairs.length - 1) {
+      html += '<div class="sc-divider"></div>';
+    }
+  }
+  html += '<div class="sc-footer">长按保存 · 分享到朋友圈</div>';
+  html += '<div class="sc-qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://6ef25e1d866643b38647207929046845.app.codebuddy.work" alt="扫码访问"><div class="sc-qr-label">扫码开始对话</div></div>';
+  inner.innerHTML = html;
+
+  // Render
+  var card = document.getElementById('shareCard');
+  card.style.left = '0';
+  card.style.top = '0';
+  card.style.position = 'fixed';
+
+  var tryRender = function() {
+    if (!window.html2canvas) {
+      setTimeout(tryRender, 200);
+      return;
+    }
+    html2canvas(card, {
+      scale: 2, useCORS: true, backgroundColor: isLacan ? '#12121e' : '#faf8f5', logging: false,
+    }).then(function(canvas) {
+      card.style.left = '-9999px';
+      card.style.position = 'fixed';
+      var imgData = canvas.toDataURL('image/png');
+      document.getElementById('sharePreviewImg').src = imgData;
+      document.getElementById('shareOverlay').classList.add('show');
+      // Exit forward mode
+      cancelForward();
+    });
+  };
+  tryRender();
+}
+
+function shareConversation(idx) {
+  // Old single-message share - open forward mode and pre-select this + previous user msg
+  toggleForwardMode();
+  // Select this message and the previous user message
+  var prevUser = -1;
+  for (var i = idx - 1; i >= 0; i--) {
+    if (conversation[i] && conversation[i].role === 'user') {
+      prevUser = i; break;
+    }
+  }
+  // Trigger clicks to select
+  var selectThese = [];
+  if (prevUser >= 0) selectThese.push(prevUser);
+  selectThese.push(idx);
+
+  document.querySelectorAll('.sel-check').forEach(function(el) {
+    var msgId = el.getAttribute('data-idx');
+    var ci = _msgToConvIdx[msgId];
+    if (ci !== undefined && selectThese.indexOf(ci) >= 0) {
+      forwardSelected[msgId] = true;
+      el.classList.add('on');
+      el.textContent = '✓';
+    }
+  });
+  var count = Object.keys(forwardSelected).length;
+  document.getElementById('forwardCount').textContent = '已选 ' + count + ' 条';
+  document.getElementById('forwardGenBtn').disabled = count < 2;
+}
+
+function closeSharePreview() {
+  document.getElementById('shareOverlay').classList.remove('show');
+}
+
+// API Health Check
+function checkAllAPIs() {
+  var row = document.getElementById('apiHealthRow');
+  row.innerHTML = TIERS.map(function(t){ return '<span style="background:#eee;color:#999;padding:2px 8px;border-radius:8px;font-size:10px;">' + t.name + ' …</span>'; }).join('');
+  TIERS.forEach(function(tier, i) {
+    setTimeout(function() {
+      var api = tier.api.replace(/\/v1\/chat\/completions.*/, '/v1/chat/completions');
+      var start = Date.now();
+      fetch(api, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tier.key },
+        body: JSON.stringify({ model:tier.model, messages:[{role:'user', content:'hi'}], max_tokens:1 })
+      }).then(function(r) {
+        var ms = Date.now() - start;
+        var color = r.ok ? '#4a9' : '#c60';
+        var label = r.ok ? '✓ ' + ms + 'ms' : '✗ ' + r.status;
+        updateTierBadge(tier.name, color, label);
+      }).catch(function() {
+        updateTierBadge(tier.name, '#c33', '✗ 超时');
+      });
+    }, i * 600);
+  });
+}
+function updateTierBadge(name, color, label) {
+  var row = document.getElementById('apiHealthRow');
+  var els = row.querySelectorAll('span');
+  for (var i = 0; i < els.length; i++) {
+    if (els[i].textContent.indexOf(name) >= 0) {
+      els[i].style.background = color; els[i].style.color = 'white';
+      els[i].textContent = name + ' ' + label; return;
+    }
+  }
+  // Fallback: append
+  var s = document.createElement('span');
+  s.style.cssText = 'background:'+color+';color:white;padding:2px 8px;border-radius:8px;font-size:10px;';
+  s.textContent = name + ' ' + label;
+  row.appendChild(s);
+}
+// Auto-check on load
+setTimeout(checkAllAPIs, 2000);
+
+// Feedback
+function openFeedback() {
+  document.getElementById('feedbackText').value = '';
+  document.getElementById('feedbackOverlay').classList.add('show');
+}
+function closeFeedback() {
+  document.getElementById('feedbackOverlay').classList.remove('show');
+}
+function submitFeedback() {
+  var text = document.getElementById('feedbackText').value.trim();
+  if (!text) { showBanner('info', '请先填写反馈内容'); return; }
+  var subj = encodeURIComponent('温尼科特对话页反馈');
+  var body = encodeURIComponent(text + '\n\n---\n发送时间: ' + new Date().toLocaleString());
+  window.location.href = 'mailto:985729106@qq.com?subject=' + subj + '&body=' + body;
+  closeFeedback();
+  showBanner('info', '感谢反馈！邮件客户端已打开，发送即可');
+}
+
+function showTyping() {
+  const div = document.createElement('div');
+  div.className = 'msg ai typing-msg'; div.id = 'typing';
+  var aiAvatar = _persona === 'lacan' ? '<img src="lacan-avatar.jpg" alt="L" style="width:36px;height:36px;border-radius:50%;object-fit:cover;pointer-events:none;user-select:none;">' : 'DW';
+  var aiNameLabel = _persona === 'lacan' ? '拉康' : '温尼科特';
+  div.innerHTML = '<div class="ai-header"><div class="avatar">' + aiAvatar + '</div><span class="ai-name">' + aiNameLabel + '</span></div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
+  messagesEl.appendChild(div); scrollToBottom();
+}
+function removeTyping() { var el = document.getElementById('typing'); if (el) el.remove(); }
+function scrollToBottom() { messagesEl.scrollTop = messagesEl.scrollHeight; }
+
+// Auto-save conversation
+function saveConversation() {
+  var toSave = conversation.slice(-100); // keep last 100 messages
+  try { localStorage.setItem('winnicott_conv', JSON.stringify(toSave)); } catch(e) {}
+}
+function restoreConversation() {
+  var saved;
+  try { saved = JSON.parse(localStorage.getItem('winnicott_conv')); } catch(e) {}
+  if (saved && saved.length) {
+    conversation = saved;
+    messagesEl.innerHTML = '';
+    for (var i = 0; i < conversation.length; i++) {
+      appendMessage(conversation[i].role, conversation[i].content, i);
+    }
+  }
+}
+// New chat: clear saved conversation
+function newChat() {
+  showConfirm('新对话', '确定开始新对话？当前对话将保留。').then(function(ok) {
+    if (!ok) return;
+    localStorage.removeItem('winnicott_conv');
+    conversation = [];
+    messagesEl.innerHTML = '';
+    _tierLevel = 0; // 新对话从线路一开始
+    showBanner('info', '已开始新对话');
+  });
+}
+function escapeHtml(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+
+async function sendMessage() {
+  // Save any unsaved settings changes
+  var dirtyKey = document.getElementById('customKey').value.trim();
+  var dirtyApi = document.getElementById('customApi').value.trim();
+  var dirtyModel = document.getElementById('customModel').value.trim();
+  if (apiMode === 'custom' && dirtyKey !== customKey) { saveSettings(); }
+
+  var text = inputEl.value.trim();
+  if (!text || isLoading) return;
+  if (!systemPrompt) { showBanner('info', '知识库加载中，请稍等……'); loadSystemPrompt(); setTimeout(function(){showBanner('info', '请重试发送消息');},3000); return; }
+
+  var cfg = getActiveConfig();
+  if (apiMode === 'custom' && !cfg.key) { showBanner('error', '未配置 API Key，请在设置中填写。'); return; }
+
+  var intro = document.getElementById('intro');
+  if (intro) intro.style.display = 'none';
+  document.querySelector('.header').classList.add('compact');
+
+  inputEl.value = ''; inputEl.style.height = 'auto';
+  appendMessage('user', text);
+  conversation.push({ role: 'user', content: text });
+  saveConversation();
+  saveConversation();
+
+  // Reward trigger: 15 user messages, once per session
+  var userMsgCount = conversation.filter(function(m){return m.role==='user';}).length;
+  if (userMsgCount === 15 && !sessionStorage.getItem('winnicott_reward_auto_shown')) {
+    setTimeout(function(){ showRewardModal(true); }, 1200);
+  }
+
+  // Build context: inject temperature instruction
+  var tempInstr = '\n\n[温度指令：当前对话权重 ' + talkTemp + '/100。';
+  if (_persona === 'lacan') {
+    if (talkTemp <= 30) {
+      tempInstr += '拉康最直白的模式。用日常语言解释精神分析概念，尽量减少法语术语。多用简单句，少用嵌套从句。适合非专业用户理解三界、对象a等核心概念。不要输出任何markdown符号，用纯文本。]';
+    } else if (talkTemp <= 50) {
+      tempInstr += '拉康标准模式。引入少量必要的法语术语（objet petit a, jouissance, l\'Autre），句式中等复杂度。用结构分析方法讨论问题。不要输出任何markdown符号，用纯文本。]';
+    } else if (talkTemp <= 70) {
+      tempInstr += '拉康专业模式。优先使用法语术语，句式可嵌套复杂。大量使用能指链分析、三界框架、欲望辩证法。适合有一定精神分析基础的对话者。不要输出任何markdown符号，用纯文本。]';
+    } else if (talkTemp <= 90) {
+      tempInstr += '拉康形式化模式。大量使用数学型（matheme）、拓扑学类比。可引用博罗米结、性化公式等。假设对话者熟悉拉康术语体系。优先结构分析，反对共情式回应。不要输出任何markdown符号，用纯文本。]';
+    } else {
+      tempInstr += '拉康完全形式化模式。以能指链分析、拓扑学结构、逻辑推演为主导。使用 "$ ◊ a" "S(\u0160)" 等符号。冷峻、精确、拒绝简化。不要输出任何markdown符号，用纯文本。]';
+    }
+  } else {
+    if (talkTemp <= 20) {
+      tempInstr += '只用情感化个人回应，不要分隔线，不要理论部分。用温尼科特自己的声音说话，像一个人在跟你聊天。每次回复控制在150字以内，精简，温暖，有人味儿。适当使用"I wonder...""在我看来""你知道……"等口癖。不要输出任何markdown符号（**、##、---、-、*等），用纯文本。不要出现分隔线。]';
+    } else if (talkTemp <= 40) {
+      tempInstr += '第一部分情感回应为主（约70%），第二部分理论锚点简略带过（约30%）。两部分之间用柔和的留空分隔，不要用"---"或者"—"。不要输出任何markdown符号（**、##、---等），用纯文本。]';
+    } else if (talkTemp <= 60) {
+      tempInstr += '默认模式：第一部分情感回应（约40%）+ 第二部分理论锚点（约60%）。两部分之间用柔和的留空分隔，不要用"---"。不要输出任何markdown符号（**、##等），用纯文本。]';
+    } else if (talkTemp <= 80) {
+      tempInstr += '重点在第二部分理论锚点（约80%），第一部分情感回应简略带过（约20%）。不要用"---"或"—"分隔。不要输出任何markdown符号（**、##等），用纯文本。]';
+    } else {
+      tempInstr += '优先使用第二部分（精确理论回答），情感回应大幅减少。直接给出专业准确的理论说明。不要用"---"分隔。不要输出任何markdown符号（**、##等），用纯文本。]';
+    }
+  }
+
+  // Unlimited context: send full conversation
+  var ctxMessages = [{ role: 'system', content: systemPrompt + tempInstr }];
+  ctxMessages = ctxMessages.concat(conversation);
+  // 100轮弹出提示（每轮=用户+AI两条消息，共200条）
+  if (conversation.length >= 200) {
+    showBanner('info', '对话轮数较多，受模型限制回复质量可能下降，建议点击新对话继续');
+  }
+
+  isLoading = true; sendBtn.disabled = true; showTyping();
+
+  // Create streaming message container (reused on retry)
+  var streamIdx = conversation.length;
+  _msgIdCounter++;
+  var streamMsgId = _msgIdCounter;
+  _msgToConvIdx[streamMsgId] = streamIdx;
+  var div = document.createElement('div');
+  div.className = 'msg ai';
+  var savedFs = localStorage.getItem('winnicott_fontsize');
+  var fsStyle = savedFs ? ' style="font-size:' + savedFs + 'px"' : '';
+  var aiAvatar = _persona === 'lacan' ? '<img src="lacan-avatar.jpg" alt="L" style="width:36px;height:36px;border-radius:50%;object-fit:cover;pointer-events:none;user-select:none;">' : 'DW';
+  var aiNameLabel = _persona === 'lacan' ? '拉康' : '温尼科特';
+  div.innerHTML = '<div class="sel-check" data-idx="' + streamMsgId + '"></div><div class="ai-header"><div class="avatar">' + aiAvatar + '</div><span class="ai-name">' + aiNameLabel + '</span></div><div class="bubble"' + fsStyle + ' id="streamBubble' + streamIdx + '"></div>';
+
+  var fullReply = '';
+  var _retry = 0;
+  var _maxRetries = 1;
+  var _fatalError = false;
+
+  while (_retry <= _maxRetries) {
+    var _firstAttempt = (_retry === 0);
+    if (!_firstAttempt) {
+      showBanner('info', '线路 ' + (_tierLevel + 1) + ' ' + TIERS[_tierLevel].name + ' 繁忙，尝试下一条……');
+      await new Promise(function(r){setTimeout(r, 1500);});
+      removeTyping();
+      div.querySelector('.bubble').innerHTML = '';
+      fullReply = '';
+      showTyping();
+    }
+
+    try {
+      var fetchHeaders = { 'Content-Type': 'application/json' };
+      if (cfg.key) fetchHeaders['Authorization'] = 'Bearer ' + cfg.key;
+      var res = await fetch(cfg.api, {
+        method: 'POST',
+        headers: fetchHeaders,
+        body: JSON.stringify({ model: cfg.model, messages: ctxMessages, temperature: 0.7, max_tokens: _maxTokens || undefined, stream: true })
+      });
+
+      if (!res.ok || !res.body) {
+        // Determine if this is a retryable error
+        var errData;
+        try { errData = await res.json(); } catch(e) { errData = {}; }
+        removeTyping();
+        var errMsg = (errData.error && errData.error.message) || '';
+        var retryable = (res.status >= 500 || res.status === 429 || res.status === 439 || res.status === 0);
+        if (res.status === 401 || errMsg.indexOf('invalid_api_key') >= 0 || errMsg.indexOf('auth') >= 0) {
+          showBanner('error', 'API Key 无效，请在设置中检查。');
+        } else if (errMsg.indexOf('rate') >= 0 || errMsg.indexOf('quota') >= 0 || errMsg.indexOf('insufficient') >= 0) {
+          showBanner('info', TIERS[_tierLevel].name + ' 忙碌中，正在尝试其他路线……');
+          if (_tierLevel < TIERS.length - 1 && apiMode !== 'custom') {
+            _tierLevel++;
+            conversation.pop();
+            await new Promise(r => setTimeout(r, 1000));
+            _retry = 0; _maxRetries = TIERS.length - _tierLevel;
+            cfg = getActiveConfig();
+            continue;
+          }
+        } else if (errMsg.indexOf('token') >= 0 || errMsg.indexOf('too long') >= 0) {
+          showBanner('error', '对话较长，建议点击设置→新对话后重试。');
+        } else if (retryable && _retry < _maxRetries) {
+          // Retry on transient server errors
+          _retry++; continue;
+        } else {
+          showBanner('info', TIERS[_tierLevel].name + ' 忙碌中，切换下一条路线……');
+          if (_tierLevel < TIERS.length - 1 && apiMode !== 'custom') {
+            _tierLevel++;
+            conversation.pop();
+            await new Promise(r => setTimeout(r, 2000));
+            _retry = 0; _maxRetries = TIERS.length - _tierLevel;
+            cfg = getActiveConfig();
+            continue;
+          }
+        }
+        conversation.pop(); _fatalError = true; _retry = _maxRetries + 1; break;
+      }
+
+      // --- SSE streaming ---
+      removeTyping();
+      var reader = res.body.getReader();
+      var decoder = new TextDecoder();
+      if (_firstAttempt) {
+        messagesEl.appendChild(div);
+        scrollToBottom();
+      }
+      var streamBubble = document.getElementById('streamBubble' + streamIdx);
+
+      var buffer = '';
+      while (true) {
+        var done = false;
+        var chunk;
+        try { var result = await reader.read(); done = result.done; chunk = result.value; } catch(e) { break; }
+        if (done) break;
+        buffer += decoder.decode(chunk, { stream: true });
+        var lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i];
+          if (line.startsWith('data: ')) {
+            var payload = line.slice(6).trim();
+            if (payload === '[DONE]') { done = true; break; }
+            try {
+              var parsed = JSON.parse(payload);
+              var delta = parsed.choices && parsed.choices[0] && parsed.choices[0].delta;
+              var content = delta && delta.content ? delta.content : '';
+              if (content) {
+                fullReply += content;
+                streamBubble.innerHTML = escapeHtml(fullReply) + '<span class="stream-cursor"></span>';
+                scrollToBottom();
+              }
+            } catch(e) { /* skip malformed JSON lines */ }
+          }
+        }
+        if (done) break;
+      }
+      // Flush any remaining buffer
+      if (buffer.startsWith('data: ')) {
+        var payload = buffer.slice(6).trim();
+        if (payload !== '[DONE]') {
+          try {
+            var parsed = JSON.parse(payload);
+            var delta = parsed.choices && parsed.choices[0] && parsed.choices[0].delta;
+            var content = delta && delta.content ? delta.content : '';
+            if (content) { fullReply += content; }
+          } catch(e) {}
+        }
+      }
+
+      if (fullReply) break; // Success, exit retry loop
+      _retry++;
+    } catch (e) {
+      removeTyping();
+      // 本地代理不可用，自动降级到Agnes
+      showBanner('info', TIERS[_tierLevel].name + ' 暂时不可用，尝试下一条路线……');
+      if (_tierLevel < TIERS.length - 1 && apiMode !== 'custom') {
+        _tierLevel++;
+        div.querySelector('.bubble').innerHTML = '';
+        fullReply = '';
+        cfg = getActiveConfig();
+        _retry = 0; _maxRetries = TIERS.length - _tierLevel;
+        continue;
+      }
+      if (_retry < _maxRetries) {
+        _retry++;
+        continue;
+      }
+      showBanner('info', '所有线路繁忙，请稍后再试……');
+      conversation.pop(); _fatalError = true;
+      _retry = _maxRetries + 1; break;
+    }
+  }
+
+  if (!fullReply && !_fatalError) {
+    showBanner('info', '所有线路繁忙，请稍后再试……');
+    div.remove(); conversation.pop();
+    isLoading = false; sendBtn.disabled = false; return;
+  }
+  if (!fullReply) {
+    div.remove(); if (!_fatalError) conversation.pop();
+    isLoading = false; sendBtn.disabled = false; return;
+  }
+
+  // Remove cursor, set final content
+  // 不自动切回更高优先级，同一次对话中使用已切换成功的线路
+  streamBubble.innerHTML = escapeHtml(fullReply);
+  streamBubble.classList.remove('stream-cursor');
+  conversation.push({ role: 'assistant', content: fullReply });
+  // 话题检测：新话题转折时插入章节分隔
+  checkChapterShift();
+  // 自动保存历史：每 5 轮静默保存一次
+  _autoSaveCounter++;
+  if (_autoSaveCounter >= 5 && conversation.length > 2) {
+    _autoSaveCounter = 0;
+    saveToHistory();
+  }
+  saveConversation();
+  saveConversation();
+  scrollToBottom();
+  isLoading = false; sendBtn.disabled = false; inputEl.focus();
+}
+function askHint(btn) { inputEl.value = btn.textContent; sendMessage(); }
+function startChat(temp) {
+  talkTemp = temp;
+  localStorage.setItem('winnicott_temp', temp);
+  document.getElementById('tempSlider').value = temp;
+  updateTemp(temp);
+  loadSystemPrompt();
+  document.getElementById('intro').style.display = 'none';
+  inputEl.focus();
+}
+function updateTemp(val) {
+  var old = talkTemp;
+  talkTemp = parseInt(val);
+  localStorage.setItem('winnicott_temp', talkTemp);
+  document.getElementById('tempLabel').textContent = talkTemp;
+  var pct = talkTemp + '%';
+  document.getElementById('tempSlider').style.background = 'linear-gradient(to right, #a6845b ' + pct + ', #e5d9c8 ' + pct + ')';
+  // Reload knowledge base if crossing threshold
+  var oldZone = old < 20 ? 0 : old <= 80 ? 1 : 2;
+  var newZone = talkTemp < 20 ? 0 : talkTemp <= 80 ? 1 : 2;
+  if (oldZone !== newZone) loadSystemPrompt();
+}
+function updateLength(val) {
+  var labels = ['简洁', '适中', '详细'];
+  var tokens = [1024, 0, 4096];
+  _maxTokens = tokens[parseInt(val)];
+  localStorage.setItem('winnicott_len', _maxTokens);
+  document.getElementById('lenLabel').textContent = labels[parseInt(val)];
+  var pct = (parseInt(val) / 2 * 100) + '%';
+  document.getElementById('lenSlider').style.background = 'linear-gradient(to right, var(--accent) ' + pct + ', #e5d9c8 ' + pct + ')';
+}
+// Init length slider
+(function(){
+  var s = document.getElementById('lenSlider');
+  if (s) {
+    var idx = _maxTokens === 1024 ? 0 : _maxTokens === 4096 ? 2 : 1;
+    s.value = idx;
+    updateLength(idx);
+  }
+})();
+function showChangelog() {
+  var el = document.getElementById('changelogContent');
+  // If settings panel is closed, open it first
+  var panel = document.getElementById('settingsPanel');
+  if (!panel.classList.contains('open')) {
+    settingsBtn.click();
+  }
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function resetConversation() {
+  conversation = [];
+  _tierLevel = 0; _chapterCount = 0; _chapterKeywords = {}; // 新对话重置章节
+  localStorage.removeItem('winnicott_conversation');
+  localStorage.removeItem('winnicott_conv');
+  messagesEl.querySelectorAll('.msg').forEach(function(el){el.remove();});
+  document.getElementById('intro').style.display = 'block';
+  document.querySelector('.header').classList.remove('compact');
+  showBanner('info', '已开始新对话');
+  inputEl.focus();
+}
+function exportConversation() {
+  if (conversation.length === 0) { showBanner('error', '暂无对话可导出'); return; }
+  var title = _persona === 'lacan' ? '与拉康对话记录' : '与温尼科特对话记录';
+  var lines = ['# ' + title, '', '---', ''];
+  for (var i = 0; i < conversation.length; i++) {
+    var msg = conversation[i];
+    var name = msg.role === 'user' ? '我' : (_persona === 'lacan' ? '拉康' : '温尼科特');
+    lines.push('### ' + name);
+    lines.push('');
+    lines.push(msg.content);
+    lines.push('');
+    lines.push('---');
+    lines.push('');
+  }
+  lines.push('_导出时间: ' + new Date().toLocaleString() + '_');
+  var text = lines.join('\n');
+  var blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'winnicott-conversation-' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showBanner('info', '对话已导出 📥');
+}
+// ---- History functions ----
+function getHistoryTitle(msgs) {
+  // title from first user message
+  for (var i = 0; i < msgs.length; i++) {
+    if (msgs[i].role === 'user') {
+      var t = msgs[i].content;
+      return t.length > 40 ? t.slice(0, 40) + '…' : t;
+    }
+  }
+  return '未命名对话';
+}
+function saveToHistory() {
+  if (conversation.length === 0) { showBanner('error', '暂无对话可保存'); return; }
+  var history = [];
+  try { history = JSON.parse(localStorage.getItem('winnicott_history')) || []; } catch(e) {}
+  var entry = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    title: getHistoryTitle(conversation),
+    time: new Date().toISOString(),
+    msgCount: conversation.length,
+    messages: conversation
+  };
+  // avoid duplicates — same title within 5 min
+  var recent = history[0];
+  if (recent && recent.title === entry.title && (Date.now() - new Date(recent.time).getTime()) < 300000) {
+    history[0] = entry; // replace
+  } else {
+    history.unshift(entry);
+  }
+  // keep max 50
+  if (history.length > 50) history = history.slice(0, 50);
+  localStorage.setItem('winnicott_history', JSON.stringify(history));
+  showBanner('info', '已保存到历史');
+}
+function renderHistoryList() {
+  var list = document.getElementById('historyList');
+  var empty = document.getElementById('historyEmpty');
+  var history = [];
+  try { history = JSON.parse(localStorage.getItem('winnicott_history')) || []; } catch(e) {}
+  list.innerHTML = '';
+  if (history.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  for (var i = 0; i < history.length; i++) {
+    var h = history[i];
+    var date = new Date(h.time);
+    var dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    var div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = '<div class="h-info" onclick="loadFromHistory(\'' + h.id + '\')">' +
+      '<div class="h-title">' + escapeHtml(h.title) + '</div>' +
+      '<div class="h-meta">' + h.msgCount + ' 条消息 · ' + dateStr + '</div></div>' +
+      '<div class="h-actions"><button onclick="event.stopPropagation();loadFromHistory(\'' + h.id + '\')">📂</button>' +
+      '<button class="h-del" onclick="event.stopPropagation();deleteFromHistory(\'' + h.id + '\')">✕</button></div>';
+    list.appendChild(div);
+  }
+}
+function loadFromHistory(id) {
+  if (conversation.length > 0) {
+    // auto-save current conversation before loading
+    var shouldSave = confirm('当前对话未保存，是否保存后再加载历史？');
+    if (shouldSave) saveToHistory();
+  }
+  var history = [];
+  try { history = JSON.parse(localStorage.getItem('winnicott_history')) || []; } catch(e) {}
+  for (var i = 0; i < history.length; i++) {
+    if (history[i].id === id) {
+      conversation = history[i].messages;
+      messagesEl.innerHTML = '';
+      for (var j = 0; j < conversation.length; j++) {
+        appendMessage(conversation[j].role, conversation[j].content);
+      }
+      saveConversation();
+      document.getElementById('intro').style.display = 'none';
+      document.querySelector('.header').classList.add('compact');
+      showBanner('info', '已加载历史对话');
+      showHistory(); // close panel
+      return;
+    }
+  }
+  showBanner('error', '未找到该对话');
+}
+function deleteFromHistory(id) {
+  if (!confirm('确定删除此对话历史？')) return;
+  var history = [];
+  try { history = JSON.parse(localStorage.getItem('winnicott_history')) || []; } catch(e) {}
+  for (var i = 0; i < history.length; i++) {
+    if (history[i].id === id) { history.splice(i, 1); break; }
+  }
+  localStorage.setItem('winnicott_history', JSON.stringify(history));
+  renderHistoryList();
+  showBanner('info', '已删除历史记录');
+}
+function showHistory() {
+  var el = document.getElementById('historyContent');
+  var panel = document.getElementById('settingsPanel');
+  if (!panel.classList.contains('open')) {
+    settingsBtn.click();
+  }
+  renderHistoryList();
+  el.classList.toggle('open');
+}
+// Override resetConversation to save history
+var _origReset = resetConversation;
+resetConversation = function() {
+  if (conversation.length > 0) {
+    var shouldSave = confirm('是否将当前对话保存到历史？');
+    if (shouldSave) saveToHistory();
+  }
+  _origReset();
+};
+inputEl.addEventListener('input', function(){ inputEl.style.height = 'auto'; inputEl.style.height = Math.min(inputEl.scrollHeight, 180) + 'px'; });
+</script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</body>
+</html>

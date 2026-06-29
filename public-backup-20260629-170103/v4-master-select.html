@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>与更多大师对话</title>
+<style>
+  :root { --bg: #f7f4f0; --card: #fff; --text: #2c2416; --muted: #8b7355; --accent: #a6845b; --border: #e5d9c8; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: "Noto Serif SC","STSong",Georgia,serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; justify-content:center; }
+  .app { width:100%; max-width:600px; padding:40px 20px; min-height:100vh; }
+  h1 { font-size:20px; font-weight:500; text-align:center; margin-bottom:4px; }
+  .sub { font-size:13px; color:var(--muted); text-align:center; margin-bottom:28px; }
+
+  .card { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--card); border:1px solid var(--border); border-radius:14px; margin-bottom:12px; cursor:pointer; text-decoration:none; color:var(--text); transition:0.2s; }
+  .card:hover { border-color:var(--accent); box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+  .card .circle { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:500; flex-shrink:0; }
+  .card .info { flex:1; }
+  .card .info .name { font-size:15px; font-weight:500; }
+  .card .info .desc { font-size:12px; color:var(--muted); margin-top:2px; }
+  .card .arrow { font-size:12px; color:var(--muted); }
+
+  .msg-section { margin-top:36px; text-align:center; }
+  .msg-section p { font-size:12px; color:var(--muted); margin-bottom:10px; }
+  .msg-row { display:flex; gap:8px; max-width:400px; margin:0 auto; }
+  .msg-row input { flex:1; padding:10px 14px; border:1px solid var(--border); border-radius:10px; font-size:13px; font-family:inherit; outline:none; }
+  .msg-row input:focus { border-color:var(--accent); }
+  .msg-row button { padding:10px 18px; border:none; border-radius:10px; background:var(--accent); color:white; font-size:13px; cursor:pointer; font-family:inherit; }
+  .msg-row button:hover { opacity:0.9; }
+
+  .back-link { display:block; text-align:center; margin-top:20px; font-size:12px; color:var(--muted); text-decoration:none; }
+  .back-link:hover { color:var(--accent); }
+
+  @media (max-width:480px) { .app { padding:24px 14px; } }
+  .reward-overlay { position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.3); display:none; align-items:center; justify-content:center; }
+  .reward-box { background:#fff; border-radius:16px; padding:28px 24px; text-align:center; max-width:360px; width:90%; box-shadow:0 4px 24px rgba(0,0,0,0.15); }
+  .reward-box h3 { font-size:16px; font-weight:500; margin:0 0 4px; color:#2c2416; }
+  .reward-box p { font-size:12px; color:#8b7355; margin:0 0 16px; line-height:1.6; }
+  .reward-box img { width:200px; height:200px; border-radius:8px; }
+  .reward-box button { margin-top:12px; background:none; border:1px solid #ddd5c8; border-radius:8px; padding:8px 20px; font-size:12px; cursor:pointer; color:#8b7355; font-family:inherit; }
+</style>
+<script src="https://beacon.cdn.qq.com/sdk/4.5.9/beacon_web.min.js"></script>
+<script>
+(function(){
+  try{
+    var beacon=new BeaconAction({
+      appkey:'0WEB06U85YBSLJNL',
+      versionCode:'1.0.0',
+      channelID:'share',
+      delay:1000,
+      sessionDuration:30*60*1000,
+      isOversea:false,
+      needReportRqdEvent:false
+    });
+    beacon.onDirectUserAction('preview_page_view',{
+      'url':location.href,
+      'referrer':document.referrer,
+      'title':document.title,
+      'sandbox_id':'ec07603765cc46f69ac28e8c6aab137d'
+    });
+  }catch(e){}
+})();
+</script></head>
+<body>
+<div class="app">
+  <h1>与更多大师对话</h1>
+  <p class="sub">选择一个精神分析大师开始对话</p>
+
+  <a class="card" href="winnicott-chat.html" target="_self">
+    <div class="circle" style="background:var(--accent);color:white;">W</div>
+    <div class="info">
+      <div class="name">温尼科特 / 拉康</div>
+      <div class="desc">客体关系理论 · 足够好的母亲 · 过渡客体</div>
+    </div>
+    <span class="arrow">前往 →</span>
+  </a>
+
+  <a class="card" href="master-chat.html?master=freud" target="_self">
+    <div class="circle" style="background:#EEEDFE;color:#534AB7;">F</div>
+    <div class="info">
+      <div class="name">弗洛伊德</div>
+      <div class="desc">精神分析奠基人 · 无意识 · 释梦 · 俄狄浦斯情结</div>
+    </div>
+    <span class="arrow">前往 →</span>
+  </a>
+
+  <a class="card" href="master-chat.html?master=klein" target="_self">
+    <div class="circle" style="background:#EAF3DE;color:#3B6D11;">K</div>
+    <div class="info">
+      <div class="name">克莱因</div>
+      <div class="desc">客体关系 · 偏执-分裂位 · 抑郁位 · 投射性认同</div>
+    </div>
+    <span class="arrow">前往 →</span>
+  </a>
+
+  <a class="card" href="master-chat.html?master=jung" target="_self">
+    <div class="circle" style="background:#FAEEDA;color:#854F0B;">J</div>
+    <div class="info">
+      <div class="name">荣格</div>
+      <div class="desc">分析心理学 · 集体无意识 · 原型 · 心理类型</div>
+    </div>
+    <span class="arrow">前往 →</span>
+  </a>
+
+  <a class="card" href="master-chat.html?master=bion" target="_self">
+    <div class="circle" style="background:#E8E0F0;color:#6B4C8C;">B</div>
+    <div class="info">
+      <div class="name">比昂</div>
+      <div class="desc">容器与容纳 · α功能 · O · 无记忆无欲望 · 团体动力学</div>
+    </div>
+    <span class="arrow">前往 →</span>
+  </a>
+
+  <a class="card" href="master-chat.html?master=rogers" target="_self">
+    <div class="circle" style="background:#F0E8E0;color:#B8734A;">R</div>
+    <div class="info">
+      <div class="name">罗杰斯</div>
+      <div class="desc">人本主义 · 以人为中心 · 共情 · 无条件积极关注 · 自我实现</div>
+    </div>
+    <span class="arrow">前往 →</span>
+  </a>
+
+  <a class="card" href="master-chat.html?master=beck" target="_self">
+    <div class="circle" style="background:#E0E8F0;color:#4A6B8C;">Bk</div>
+    <div class="info">
+      <div class="name">贝克</div>
+      <div class="desc">认知行为 · 自动思维 · 认知歪曲 · 合作经验主义 · 行为实验</div>
+    </div>
+    <span class="arrow">前往 →</span>
+  </a>
+
+  <a class="card" href="master-chat.html?master=yalom" target="_self">
+    <div class="circle" style="background:#F0E8F0;color:#8C4A6B;">Y</div>
+    <div class="info">
+      <div class="name">亚隆</div>
+      <div class="desc">存在主义 · 四大终极关怀 · 此时此刻 · 人际动力 · 故事疗愈</div>
+    </div>
+    <span class="arrow">前往 →</span>
+  </a>
+
+  <div class="msg-section">
+    <p>你还想与哪位大师对话？写下名字发送给我们</p>
+    <div class="msg-row">
+      <input type="text" id="suggestInput" placeholder="输入大师姓名" onkeydown="if(event.key==='Enter')sendSuggestion()">
+      <button onclick="sendSuggestion()">留言</button>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;padding:12px 16px;background:#faf8f5;border:1px solid #ece4d8;border-radius:12px;text-align:center;font-size:12px;color:#8b7355;line-height:1.8;">
+    <p style="margin:0 0 6px;">📢 关注公众号 <strong style="color:#a6845b;font-size:13px;">MindMeetsHeart</strong> · 每周精神分析深度内容</p>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <a href="https://757b6f9d7772430ab0dba04609cfa611.app.codebuddy.work" target="_blank" style="color:#a6845b;text-decoration:none;">📖 了解作者</a>
+      <a href="#" onclick="showRewardMS();return false;" style="color:var(--muted);text-decoration:none;">☕ 打赏</a>
+    </div>
+  </div>
+
+  <a class="back-link" href="winnicott-chat.html" target="_self">← 与温尼科特/拉康对话</a>
+</div>
+<script>
+function sendSuggestion() {
+  var name = document.getElementById('suggestInput').value.trim();
+  if (!name) return;
+  var subj = encodeURIComponent('希望新增的大师');
+  var body = encodeURIComponent('我想与以下大师对话：' + name);
+  window.location.href = 'mailto:985729106@qq.com?subject=' + subj + '&body=' + body;
+  document.getElementById('suggestInput').value = '';
+  alert('感谢建议！邮件客户端已打开，发送即可。');
+}
+function showRewardMS() { document.getElementById('rewardOverlayMS').style.display='flex'; }
+function closeRewardMS() { document.getElementById('rewardOverlayMS').style.display='none'; }
+</script>
+
+<div class="reward-overlay" id="rewardOverlayMS" onclick="if(event.target===this)closeRewardMS()">
+  <div class="reward-box">
+    <h3>☕ 觉得是个好活？</h3>
+    <p>这网站免费用，但 API 调一次几毛钱<br>如果你聊得开心，可以打赏点 token 钱</p>
+    <img src="reward-qr.jpg" alt="打赏二维码">
+    <button onclick="closeRewardMS()">收到，关掉</button>
+  </div>
+</div>
+
+</body>
+</html>
