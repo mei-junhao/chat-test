@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI 临床督导</title>
+<style>
+  :root {
+    --bg: #f7f4f0; --card: #fff; --text: #2c2416; --muted: #8b7355;
+    --accent: #6b8f71; --accent-hover: #5a7d60; --light-accent: #edf5ee;
+    --border: #d5e0d8; --danger: #c0392b; --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:"Noto Serif SC","STSong",Georgia,serif;
+    background:var(--bg); color:var(--text); min-height:100vh;
+    display:flex; justify-content:center; line-height:1.8;
+  }
+  .app { width:100%; max-width:680px; padding:20px; display:flex; flex-direction:column; gap:20px; }
+
+  /* Password gate */
+  .gate { display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-height:60vh; text-align:center; gap:20px; }
+  .gate h1 { font-size:22px; font-weight:500; color:var(--accent); }
+  .gate p { font-size:13px; color:var(--muted); max-width:400px; }
+  .gate input {
+    padding:12px 16px; border:1px solid var(--border); border-radius:10px;
+    font-size:16px; text-align:center; outline:none; width:220px;
+    font-family:inherit; letter-spacing:4px;
+  }
+  .gate input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(107,143,113,0.15); }
+  .gate button {
+    padding:10px 36px; border:none; border-radius:10px; background:var(--accent);
+    color:white; font-size:14px; cursor:pointer; font-family:inherit;
+  }
+  .gate button:hover { background:var(--accent-hover); }
+  .gate .error { color:var(--danger); font-size:12px; display:none; }
+
+  /* Main interface (hidden until authenticated) */
+  .main { display:none; }
+
+  .header { text-align:center; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .header h1 { font-size:20px; font-weight:500; color:var(--accent); }
+  .header p { font-size:12px; color:var(--muted); margin-top:4px; }
+
+  /* Upload area */
+  .upload-zone {
+    border:2px dashed var(--border); border-radius:12px; padding:30px 20px;
+    text-align:center; cursor:pointer; transition:0.2s;
+  }
+  .upload-zone:hover { border-color:var(--accent); background:var(--light-accent); }
+  .upload-zone p { font-size:13px; color:var(--muted); }
+  .upload-zone .hint { font-size:11px; color:#aaa; margin-top:4px; }
+  #fileInfo { display:none; font-size:12px; color:var(--accent); margin-top:8px; }
+
+  /* Text area */
+  textarea {
+    width:100%; min-height:200px; border:1px solid var(--border); border-radius:10px;
+    padding:14px 16px; font-size:14px; font-family:inherit; resize:vertical;
+    outline:none; background:var(--card); color:var(--text);
+  }
+  textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(107,143,113,0.1); }
+
+  .btn-row { display:flex; gap:10px; flex-wrap:wrap; }
+  .btn-row button {
+    padding:12px 24px; border:none; border-radius:10px; font-size:14px;
+    cursor:pointer; font-family:inherit; transition:0.2s;
+  }
+  .btn-primary { background:var(--accent); color:white; flex:1; }
+  .btn-primary:hover { background:var(--accent-hover); }
+  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+  .btn-secondary { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
+
+  /* Output */
+  .output-box {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:20px 24px; display:none; line-height:2; font-size:15px;
+    white-space:pre-wrap; box-shadow:var(--shadow);
+  }
+  .output-box h3 { font-size:15px; color:var(--accent); margin-bottom:12px; font-weight:500; }
+  .output-box .label { font-weight:600; color:var(--text); margin-top:14px; display:block; }
+
+  /* Chat area */
+  .chat-area { display:none; flex-direction:column; gap:12px; }
+  .chat-messages { max-height:400px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+  .chat-msg { padding:12px 16px; border-radius:12px; font-size:14px; line-height:1.7; }
+  .chat-msg.user { background:var(--light-accent); align-self:flex-end; max-width:85%; }
+  .chat-msg.ai { background:var(--card); border:1px solid var(--border); max-width:90%; }
+  .chat-input-wrap { display:flex; gap:8px; }
+  .chat-input-wrap textarea { min-height:44px; max-height:100px; flex:1; }
+  .chat-input-wrap button {
+    padding:8px 20px; border:none; border-radius:10px; background:var(--accent);
+    color:white; font-size:13px; cursor:pointer; font-family:inherit;
+    align-self:flex-end;
+  }
+  .chat-input-wrap button:disabled { opacity:0.5; cursor:not-allowed; }
+
+  .typing { color:var(--muted); font-size:13px; font-style:italic; padding:8px 0; }
+
+  .back-link { display:inline-block; color:var(--muted); text-decoration:none; font-size:12px; margin-bottom:8px; }
+  .back-link:hover { color:var(--accent); }
+
+  .disclaimer { text-align:center; font-size:11px; color:var(--muted); padding:12px 0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ====== PASSWORD GATE ====== -->
+  <div class="gate" id="gate">
+    <h1>🧑‍⚕️ AI 临床督导（测试版）</h1>
+    <p>基于温尼科特框架的团体心理督导方法论。上传逐字稿、案例报告或反移情困惑，AI 将输出整体印象并展开督导对话。</p>
+    <input type="password" id="pwdInput" placeholder="输入密码" onkeydown="if(event.key==='Enter')verifyPassword()">
+    <button onclick="verifyPassword()">进入</button>
+    <p class="error" id="pwdError">密码错误，请重试。</p>
+  </div>
+
+  <!-- ====== MAIN INTERFACE ====== -->
+  <div class="main" id="main">
+    <a class="back-link" href="master-select.html">← 返回主页</a>
+    <div class="header">
+      <h1>🧑‍⚕️ AI 临床督导</h1>
+      <p>请上传或粘贴临床材料（逐字稿 / 案例报告 / 反移情困惑）</p>
+    </div>
+
+    <!-- Upload -->
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <p>📎 点击上传文件</p>
+      <p class="hint">支持 .txt / .md / .docx，限 4000 字</p>
+      <input type="file" id="fileInput" accept=".txt,.md,.docx" style="display:none" onchange="handleFile(event)">
+      <div id="fileInfo"></div>
+    </div>
+
+    <!-- Text input -->
+    <textarea id="materialText" placeholder="或者直接粘贴临床材料……
+
+逐字稿格式示例：
+T（治疗师）：你今天看起来不太开心。
+P（来访者）：是的，我一直在想上周你说的话……"></textarea>
+
+    <!-- Buttons -->
+    <div class="btn-row">
+      <button class="btn-primary" id="analyzeBtn" onclick="generateImpression()">🔍 生成整体印象</button>
+      <button class="btn-secondary" onclick="clearAll()">清空</button>
+    </div>
+
+    <!-- Output -->
+    <div class="output-box" id="outputBox"></div>
+
+    <!-- Chat -->
+    <div class="chat-area" id="chatArea">
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-wrap">
+        <textarea id="chatInput" rows="1" placeholder="就整体印象中的内容继续讨论……" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+        <button id="chatSendBtn" onclick="sendChat()">发送</button>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      ⚠️ 此 AI 督导为辅助工具，不能替代真人督导。如涉及危机情境，请立即寻求专业支持。
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== PASSWORD ====================
+var PASSWORD_HASH = '8b67f39584c2f28d3f9b78b2899528ed49b230172f8fd6d74439ab1488840fcb';
+
+async function verifyPassword() {
+  var input = document.getElementById('pwdInput').value.trim();
+  var data = new TextEncoder().encode(input);
+  var hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  var hashArray = Array.from(new Uint8Array(hashBuffer));
+  var hashHex = hashArray.map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+
+  if (hashHex === PASSWORD_HASH) {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    sessionStorage.setItem('supervisor_auth', '1');
+  } else {
+    document.getElementById('pwdError').style.display = 'block';
+  }
+}
+
+// Auto-auth if already verified this session
+if (sessionStorage.getItem('supervisor_auth') === '1') {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+}
+
+// ==================== FILE HANDLING ====================
+function handleFile(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  if (['txt','md','docx'].indexOf(ext) === -1) {
+    alert('仅支持 .txt / .md / .docx 文件');
+    return;
+  }
+  document.getElementById('fileInfo').style.display = 'block';
+  document.getElementById('fileInfo').textContent = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+
+  var reader = new FileReader();
+  reader.onload = function() {
+    var text = reader.result;
+    if (text.length > 4000) {
+      text = text.substring(0, 4000) + '\n\n[内容超过4000字，已截断]';
+    }
+    document.getElementById('materialText').value = text;
+  };
+
+  if (ext === 'docx') {
+    readDocx(file);
+  } else {
+    reader.readAsText(file, 'UTF-8');
+  }
+}
+
+function readDocx(file) {
+  reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var arraybuffer = e.target.result;
+      var zipReader = new JSZip();
+      zipReader.loadAsync(arraybuffer).then(function(zip) {
+        return zip.file('word/document.xml').async('string');
+      }).then(function(xml) {
+        var text = xml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (text.length > 4000) text = text.substring(0, 4000) + '\n\n[内容超过4000字，已截断]';
+        document.getElementById('materialText').value = text;
+      }).catch(function() {
+        document.getElementById('materialText').value = '[无法解析 .docx 文件，请尝试粘贴文本]';
+      });
+    } catch(e) {
+      document.getElementById('materialText').value = '[文件读取失败]';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function clearAll() {
+  document.getElementById('materialText').value = '';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('fileInfo').style.display = 'none';
+  document.getElementById('outputBox').style.display = 'none';
+  document.getElementById('chatArea').style.display = 'none';
+}
+
+// ==================== SYSTEM PROMPT ====================
+// 从 alice-perspective-full.md 加载完整 SKILL.md（直接从 Marvis skills 复制）
+var SYSTEM_PROMPT = '督导系统加载中……';
+
+async function loadSupervisorPrompt() {
+  try {
+    var res = await fetch('alice-perspective-full.md');
+    SYSTEM_PROMPT = await res.text();
+  } catch(e) {
+    SYSTEM_PROMPT = '你是 W取向临床督导师。加载完整 Skill 失败，使用备用框架。';
+  }
+}
+loadSupervisorPrompt();
+
+// ==================== API ====================
+var TIERS = [
+  { api:'https://api.kkdmx.com/v1/chat/completions', key:'sk-JvknFamMM2OEcIYgT02gbR4rKvacIM4Vy4CTPdDVe22DROJR', model:'deepseek-ai/deepseek-v4-pro', name:'DeepSeek Pro' },
+  { api:'https://api.kkdmx.com/v1/chat/completions', key:'sk-VKinfjJwko8RneSWuppXp8CuCcHGHFd9K9Uaq32VwgmIIX21', model:'deepseek-ai/deepseek-v4-flash', name:'DeepSeek Flash' },
+  { api:'https://api.kkdmx.com/v1/chat/completions', key:'sk-8sPbqqYiQIRh8ScEcbX7FDELlg5LXpjJxO2hBnwsfCxooKvD', model:'minimaxai/minimax-m3', name:'MiniMax M3' },
+  { api:'https://apihub.agnes-ai.com/v1/chat/completions', key:'sk-dggqbbPiaO2AF14ZPFGvNbCUGXy74AVi9421lMSH3gqppC2e', model:'agnes-2.0-flash', name:'Agnes' }
+];
+var apiTier = 0;
+var isLoading = false;
+var chatMessages = [];
+
+// ==================== IMPRESSION GENERATION ====================
+async function generateImpression() {
+  var text = document.getElementById('materialText').value.trim();
+  if (!text) { alert('请粘贴或上传临床材料'); return; }
+  if (text.length > 4000) text = text.substring(0, 4000) + '\n\n[内容超过4000字，已截断]';
+
+  var btn = document.getElementById('analyzeBtn');
+  btn.disabled = true; btn.textContent = '分析中……';
+  var outputBox = document.getElementById('outputBox');
+  outputBox.style.display = 'block';
+  outputBox.innerHTML = '<h3>🔍 正在生成整体印象……</h3><div class="typing">阅读材料中……</div>';
+
+  var prompt = '请对以下临床材料进行整体印象分析。按以下格式输出：\n';
+  prompt += '① 核心议题\n② 临床信号\n③ 初步假设\n④ 信息缺口\n⑤ 工作方向（含示范话术）\n\n';
+  prompt += '分析完成后，在末尾加一句："如果你愿意，我们可以就其中任何一点继续深入讨论。"\n\n';
+  prompt += '临床材料：\n' + text;
+
+  var messages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'user', content: prompt }
+  ];
+
+  apiTier = 0;
+  var success = false;
+
+  while (!success && apiTier < TIERS.length) {
+    var tier = TIERS[apiTier];
+    try {
+      var res = await fetch(tier.api, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tier.key },
+        body: JSON.stringify({ model:tier.model, messages:messages, temperature:0.7, max_tokens:3000, stream:true })
+      });
+
+      if (!res.ok) { apiTier++; continue; }
+
+      var reader = res.body.getReader();
+      var decoder = new TextDecoder();
+      var fullReply = '';
+      var buffer = '';
+
+      while (true) {
+        var result;
+        try { result = await reader.read(); } catch(e) { break; }
+        if (result.done) break;
+        buffer += decoder.decode(result.value, { stream:true });
+        var lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i];
+          if (line.startsWith('data: ')) {
+            var payload = line.slice(6).trim();
+            if (payload === '[DONE]') { success = true; break; }
+            try {
+              var parsed = JSON.parse(payload);
+              var delta = parsed.choices && parsed.choices[0] && parsed.choices[0].delta;
+              var content = delta && delta.content ? delta.content : '';
+              if (content) {
+                fullReply += content;
+                outputBox.innerHTML = '<h3>🔍 整体印象</h3>' + escapeHtml(fullReply).replace(/\n/g,'<br>') + '<span style="color:var(--accent);">▍</span>';
+              }
+            } catch(e) {}
+          }
+        }
+        if (success) break;
+      }
+
+      if (fullReply) {
+        outputBox.innerHTML = '<h3>🔍 整体印象</h3>' + escapeHtml(fullReply).replace(/\n/g,'<br>');
+        document.getElementById('chatArea').style.display = 'flex';
+        chatMessages = [
+          { role:'system', content:SYSTEM_PROMPT },
+          { role:'assistant', content:'我已完成对材料的整体印象分析。如果你愿意，我们可以就其中任何一点继续深入讨论。' }
+        ];
+      } else if (success) {
+        outputBox.innerHTML = '<h3>🔍 整体印象</h3><p style="color:var(--muted)">模型返回为空，请重试。</p>';
+      }
+    } catch(e) {
+      apiTier++;
+      if (apiTier >= TIERS.length) {
+        outputBox.innerHTML = '<p style="color:var(--danger)">所有线路均不可用，请稍后重试。</p>';
+      }
+    }
+  }
+
+  btn.disabled = false; btn.textContent = '🔍 生成整体印象';
+}
+
+// ==================== CHAT ====================
+async function sendChat() {
+  var input = document.getElementById('chatInput');
+  var text = input.value.trim();
+  if (!text || isLoading) return;
+
+  input.value = '';
+  chatMessages.push({ role:'user', content:text });
+
+  var chatDiv = document.getElementById('chatMessages');
+  chatDiv.innerHTML += '<div class="chat-msg user">' + escapeHtml(text) + '</div>';
+
+  var typingDiv = document.createElement('div');
+  typingDiv.className = 'chat-msg ai typing';
+  typingDiv.textContent = '思考中……';
+  chatDiv.appendChild(typingDiv);
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+
+  var chatSendBtn = document.getElementById('chatSendBtn');
+  isLoading = true; chatSendBtn.disabled = true;
+
+  apiTier = 0;
+  var success = false;
+
+  while (!success && apiTier < TIERS.length) {
+    var tier = TIERS[apiTier];
+    try {
+      var res = await fetch(tier.api, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+tier.key },
+        body:JSON.stringify({ model:tier.model, messages:chatMessages, temperature:0.7, max_tokens:2000, stream:true })
+      });
+
+      if (!res.ok) { apiTier++; continue; }
+
+      var reader = res.body.getReader();
+      var decoder = new TextDecoder();
+      var fullReply = '';
+      var buffer = '';
+      typingDiv.remove();
+
+      var msgDiv = document.createElement('div');
+      msgDiv.className = 'chat-msg ai';
+      chatDiv.appendChild(msgDiv);
+
+      while (true) {
+        var result;
+        try { result = await reader.read(); } catch(e) { break; }
+        if (result.done) break;
+        buffer += decoder.decode(result.value, { stream:true });
+        var lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i];
+          if (line.startsWith('data: ')) {
+            var payload = line.slice(6).trim();
+            if (payload === '[DONE]') { success = true; break; }
+            try {
+              var parsed = JSON.parse(payload);
+              var delta = parsed.choices && parsed.choices[0] && parsed.choices[0].delta;
+              var content = delta && delta.content ? delta.content : '';
+              if (content) {
+                fullReply += content;
+                msgDiv.innerHTML = escapeHtml(fullReply).replace(/\n/g,'<br>');
+                chatDiv.scrollTop = chatDiv.scrollHeight;
+              }
+            } catch(e) {}
+          }
+        }
+        if (success) break;
+      }
+
+      if (fullReply) {
+        chatMessages.push({ role:'assistant', content:fullReply });
+        msgDiv.innerHTML = escapeHtml(fullReply).replace(/\n/g,'<br>');
+      }
+    } catch(e) {
+      apiTier++;
+      if (apiTier >= TIERS.length) {
+        typingDiv.remove();
+        chatDiv.innerHTML += '<div class="chat-msg ai" style="color:var(--danger)">所有线路均不可用，请稍后重试。</div>';
+      }
+    }
+  }
+
+  isLoading = false; chatSendBtn.disabled = false;
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+function escapeHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</body>
+</html>
