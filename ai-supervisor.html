@@ -347,15 +347,17 @@ async function generateImpression() {
   ];
 
   apiTier = 0;
-  var gotContent = false;  // 是否已收到过内容（用于决定清屏还是追加）
-  var finalReply = '';     // 最终完整回答
+  var gotContent = false;
+  var finalReply = '';
+  var lastLineBreak = false;  // 跟踪是否已追加分隔符
 
   while (!gotContent && apiTier < TIERS.length) {
     var tier = TIERS[apiTier];
-    var tierDisplay = apiTier === 0 ? '' : '<div style="color:var(--muted);font-size:12px;margin-top:8px">⚠️ 线路 ' + (apiTier) + ' 中断，切换至 ' + tier.name + '……</div>';
-    
+
+    // 切换线路时在已有内容后追加提示，不清屏
     if (apiTier > 0 && finalReply) {
-      outputBox.innerHTML = '<h3>🔍 整体印象</h3>' + escapeHtml(finalReply).replace(/\n/g,'<br>') + tierDisplay + '<span style="color:var(--accent);">▍</span>';
+      var switchNote = '\n\n<span style="color:var(--muted);font-size:11px;">⚠️ 线路 ' + apiTier + ' 中断，切换至 ' + tier.name + '……</span>\n';
+      outputBox.innerHTML = '<h3>🔍 整体印象</h3>' + escapeHtml(finalReply).replace(/\n/g,'<br>') + switchNote + '<span style="color:var(--accent);">▍</span>';
     }
 
     try {
@@ -410,10 +412,10 @@ async function generateImpression() {
           { role:'assistant', content:finalReply }
         ];
       } else {
-        // 流中断但有部分内容 → 保留内容，切下一条
+        // 流中断但有部分内容 → 立即固化显示，再切下一条
         if (tierReply) {
           finalReply += tierReply;
-          finalReply += '\n\n---\n';  // 分隔标记
+          outputBox.innerHTML = '<h3>🔍 整体印象（生成中……）</h3>' + escapeHtml(finalReply).replace(/\n/g,'<br>') + '<span style="color:var(--accent);">▍</span>';
         }
         apiTier++;
       }
@@ -464,15 +466,13 @@ async function sendChat() {
   apiTier = 0;
   var gotContent = false;
   var finalReply = '';
+  var msgDiv = null;  // 单气泡复用，避免重试时创建多个空白气泡（撤回假象）
 
   while (!gotContent && apiTier < TIERS.length) {
     var tier = TIERS[apiTier];
-    var msgDiv = null;
 
-    if (apiTier > 0 && finalReply) {
-      msgDiv = document.createElement('div');
-      msgDiv.className = 'chat-msg ai';
-      chatDiv.appendChild(msgDiv);
+    // 切换线路：在已有 msgDiv 末尾追加提示，不创建新气泡
+    if (apiTier > 0 && msgDiv && finalReply) {
       msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>') + '<div style="color:var(--muted);font-size:11px;margin-top:6px">⚠️ 切换至 ' + tier.name + '……</div>';
     }
 
@@ -532,7 +532,8 @@ async function sendChat() {
         msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>');
       } else {
         if (tierReply) {
-          finalReply += tierReply + '\n\n';
+          finalReply += tierReply;
+          msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>') + '<div style="color:var(--muted);font-size:11px;margin-top:6px">⚠️ 流中断，切换中……</div>';
         }
         apiTier++;
       }
