@@ -644,7 +644,7 @@ async function sendMessage() {
           }
         }
       }
-      if(fullReply){_tierLevel=attempt; break;}
+      if(fullReply){success=true;_tierLevel=attempt; break;}
       _retry++;
     }catch(e){
       removeTyping(); showBanner(cfg.name+' 不可用，尝试下一条');
