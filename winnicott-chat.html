@@ -6,25 +6,27 @@
 <title>与温尼科特对话</title>
 <style>
   :root {
-    --bg: #faf8f5; --card: #ffffff; --text: #2c2416; --muted: #8b7355;
-    --accent: #a6845b; --light-accent: #f0e8dc; --bubble-user: #e8dfd3;
-    --bubble-ai: #ffffff; --border: #e5d9c8; --shadow: 0 2px 16px rgba(0,0,0,0.06);
-    --danger: #c0392b; --panel-bg: #fefcf9;
-    --icon-bg: #f5ede4; --bubble-radius: 14px; --btn-radius: 22px;
+    --bg: #faf8f5; --card: #fffdfb; --text: #2d2925; --muted: #8f857d;
+    --accent: #8b6f5c; --accent-hover: #7a5f4d; --light-accent: #f3ede6; --bubble-user: #ece5dc;
+    --bubble-ai: #fffdfb; --border: #e8e1d9; --shadow-sm: 0 1px 3px rgba(45,41,37,0.04); --shadow: 0 2px 12px rgba(45,41,37,0.05),0 8px 24px rgba(45,41,37,0.04);
+    --danger: #b85450; --panel-bg: #fdfbf8;
+    --icon-bg: #f5ede6; --bubble-radius: 14px; --btn-radius: 22px;
+    --radius: 14px; --radius-sm: 10px; --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   :root.lacan {
-    --bg: #12121e; --card: #1a1a2e; --text: #c8c8d6; --muted: #6b6b82;
-    --accent: #8b0000; --light-accent: #22223a; --bubble-user: #22223a;
-    --bubble-ai: #1a1a2e; --border: #2a2a42; --shadow: 0 2px 16px rgba(0,0,0,0.3);
-    --danger: #c0392b; --panel-bg: #1a1a2e;
-    --icon-bg: #1e1e32; --bubble-radius: 4px; --btn-radius: 6px;
+    --bg: #1a1614; --card: #241f1c; --text: #d4cfca; --muted: #8f857d;
+    --accent: #8b5a4a; --accent-hover: #7a4d3e; --light-accent: #2c2622; --bubble-user: #2c2622;
+    --bubble-ai: #241f1c; --border: #3a322d; --shadow: 0 2px 16px rgba(0,0,0,0.25);
+    --danger: #b85450; --panel-bg: #241f1c;
+    --icon-bg: #2a2420; --bubble-radius: 4px; --btn-radius: 6px;
+    --radius: 8px; --radius-sm: 4px; --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: "Noto Serif SC", "Source Han Serif SC", "STSong", Georgia, serif;
     background: var(--bg); color: var(--text); min-height: 100vh; height: 100vh;
-    display: flex; justify-content: center; line-height: 1.8;
-    overflow: hidden;
+    display: flex; justify-content: center; line-height: 1.85;
+    overflow: hidden; -webkit-font-smoothing: antialiased;
   }
   .app { width: 100%; max-width: 680px; display: flex; flex-direction: column; height: 100vh; min-height: 0; overflow: hidden; }
 
@@ -53,10 +55,10 @@
     padding: 4px 12px; letter-spacing: 2px; font-family: inherit;
     background: none; cursor: pointer; color: var(--muted); line-height: 1.4;
   }
-  .settings-btn.custom { border-color: #d4a056; color: #d4a056; }
+  .settings-btn.custom { border-color: var(--accent); color: var(--accent); }
 
   .settings-panel {
-    background: #fefcf9; border-bottom: 1px solid var(--border);
+    background: var(--panel-bg); border-bottom: 1px solid var(--border);
     padding: 0 20px; max-height: 0; overflow: hidden;
     transition: max-height 0.3s ease, padding 0.3s ease;
     flex-shrink: 0;
@@ -81,15 +83,15 @@
   }
   .mode-toggle button {
     flex: 1; padding: 8px 0; border: none; font-size: 13px; cursor: pointer;
-    font-family: inherit; transition: 0.2s;
+    font-family: inherit; transition: var(--transition);
   }
   .mode-toggle .default-btn { background: var(--light-accent); color: var(--text); }
   .mode-toggle .default-btn.active { background: var(--accent); color: white; }
   .mode-toggle .custom-btn { background: var(--bg); color: var(--text); }
-  .mode-toggle .custom-btn.active { background: #d4a056; color: white; }
+  .mode-toggle .custom-btn.active { background: var(--accent); color: white; }
 
   .rich-text {
-    text-align: center; font-size: 11px; color: #b8860b; margin: 6px 0 10px;
+    text-align: center; font-size: 11px; color: var(--accent); margin: 6px 0 10px;
     animation: glow 2s ease-in-out infinite;
   }
   @keyframes glow { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
@@ -152,7 +154,7 @@
     background: var(--accent); color: white; cursor: pointer; flex-shrink: 0;
     transition: background 0.2s; display: flex; align-items: center; justify-content: center;
   }
-  .input-wrap button:hover { background: #8c6e4a; }
+  .input-wrap button:hover { background: var(--accent-hover); transform: scale(1.05); }
   .input-wrap button:disabled { opacity: 0.5; cursor: not-allowed; }
   .disclaimer {
     text-align: center; padding: 2px 24px 6px; font-size: 11px; color: var(--muted);
@@ -168,7 +170,7 @@
     background: var(--light-accent); padding: 8px 16px; border-radius: 20px;
     font-size: 13px; cursor: pointer; transition: background 0.2s; border: none; font-family: inherit; color: var(--text);
   }
-  .intro .hint:hover { background: #e0d4c0; }
+  .intro .hint:hover { background: var(--light-accent); }
   .banner {
     padding: 10px 16px; border-radius: 10px; font-size: 13px;
     margin: 8px 20px; text-align: center;
@@ -263,32 +265,32 @@
   .share-card {
     position:fixed; left:-9999px; top:0;
     width:540px; padding:0;
-    background:#faf8f5;
-    background-image: radial-gradient(circle at 10% 20%, rgba(166,132,91,0.04) 0%, transparent 50%),
-                      radial-gradient(circle at 90% 80%, rgba(166,132,91,0.03) 0%, transparent 50%);
+    background:var(--bg);
+    background-image: radial-gradient(circle at 10% 20%, rgba(139,111,92,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 90% 80%, rgba(139,111,92,0.03) 0%, transparent 50%);
     font-family:"PingFang SC","Microsoft YaHei","Noto Serif SC","STSong",Georgia,serif;
     z-index:-1; border-radius:4px;
   }
-  .share-card-inner { padding:32px 28px 24px; border:1px solid #e8ddd0; border-radius:4px; background:rgba(255,255,255,0.7); }
+  .share-card-inner { padding:32px 28px 24px; border:1px solid var(--border); border-radius:4px; background:var(--card); }
   .share-card .sc-header {
-    text-align:center; padding-bottom:14px; border-bottom:1px solid #e5d9c8; margin-bottom:18px;
+    text-align:center; padding-bottom:14px; border-bottom:1px solid var(--border); margin-bottom:18px;
   }
   .share-card .sc-header .sc-icon { font-size:20px; }
-  .share-card .sc-header .sc-title { font-size:12px; color:#a6845b; letter-spacing:2px; margin-top:4px; }
-  .share-card .sc-user { font-size:13px; color:#8b7355; margin-bottom:8px; line-height:1.7; white-space:pre-wrap; }
-  .share-card .sc-ai { font-size:14px; color:#2c2416; line-height:1.85; white-space:pre-wrap; margin-bottom:8px; }
-  .share-card .sc-divider { height:1px; background:#e5d9c8; margin:16px 0; }
-  .share-card .sc-footer { text-align:center; font-size:10px; color:#c9b99d; margin-top:12px; }
+  .share-card .sc-header .sc-title { font-size:12px; color:var(--accent); letter-spacing:2px; margin-top:4px; }
+  .share-card .sc-user { font-size:13px; color:var(--muted); margin-bottom:8px; line-height:1.7; white-space:pre-wrap; }
+  .share-card .sc-ai { font-size:14px; color:var(--text); line-height:1.85; white-space:pre-wrap; margin-bottom:8px; }
+  .share-card .sc-divider { height:1px; background:var(--border); margin:16px 0; }
+  .share-card .sc-footer { text-align:center; font-size:10px; color:var(--muted); opacity:0.6; margin-top:12px; }
   .share-card .sc-qr { text-align:center; margin-top:10px; }
   .share-card .sc-qr img { width:80px; height:80px; border-radius:6px; }
-  .share-card-lacan.share-card-inner { background:rgba(26,26,46,0.9); border-color:#2a2a42; }
-  .share-card-lacan .sc-header { border-bottom-color:#2a2a42; }
-  .share-card-lacan .sc-header .sc-title { color:#8b0000; }
-  .share-card-lacan .sc-user { color:#6b6b82; }
-  .share-card-lacan .sc-ai { color:#c8c8d6; }
-  .share-card-lacan .sc-divider { background:#2a2a42; }
-  .share-card-lacan .sc-footer { color:#5a5a72; }
-  .share-card-lacan .sc-qr-label { color:#5a5a72; }
+  .share-card-lacan.share-card-inner { background:var(--card); border-color:var(--border); }
+  .share-card-lacan .sc-header { border-bottom-color:var(--border); }
+  .share-card-lacan .sc-header .sc-title { color:var(--accent); }
+  .share-card-lacan .sc-user { color:var(--muted); }
+  .share-card-lacan .sc-ai { color:var(--text); }
+  .share-card-lacan .sc-divider { background:var(--border); }
+  .share-card-lacan .sc-footer { color:var(--muted); }
+  .share-card-lacan .sc-qr-label { color:var(--muted); }
 
   /* Share preview overlay */
   .share-overlay {
@@ -351,26 +353,26 @@
     background:none; border:none; cursor:pointer; font-size:18px;
     color:var(--muted); padding:4px; line-height:1; transition:color 0.2s, transform 0.2s;
   }
-  .reward-btn:hover { color:#e6a23c; transform:scale(1.1); }
+  .reward-btn:hover { color:var(--accent); transform:scale(1.1); }
 
   /* Dark mode */
-  .dark { --bg: #1a1510; --card: #241e18; --text: #e0d8cc; --muted: #8b7d6a;
-    --accent: #c4a87a; --light-accent: #2a241e; --bubble-user: #2a241e;
-    --bubble-ai: #1e1914; --border: #3a3028; --shadow: 0 2px 16px rgba(0,0,0,0.3);
-    --panel-bg: #1e1914; --danger: #e05050;
+  .dark { --bg: #1a1614; --card: #241f1c; --text: #d4cfca; --muted: #8f857d;
+    --accent: #a0806a; --accent-hover: #8e705c; --light-accent: #2c2622; --bubble-user: #2c2622;
+    --bubble-ai: #241f1c; --border: #3a322d; --shadow: 0 2px 16px rgba(0,0,0,0.25);
+    --panel-bg: #241f1c; --danger: #c46b66;
   }
   .dark .msg .avatar { color: var(--accent); }
   .dark .msg.user .avatar { color: white; }
-  .dark input, .dark textarea { background: #1e1914 !important; color: #e0d8cc !important; border-color: #3a3028 !important; }
+  .dark input, .dark textarea { background: var(--card) !important; color: var(--text) !important; border-color: var(--border) !important; }
   .dark .settings-panel { background: var(--panel-bg); }
-  .dark .changelogContent { background: #1e1914; }
-  .dark .history-content { background: #1e1914; }
-  .dark .history-item { border-color: #3a3028; }
-  .dark .history-item:hover { background: #2a221c; }
+  .dark .changelogContent { background: var(--card); }
+  .dark .history-content { background: var(--light-accent); }
+  .dark .history-item { border-color: var(--border); }
+  .dark .history-item:hover { background: var(--light-accent); }
 
   .history-content {
-    display: none; margin-top: 10px; background: #faf8f5; border: 1px solid var(--border);
-    border-radius: 8px; padding: 8px; font-size: 12px; color: #5c4c38;
+    display: none; margin-top: 10px; background: var(--light-accent); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px; font-size: 12px; color: var(--text);
     line-height: 1.6; max-height: 220px; overflow-y: auto;
   }
   .history-content.open { display: block; }
@@ -381,9 +383,9 @@
     transition: background 0.15s;
   }
   .history-item:last-child { border-bottom: none; }
-  .history-item:hover { background: #f0e8dc; }
+  .history-item:hover { background: var(--light-accent); }
   .history-item .h-info { flex: 1; min-width: 0; }
-  .history-item .h-title { font-size: 13px; color: #2c2416; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-item .h-title { font-size: 13px; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .history-item .h-meta { font-size: 10px; color: var(--muted); margin-top: 1px; }
   .history-item .h-actions { display: flex; gap: 4px; flex-shrink: 0; }
   .history-item .h-actions button {
@@ -392,8 +394,8 @@
     transition: 0.15s;
   }
   .history-item .h-actions button:hover { background: var(--light-accent); }
-  .history-item .h-actions .h-del:hover { background: #f5e0d8; color: #c0392b; border-color: #d4a0a0; }
-  .dark .greet-btn { background: #1e1914 !important; color: #e0d8cc !important; border-color: #3a3028 !important; }
+  .history-item .h-actions .h-del:hover { background: var(--light-accent); color: var(--danger); border-color: var(--danger); }
+  .dark .greet-btn { background: var(--card) !important; color: var(--text) !important; border-color: var(--border) !important; }
 
   /* Context indicator */
 
@@ -501,12 +503,12 @@
           <button onclick="fillPreset('https://api.deepseek.com/v1/chat/completions','deepseek-chat')" style="background:none;border:1px solid var(--border);padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;color:var(--muted);font-family:inherit;">DeepSeek</button>
           <button onclick="fillPreset('https://api.openai.com/v1/chat/completions','gpt-4o')" style="background:none;border:1px solid var(--border);padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;color:var(--muted);font-family:inherit;">OpenAI</button>
           <button onclick="fillPreset('https://api.siliconflow.cn/v1/chat/completions','deepseek-ai/DeepSeek-V3')" style="background:none;border:1px solid var(--border);padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;color:var(--muted);font-family:inherit;">硅基流动</button>
-          <span style="font-size:9px;color:#c9b99d;align-self:center;">点击填入</span>
+          <span style="font-size:9px;color:var(--muted);align-self:center;">点击填入</span>
         </div>
       </div>
     </div>
 
-    <hr style="border:0;border-top:1px solid #ece4d8;margin:12px 0;">
+    <hr style="border:0;border-top:1px solid var(--border);margin:12px 0;">
     <div style="margin-bottom:10px;">
       <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-bottom:4px;">
         <span data-i18n="temp-left">❤️ 情感对话</span>
@@ -515,8 +517,8 @@
       </div>
       <input type="range" id="tempSlider" min="0" max="100" value="60"
         oninput="updateTemp(this.value)"
-        style="width:100%;height:4px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right, #a6845b 60%, #e5d9c8 60%);border-radius:2px;outline:none;cursor:pointer;">
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:#c9b99d;margin-top:4px;">
+        style="width:100%;height:4px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right, var(--accent) 60%, var(--border) 60%);border-radius:2px;outline:none;cursor:pointer;">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:4px;">
         <span id="tempHintLeft" data-i18n="temp-hint-left">🧸 情感陪伴</span>
         <span id="tempHintRight" data-i18n="temp-hint-right">📚 专业知识</span>
       </div>
@@ -530,8 +532,8 @@
       </div>
       <input type="range" id="lenSlider" min="0" max="2" value="1"
         onchange="updateLength(this.value)"
-        style="width:100%;height:4px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right, var(--accent) 50%, #e5d9c8 50%);border-radius:2px;outline:none;cursor:pointer;">
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:#c9b99d;margin-top:4px;">
+        style="width:100%;height:4px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right, var(--accent) 50%, var(--border) 50%);border-radius:2px;outline:none;cursor:pointer;">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:4px;">
         <span>简洁</span>
         <span>详细</span>
       </div>
@@ -553,60 +555,60 @@
     </div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button onclick="showChangelog()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="changelog-btn">📋 更新日志</button>
-      <button onclick="resetConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:#b8860b;font-family:inherit;" data-i18n="reset-btn">🔄 新对话</button>
+      <button onclick="resetConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--accent);font-family:inherit;" data-i18n="reset-btn">🔄 新对话</button>
       <button onclick="showHistory()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="history-btn">📋 对话历史</button>
       <button onclick="openFeedback()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="feedback-btn">💡 反馈</button>
-      <a href="ai-supervisor.html" target="_blank" style="background:none;border:1px solid #6b8f71;padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:#6b8f71;font-family:inherit;text-decoration:none;display:inline-block;">🧑‍⚕️ AI督导</a>
+      <a href="ai-supervisor.html" target="_blank" style="background:none;border:1px solid var(--accent);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--accent);font-family:inherit;text-decoration:none;display:inline-block;">🧑‍⚕️ AI督导</a>
       <a href="master-select.html" target="_self" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;text-decoration:none;display:inline-block;">🧑‍🎨 更多大师</a>
     </div>
-    <div style="margin-top:10px;padding:8px 10px;background:#faf8f5;border:1px solid #ece4d8;border-radius:8px;text-align:center;font-size:11px;color:#8b7355;line-height:1.6;">
-      📢 关注公众号 <strong style="color:#a6845b;">MindMeetsHeart</strong> · 获取更多精神分析内容
+    <div style="margin-top:10px;padding:8px 10px;background:var(--light-accent);border:1px solid var(--border);border-radius:8px;text-align:center;font-size:11px;color:var(--muted);line-height:1.6;">
+      📢 关注公众号 <strong style="color:var(--accent);">MindMeetsHeart</strong> · 获取更多精神分析内容
     </div>
-    <div id="changelogContent" style="display:none;margin-top:10px;background:#faf8f5;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:#5c4c38;line-height:1.8;max-height:180px;overflow-y:auto;">
-      <p><strong style="color:#1a1510;">v4</strong> (2026-06-28)<br>
+    <div id="changelogContent" style="display:none;margin-top:10px;background:var(--light-accent);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text);line-height:1.8;max-height:180px;overflow-y:auto;">
+      <p><strong style="color:var(--text);">v4</strong> (2026-06-28)<br>
       • 新增：大师列表扩充至 8 位——罗杰斯、贝克、亚隆入驻<br>
       • 新增：与更多大师对话（设置面板 → 大师选择）<br>
       • 新增：master-chat.html 共享聊天模板，支持 ?master= 参数切换<br>
       • 新增：比昂入驻大师列表<br>
       • 更新：弗洛伊德/克莱因/荣格三位大师知识库更新至 v2.0 风格指令</p>
-      <p><strong style="color:#1a1510;">v3</strong> (2026-06-27)<br>
+      <p><strong style="color:var(--text);">v3</strong> (2026-06-27)<br>
       • 新增：API 线路健康检测（设置面板实时显示各线路状态）<br>
       • 新增：回复长度控制（简洁/适中/详细）<br>
       • 新增：自用 API 快速预设（DeepSeek/OpenAI/硅基流动一键填入）<br>
       • 新增：对话自动章节（根据话题转折插入轮次分隔）<br>
       • 新增：对话自动保存历史（每 5 轮静默保存一次）<br>
       • 优化：设置面板按钮支持移动端换行</p>
-      <p><strong style="color:#1a1510;">v3.11</strong> (2026-06-27)<br>
+      <p><strong style="color:var(--text);">v3.11</strong> (2026-06-27)<br>
       • 新增：AI督导测试版（独立页面，需密码进入，支持文件上传与整体印象输出）<br>
       • 新增：在主页面设置面板添加「AI督导」跳转链接</p>
-      <p><strong style="color:#1a1510;">v3.10</strong> (2026-06-26)<br>
+      <p><strong style="color:var(--text);">v3.10</strong> (2026-06-26)<br>
       • 新增：四层路由——DeepSeek V4 Pro 主力 → Flash 高速备胎 → MiniMax M3 中文保底 → Agnes 兜底<br>
       • 新增：DeepSeek V4 Pro（增强版）替换 Kimi 为 MiniMax M3</p>
-      <p><strong style="color:#1a1510;">v3.9</strong> (2026-06-26)<br>
+      <p><strong style="color:var(--text);">v3.9</strong> (2026-06-26)<br>
       • 公告：即日起对话不限上下文，100 轮内体验最佳，超过可能受模型限制降低回复质量</p>
-      <p><strong style="color:#1a1510;">v3.8</strong> (2026-06-26)<br>
+      <p><strong style="color:var(--text);">v3.8</strong> (2026-06-26)<br>
       • 优化：移除上下文长度限制，受益于模型能力增长，不再截断长对话<br>
       • 优化：上下文窗口从最近 10 条扩展到最近 30 条</p>
-      <p><strong style="color:#1a1510;">v3.7</strong> (2026-06-25)<br>
+      <p><strong style="color:var(--text);">v3.7</strong> (2026-06-25)<br>
       • 新增：三层模型自动切换——DeepSeek → Kimi K2.6 → Agnes，不可用时自动降级<br>
       • 新增：Kimi K2.6 模型接入，作为 DeepSeek 的备用路线<br>
       • 优化：同一对话中保持当前线路，新对话从线路一重新尝试<br>
       • 优化：滑动消息或点击输入框时自动收起设置面板<br>
       • 优化：复制按钮始终可见，不再需要悬停<br>
       • 优化：模型切换提示改为"DeepSeek 繁忙"等模型名，无红色报错</p>
-      <p><strong style="color:#1a1510;">v3.6</strong> (2026-06-25)<br>
+      <p><strong style="color:var(--text);">v3.6</strong> (2026-06-25)<br>
       • 新增：双人物模式——在温尼科特与拉康之间自由切换<br>
       • 新增：拉康模式专属冷峻主题（深色/几何/锐利）<br>
       • 新增：拉康知识库（整合拉康 SKILL + 5 个心智模型）<br>
       • 新增：拉康版温度调节——直白解析到形式化推演<br>
       • 新增：设置面板内人物切换开关<br>
       • 优化：切换人物时自动清空对话并保存历史</p>
-      <p><strong style="color:#1a1510;">v3.5</strong> (2026-06-24)<br>
+      <p><strong style="color:var(--text);">v3.5</strong> (2026-06-24)<br>
       • 新增：对话历史——自动保存多条对话记录，随时回顾与加载<br>
       • 新增：一键加载历史对话、删除单条记录<br>
       • 优化：新对话前自动询问是否保存当前对话到历史<br>
       • 优化：对话列表显示标题、消息数、时间</p>
-      <p><strong style="color:#1a1510;">v3.4</strong> (2026-06-23)<br>
+      <p><strong style="color:var(--text);">v3.4</strong> (2026-06-23)<br>
       • 重构：默认模型切换——优先调用 DeepSeek（本地代理），不可用时自动降级 Agnes<br>
       • 新增：本地代理方案——家庭 PC 跑 Python 代理 + cloudflared 隧道，Key 不暴露前端<br>
       • 重构：知识库全面升级——新版温尼科特 Skill（角色纯度、两段式回答、反面教材、自检清单、经典引语）<br>
@@ -615,7 +617,7 @@
       • 修复：模型返回为空时自动重试 1 次<br>
       • 优化：A−/A+ 字体调节回滚至稳定版本<br>
       • 优化：底部栏移除 Enter 提示文字</p>
-      <p><strong style="color:#1a1510;">v3.3</strong> (2026-06-23)<br>
+      <p><strong style="color:var(--text);">v3.3</strong> (2026-06-23)<br>
       • 修复：A−/A+ 字体调节无效（CSS 变量 + inline style 双重兜底）<br>
       • 修复：底部"此对话/了解作者"仍会滚动（body 加 height:100vh + overflow:hidden）<br>
       • 修复：🔌 API 按钮点击不展开配置面板（改为直接切换内联样式）<br>
@@ -623,7 +625,7 @@
       • 重构：API 设置与功能按钮合并至同一行<br>
       • 优化：温度滑块数字不再遮挡下方文字<br>
       • 优化：设置面板视觉重新梳理</p>
-      <p><strong style="color:#1a1510;">v3.2</strong> (2026-06-23)<br>
+      <p><strong style="color:var(--text);">v3.2</strong> (2026-06-23)<br>
       • 重构：UI 按钮全部移入设置面板，使用汉字按钮<br>
       • 新增：对话自动保存 localStorage，刷新可恢复<br>
       • 新增：转发选择模式——勾选多条对话生成卡片图<br>
@@ -634,13 +636,13 @@
       • 优化：输入框 sticky 固定底部，键盘弹起不遮挡<br>
       • 优化：设置面板可滚动 + API 设置折叠收起<br>
       • 优化：更新日志点击自动打开面板并展开</p>
-      <p><strong style="color:#1a1510;">v3.1</strong> (2026-06-22)<br>
+      <p><strong style="color:var(--text);">v3.1</strong> (2026-06-22)<br>
       • 重构：SSE 流式输出——回复逐字出现，不再卡等<br>
       • 新增：✂️ 转发——勾选对话生成卡片图，长按保存分享朋友圈<br>
       • 新增：☕ 打赏按钮（顶部咖啡杯图标）<br>
       • 新增：聊到 15 轮自动弹打赏二维码<br>
       • 新增：自定义打赏模态框（带柔光弹动效）</p>
-      <p><strong style="color:#1a1510;">v3.0</strong> (2026-06-22)<br>
+      <p><strong style="color:var(--text);">v3.0</strong> (2026-06-22)<br>
       • 优化：设置面板不再遮挡底部操作按钮<br>
       • 优化：移动端复制按钮始终可见<br>
       • 优化：自定义确认弹窗替换原生 confirm<br>
@@ -653,30 +655,30 @@
       • 优化：分隔线改为柔和留空<br>
       • 优化：增加温尼科特标志性口癖（I wonder/在我看来等）<br>
       • 更换：默认模型切换为 DeepSeek V4 Flash</p>
-      <p><strong style="color:#1a1510;">v2.6</strong> (2026-06-22)<br>
+      <p><strong style="color:var(--text);">v2.6</strong> (2026-06-22)<br>
       • 优化：心事模式只回复情感内容，删除分隔线和理论部分<br>
       • 新增：进入对话时选择模式（心事/专业/随便聊聊）</p>
-      <p><strong style="color:#1a1510;">v2.5</strong> (2026-06-22)<br>
+      <p><strong style="color:var(--text);">v2.5</strong> (2026-06-22)<br>
       • 新增：对话温度调节（情感↔知识可调）<br>
       • 新增：导出对话到本地<br>
       • 新增：对话上下文自动精简</p>
-      <p><strong style="color:#1a1510;">v2.4</strong> (2026-06-22)<br>
+      <p><strong style="color:var(--text);">v2.4</strong> (2026-06-22)<br>
       • 新增：知识问答模式自动加载完整知识库（181KB）<br>
       • 优化：移除引导问题按钮</p>
-      <p><strong style="color:#1a1510;">v2.3</strong> (2026-06-22)<br>
+      <p><strong style="color:var(--text);">v2.3</strong> (2026-06-22)<br>
       • 新增：更新日志 & 了解作者<br>
       • 优化：桌面端字体放大<br>
       • 新增：访问统计</p>
-      <p><strong style="color:#1a1510;">v2.2</strong> (2026-06-22)<br>
+      <p><strong style="color:var(--text);">v2.2</strong> (2026-06-22)<br>
       • 优化：回答增加英文提示<br>
       • 优化：温度调节联动知识库切换</p>
-      <p><strong style="color:#1a1510;">v2.1</strong> (2026-06-22)<br>
+      <p><strong style="color:var(--text);">v2.1</strong> (2026-06-22)<br>
       • 新增：自定义 API 设置<br>
       • 新增：新对话按钮</p>
-      <p><strong style="color:#1a1510;">v2.0</strong> (2026-06-22)<br>
+      <p><strong style="color:var(--text);">v2.0</strong> (2026-06-22)<br>
       • 重构：对话上下文自动精简<br>
       • 优化：长对话自动提示重置</p>
-      <p><strong style="color:#1a1510;">v1.0</strong> (2026-06-21)<br>
+      <p><strong style="color:var(--text);">v1.0</strong> (2026-06-21)<br>
       • 首发：温尼科特思维框架对话</p>
     </div>
     <div id="historyContent" class="history-content">
@@ -692,20 +694,20 @@
         <h2 id="greetingTitle" data-i18n="intro-greeting">今天想聊聊什么？</h2>
         <p id="greetingSub" style="font-size:14px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.8;" data-i18n="intro-sub">选一个方向，我来调成最适合聊天的模式</p>
         <div class="hints" id="greetingBtns" style="margin-top:20px;display:flex;flex-direction:column;gap:10px;align-items:center;">
-          <button class="greet-btn" onclick="startChat(10)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:var(--btn-radius,22px);background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+          <button class="greet-btn" onclick="startChat(20)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:var(--btn-radius,22px);background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
             <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">❤️</span>
-            <span data-i18n="chat-feeling">聊聊心事</span>
-            <span style="font-size:10px;color:#b0a090;display:block;margin-top:2px;" data-i18n="chat-feeling-sub">温度 10 · 温暖陪伴</span>
+            <span data-i18n="chat-feeling">你来，我听着</span>
+            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;" data-i18n="chat-feeling-sub">温度 20 · 像一次温和的咨询，回应简短温暖</span>
           </button>
           <button class="greet-btn" onclick="startChat(90)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:var(--btn-radius,22px);background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
             <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">📚</span>
-            <span data-i18n="chat-professional">聊聊专业</span>
-            <span style="font-size:10px;color:#b0a090;display:block;margin-top:2px;" data-i18n="chat-professional-sub">温度 90 · 深度知识</span>
+            <span data-i18n="chat-professional">进书房坐</span>
+            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;" data-i18n="chat-professional-sub">温度 90 · 深入探讨客体关系等概念</span>
           </button>
           <button class="greet-btn" onclick="startChat(60)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:var(--btn-radius,22px);background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
             <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">🫖</span>
-            随便聊聊
-            <span style="font-size:10px;color:#b0a090;display:block;margin-top:2px;">温度 60 · 默认平衡</span>
+            喝杯茶聊聊
+            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">温度 60 · 情感陪伴与理论思考各半</span>
           </button>
         </div>
       </div>
@@ -714,24 +716,24 @@
         <h2 style="font-size:16px;margin:0 0 4px;font-weight:500;">你以为你在说什么？</h2>
         <p style="font-size:14px;color:var(--muted);max-width:420px;margin:0 auto 18px;line-height:1.8;">你不知道的，语言替你说</p>
         <div class="hints" style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-          <button class="greet-btn" onclick="startChat(30)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+          <button class="greet-btn" onclick="startChat(20)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
             <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">◉</span>
-            <span>直白解析</span>
-            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">用日常语言理解三界</span>
+            <span>说人话</span>
+            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">用大白话解释欲望和症状</span>
           </button>
-          <button class="greet-btn" onclick="startChat(80)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+          <button class="greet-btn" onclick="startChat(90)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
             <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">◈</span>
-            <span>形式化推演</span>
-            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">Matheme · 能指链 · 拓扑学</span>
+            <span>上讲台</span>
+            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">数学型、拓扑学、博罗米结</span>
           </button>
           <button class="greet-btn" onclick="startChat(60)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
             <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">◐</span>
-            分析你的症状
-            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">温度 60 · 标准拉康</span>
+            躺下来
+            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">标准分析式对话，能指链追溯</span>
           </button>
         </div>
       </div>
-      <p id="langTip" style="font-size:12px;color:#8b7355;margin-top:22px;line-height:1.6;">💡 原始语料为英文，用英文提问效果更佳 / <span style="font-size:11px;opacity:0.7;">English prompts work best</span></p>
+      <p id="langTip" style="font-size:12px;color:var(--muted);margin-top:22px;line-height:1.6;">💡 原始语料为英文，用英文提问效果更佳 / <span style="font-size:11px;opacity:0.7;">English prompts work best</span></p>
     </div>
   </div>
   <div class="forward-bar" id="forwardBar">
@@ -751,8 +753,8 @@
   <div class="disclaimer">
     <span id="disclaimerText">此对话由 AI 模拟温尼科特思维框架生成，非临床治疗建议。如有心理困扰，可请寻求作者帮助。</span>
     <span id="busuanzi_container_page_pv" style="opacity:0.3;margin-left:8px;">| 👁️ <span id="busuanzi_value_page_pv"></span></span>
-    | <strong><a href="https://757b6f9d7772430ab0dba04609cfa611.app.codebuddy.work" target="_blank" style="color:#a6845b;text-decoration:none;font-weight:bold;">了解作者</a></strong> | <a onclick="showChangelog()" style="color:var(--muted);text-decoration:none;cursor:pointer;">v4</a>
-    | <span style="color:#c9b99d;font-size:10px;">📢 关注公众号 <strong style="color:#a6845b;">MindMeetsHeart</strong></span>
+    | <strong><a href="https://757b6f9d7772430ab0dba04609cfa611.app.codebuddy.work" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:bold;">了解作者</a></strong> | <a onclick="showChangelog()" style="color:var(--muted);text-decoration:none;cursor:pointer;">v4</a>
+    | <span style="color:var(--muted);font-size:10px;">📢 关注公众号 <strong style="color:var(--accent);">MindMeetsHeart</strong></span>
   </div>
 </div>
 
@@ -846,7 +848,8 @@ const TIER_PRO = { api: 'https://api.kkdmx.com/v1/chat/completions', key: 'sk-Jv
 const TIER_FLASH = { api: 'https://api.kkdmx.com/v1/chat/completions', key: 'sk-VKinfjJwko8RneSWuppXp8CuCcHGHFd9K9Uaq32VwgmIIX21', model: 'deepseek-ai/deepseek-v4-flash', name: 'DeepSeek Flash' };
 const TIER_M3 = { api: 'https://api.kkdmx.com/v1/chat/completions', key: 'sk-8sPbqqYiQIRh8ScEcbX7FDELlg5LXpjJxO2hBnwsfCxooKvD', model: 'minimaxai/minimax-m3', name: 'MiniMax M3' };
 const TIER_AGNES = { api: 'https://apihub.agnes-ai.com/v1/chat/completions', key: 'sk-dggqbbPiaO2AF14ZPFGvNbCUGXy74AVi9421lMSH3gqppC2e', model: 'agnes-2.0-flash', name: 'Agnes' };
-const TIERS = [TIER_PRO, TIER_FLASH, TIER_M3, TIER_AGNES];
+const TIER_OFFICIAL = { api:'https://api.deepseek.com/v1/chat/completions', key:'sk-7adbf5d8592f415893086e21cf84f1b8', model:'deepseek-chat', name:'DeepSeek Official' };
+const TIERS = [TIER_OFFICIAL, TIER_PRO, TIER_FLASH, TIER_M3, TIER_AGNES];
 
 var _tierLevel = 0;
 
@@ -903,10 +906,10 @@ var i18n = {
   'intro-hint-parent': { zh: '👶 育儿困惑', en: '👶 Parenting concerns' },
   'intro-hint-relation': { zh: '💔 关系难题', en: '💔 Relationship issues' },
   'intro-hint-bored': { zh: '😶 随便聊聊', en: '😶 Just chat' },
-  'chat-feeling': { zh: '聊聊心事', en: 'Share feelings' },
-  'chat-feeling-sub': { zh: '温度 10 · 温暖陪伴', en: 'Temp 10 · Warm company' },
-  'chat-professional': { zh: '聊聊专业', en: 'Talk theory' },
-  'chat-professional-sub': { zh: '温度 90 · 深度知识', en: 'Temp 90 · Deep knowledge' },
+  'chat-feeling': { zh: '你来，我听着', en: 'I\'m listening' },
+  'chat-feeling-sub': { zh: '温度 20 · 像一次温和的咨询，回应简短温暖', en: 'Temp 20 · Gentle listening' },
+  'chat-professional': { zh: '进书房坐', en: 'Come to my study' },
+  'chat-professional-sub': { zh: '温度 90 · 深入探讨客体关系等概念', en: 'Temp 90 · Deep theoretical exploration' },
   'intro-english-tip': { zh: '💡 原始语料为英文，用英文提问效果更佳 / English prompts work best', en: '💡 Winnicott wrote in English — English prompts work best' },
   'intro-english-tip': { zh: '💡 原始语料为英文，用英文提问效果更佳 / English prompts work best', en: '💡 Winnicott wrote in English — English prompts work best' },
   'disclaimer': { zh: '此对话由 AI 模拟人设思维框架生成，非临床治疗建议。如有心理困扰，请寻求专业帮助。', en: 'This conversation is an AI simulation and is not clinical advice. If you need help, seek a qualified professional.' },
@@ -962,6 +965,9 @@ let customApi = localStorage.getItem('winnicott_custom_api') || '';
 let customKey = localStorage.getItem('winnicott_custom_key') || '';
 let customModel = localStorage.getItem('winnicott_custom_model') || '';
 let _persona = localStorage.getItem('winnicott_persona') || 'winnicott';
+var urlParams = new URLSearchParams(window.location.search);
+var _urlTemp = parseInt(urlParams.get('temp'));
+var _urlPersona = urlParams.get('persona');
 
 const messagesEl = document.getElementById('messages');
 const inputEl = document.getElementById('input');
@@ -1130,7 +1136,7 @@ function insertChapterDivider() {
   var el = document.getElementById('messages');
   var d = document.createElement('div');
   d.className = 'msg chapter-divider';
-  d.style.cssText = 'text-align:center;padding:12px 0 8px;font-size:11px;color:#c9b99d;border-top:1px dashed var(--border);margin-top:8px;';
+  d.style.cssText = 'text-align:center;padding:12px 0 8px;font-size:11px;color:var(--muted);border-top:1px dashed var(--border);margin-top:8px;';
   d.textContent = '—— ' + title + ' ——';
   el.appendChild(d);
 }// Init
@@ -1177,6 +1183,18 @@ settingsObs.observe(document.getElementById('settingsPanel'), { attributes: true
 document.getElementById('tempSlider').value = talkTemp;
 updateTemp(talkTemp);
 loadSystemPrompt();
+if (_urlTemp && !isNaN(_urlTemp)) {
+  talkTemp = _urlTemp;
+  localStorage.setItem('winnicott_temp', talkTemp);
+  document.getElementById('tempSlider').value = talkTemp;
+  updateTemp(talkTemp);
+  if (_urlPersona === 'winnicott' || _urlPersona === 'lacan') {
+    switchPersona(_urlPersona);
+  }
+  document.getElementById('intro').style.display = 'none';
+  document.querySelector('.header').classList.add('compact');
+  inputEl.focus();
+}
 // Dark mode restore
 if (localStorage.getItem('winnicott_dark') === '1') { document.body.classList.add('dark'); document.getElementById('darkBtn').textContent = '☀️ 浅色'; }
 function saveConversation() {
@@ -1405,7 +1423,7 @@ function generateForwardCard() {
     var p = pairs[i];
     var label = p.role === 'user' ? '🙋' : aiLabel;
     var cls = p.role === 'user' ? 'sc-user' : 'sc-ai';
-    html += '<div class="' + cls + '"><span style="font-size:11px;color:#b0a090;display:block;margin-bottom:2px;">' + label + '</span>' + escapeHtml(p.content) + '</div>';
+    html += '<div class="' + cls + '"><span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">' + label + '</span>' + escapeHtml(p.content) + '</div>';
     if (i < pairs.length - 1) {
       html += '<div class="sc-divider"></div>';
     }
@@ -1426,7 +1444,7 @@ function generateForwardCard() {
       return;
     }
     html2canvas(card, {
-      scale: 2, useCORS: true, backgroundColor: isLacan ? '#12121e' : '#faf8f5', logging: false,
+      scale: 2, useCORS: true, backgroundColor: isLacan ? '#1a1614' : '#faf8f5', logging: false,
     }).then(function(canvas) {
       card.style.left = '-9999px';
       card.style.position = 'fixed';
@@ -1835,7 +1853,7 @@ function updateTemp(val) {
   localStorage.setItem('winnicott_temp', talkTemp);
   document.getElementById('tempLabel').textContent = talkTemp;
   var pct = talkTemp + '%';
-  document.getElementById('tempSlider').style.background = 'linear-gradient(to right, #a6845b ' + pct + ', #e5d9c8 ' + pct + ')';
+  document.getElementById('tempSlider').style.background = 'linear-gradient(to right, var(--accent) ' + pct + ', var(--border) ' + pct + ')';
   // Reload knowledge base if crossing threshold
   var oldZone = old < 20 ? 0 : old <= 80 ? 1 : 2;
   var newZone = talkTemp < 20 ? 0 : talkTemp <= 80 ? 1 : 2;

@@ -5,39 +5,51 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>与更多大师对话</title>
 <style>
-  :root { --bg: #f7f4f0; --card: #fff; --text: #2c2416; --muted: #8b7355; --accent: #a6845b; --border: #e5d9c8; }
+  :root { --bg: #faf8f5; --card: #fffdfb; --text: #2d2925; --muted: #8f857d; --accent: #8b6f5c; --accent-hover: #7a5f4d; --light-accent: #f3ede6; --border: #e8e1d9; --shadow-sm: 0 1px 3px rgba(45,41,37,0.04); --shadow: 0 2px 12px rgba(45,41,37,0.05), 0 8px 24px rgba(45,41,37,0.04); --radius: 14px; --radius-sm: 10px; --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: "Noto Serif SC","STSong",Georgia,serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; justify-content:center; }
-  .app { width:100%; max-width:600px; padding:40px 20px; min-height:100vh; }
-  h1 { font-size:20px; font-weight:500; text-align:center; margin-bottom:4px; }
-  .sub { font-size:13px; color:var(--muted); text-align:center; margin-bottom:28px; }
+  body { font-family: "Noto Serif SC","STSong",Georgia,serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; justify-content:center; -webkit-font-smoothing:antialiased; }
+  .app { width:100%; max-width:600px; padding:48px 20px 40px; min-height:100vh; }
+  h1 { font-size:21px; font-weight:500; text-align:center; margin-bottom:6px; letter-spacing:0.06em; }
+  .sub { font-size:13px; color:var(--muted); text-align:center; margin-bottom:32px; letter-spacing:0.03em; }
 
-  .card { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--card); border:1px solid var(--border); border-radius:14px; margin-bottom:12px; cursor:pointer; text-decoration:none; color:var(--text); transition:0.2s; }
-  .card:hover { border-color:var(--accent); box-shadow:0 2px 12px rgba(0,0,0,0.06); }
-  .card .circle { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:500; flex-shrink:0; }
+  .card { display:flex; align-items:center; gap:16px; padding:16px 20px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:14px; cursor:pointer; text-decoration:none; color:var(--text); transition:var(--transition); box-shadow:var(--shadow-sm); }
+  .card:hover { border-color:var(--accent); box-shadow:var(--shadow); transform:translateY(-1px); }
+  .card .circle { width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:500; flex-shrink:0; letter-spacing:0.04em; }
   .card .info { flex:1; }
-  .card .info .name { font-size:15px; font-weight:500; }
-  .card .info .desc { font-size:12px; color:var(--muted); margin-top:2px; }
-  .card .arrow { font-size:12px; color:var(--muted); }
+  .card .info .name { font-size:15px; font-weight:500; letter-spacing:0.03em; }
+  .card .info .desc { font-size:12px; color:var(--muted); margin-top:3px; line-height:1.6; }
+  .card .arrow { font-size:12px; color:var(--muted); transition:transform var(--transition); }
+  .card:hover .arrow { transform:translateX(3px); color:var(--accent); }
 
-  .msg-section { margin-top:36px; text-align:center; }
-  .msg-section p { font-size:12px; color:var(--muted); margin-bottom:10px; }
-  .msg-row { display:flex; gap:8px; max-width:400px; margin:0 auto; }
-  .msg-row input { flex:1; padding:10px 14px; border:1px solid var(--border); border-radius:10px; font-size:13px; font-family:inherit; outline:none; }
-  .msg-row input:focus { border-color:var(--accent); }
-  .msg-row button { padding:10px 18px; border:none; border-radius:10px; background:var(--accent); color:white; font-size:13px; cursor:pointer; font-family:inherit; }
-  .msg-row button:hover { opacity:0.9; }
+  .msg-section { margin-top:44px; text-align:center; }
+  .msg-section p { font-size:12px; color:var(--muted); margin-bottom:12px; letter-spacing:0.03em; }
+  .msg-row { display:flex; gap:10px; max-width:400px; margin:0 auto; }
+  .msg-row input { flex:1; padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13px; font-family:inherit; outline:none; background:var(--card); transition:var(--transition); }
+  .msg-row input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(139,111,92,0.08); }
+  .msg-row button { padding:12px 22px; border:none; border-radius:var(--radius-sm); background:var(--accent); color:white; font-size:13px; cursor:pointer; font-family:inherit; transition:var(--transition); letter-spacing:0.04em; }
+  .msg-row button:hover { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 4px 12px rgba(139,111,92,0.15); }
 
-  .back-link { display:block; text-align:center; margin-top:20px; font-size:12px; color:var(--muted); text-decoration:none; }
+  .back-link { display:block; text-align:center; margin-top:24px; font-size:12px; color:var(--muted); text-decoration:none; transition:var(--transition); }
   .back-link:hover { color:var(--accent); }
 
-  @media (max-width:480px) { .app { padding:24px 14px; } }
-  .reward-overlay { position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.3); display:none; align-items:center; justify-content:center; }
-  .reward-box { background:#fff; border-radius:16px; padding:28px 24px; text-align:center; max-width:360px; width:90%; box-shadow:0 4px 24px rgba(0,0,0,0.15); }
-  .reward-box h3 { font-size:16px; font-weight:500; margin:0 0 4px; color:#2c2416; }
-  .reward-box p { font-size:12px; color:#8b7355; margin:0 0 16px; line-height:1.6; }
-  .reward-box img { width:200px; height:200px; border-radius:8px; }
-  .reward-box button { margin-top:12px; background:none; border:1px solid #ddd5c8; border-radius:8px; padding:8px 20px; font-size:12px; cursor:pointer; color:#8b7355; font-family:inherit; }
+  .mode-overlay { position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.3); }
+  .mode-overlay.show { display:flex; }
+  .mode-box { background:var(--card); border-radius:16px; padding:28px 24px; max-width:360px; width:90%; text-align:center; box-shadow:0 4px 24px rgba(0,0,0,0.12); }
+  .mode-box h3 { margin-bottom:16px; font-size:16px; font-weight:500; letter-spacing:0.04em; }
+  .mode-box .mode-btn { display:block; width:100%; padding:14px 16px; margin-bottom:8px; border:1px solid var(--border); border-radius:var(--radius); background:var(--card); cursor:pointer; font-family:inherit; font-size:14px; color:var(--text); text-align:left; transition:var(--transition); }
+  .mode-box .mode-btn:hover { background:var(--light-accent, #f5f0e8); }
+  .mode-btn .m-title { font-weight:500; }
+  .mode-btn .m-sub { font-size:12px; color:var(--muted); display:block; margin-top:4px; }
+  .mode-box .mode-close { margin-top:8px; background:none; border:none; font-size:12px; color:var(--muted); cursor:pointer; }
+
+  @media (max-width:480px) { .app { padding:32px 14px; } }
+  .reward-overlay { position:fixed; inset:0; z-index:999; background:rgba(45,41,37,0.2); display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); }
+  .reward-box { background:var(--card); border-radius:var(--radius); padding:28px 24px; text-align:center; max-width:360px; width:90%; box-shadow:var(--shadow); }
+  .reward-box h3 { font-size:16px; font-weight:500; margin:0 0 4px; color:var(--text); letter-spacing:0.04em; }
+  .reward-box p { font-size:12px; color:var(--muted); margin:0 0 16px; line-height:1.7; }
+  .reward-box img { width:200px; height:200px; border-radius:var(--radius-sm); }
+  .reward-box button { margin-top:12px; background:none; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 20px; font-size:12px; cursor:pointer; color:var(--muted); font-family:inherit; transition:var(--transition); }
+  .reward-box button:hover { border-color:var(--accent); color:var(--accent); }
 </style>
 <script src="https://beacon.cdn.qq.com/sdk/4.5.9/beacon_web.min.js"></script>
 <script>
@@ -66,77 +78,77 @@
   <h1>与更多大师对话</h1>
   <p class="sub">选择一个精神分析大师开始对话</p>
 
-  <a class="card" href="winnicott-chat.html" target="_self">
+  <div class="card" onclick="openModeOverlay('winnicott')" data-master="winnicott">
     <div class="circle" style="background:var(--accent);color:white;">W</div>
     <div class="info">
       <div class="name">温尼科特 / 拉康</div>
       <div class="desc">客体关系理论 · 足够好的母亲 · 过渡客体</div>
     </div>
     <span class="arrow">前往 →</span>
-  </a>
+  </div>
 
-  <a class="card" href="master-chat.html?master=freud" target="_self">
+  <div class="card" onclick="openModeOverlay('freud')" data-master="freud">
     <div class="circle" style="background:#EEEDFE;color:#534AB7;">F</div>
     <div class="info">
       <div class="name">弗洛伊德</div>
       <div class="desc">精神分析奠基人 · 无意识 · 释梦 · 俄狄浦斯情结</div>
     </div>
     <span class="arrow">前往 →</span>
-  </a>
+  </div>
 
-  <a class="card" href="master-chat.html?master=klein" target="_self">
+  <div class="card" onclick="openModeOverlay('klein')" data-master="klein">
     <div class="circle" style="background:#EAF3DE;color:#3B6D11;">K</div>
     <div class="info">
       <div class="name">克莱因</div>
       <div class="desc">客体关系 · 偏执-分裂位 · 抑郁位 · 投射性认同</div>
     </div>
     <span class="arrow">前往 →</span>
-  </a>
+  </div>
 
-  <a class="card" href="master-chat.html?master=jung" target="_self">
+  <div class="card" onclick="openModeOverlay('jung')" data-master="jung">
     <div class="circle" style="background:#FAEEDA;color:#854F0B;">J</div>
     <div class="info">
       <div class="name">荣格</div>
       <div class="desc">分析心理学 · 集体无意识 · 原型 · 心理类型</div>
     </div>
     <span class="arrow">前往 →</span>
-  </a>
+  </div>
 
-  <a class="card" href="master-chat.html?master=bion" target="_self">
+  <div class="card" onclick="openModeOverlay('bion')" data-master="bion">
     <div class="circle" style="background:#E8E0F0;color:#6B4C8C;">B</div>
     <div class="info">
       <div class="name">比昂</div>
       <div class="desc">容器与容纳 · α功能 · O · 无记忆无欲望 · 团体动力学</div>
     </div>
     <span class="arrow">前往 →</span>
-  </a>
+  </div>
 
-  <a class="card" href="master-chat.html?master=rogers" target="_self">
+  <div class="card" onclick="openModeOverlay('rogers')" data-master="rogers">
     <div class="circle" style="background:#F0E8E0;color:#B8734A;">R</div>
     <div class="info">
       <div class="name">罗杰斯</div>
       <div class="desc">人本主义 · 以人为中心 · 共情 · 无条件积极关注 · 自我实现</div>
     </div>
     <span class="arrow">前往 →</span>
-  </a>
+  </div>
 
-  <a class="card" href="master-chat.html?master=beck" target="_self">
+  <div class="card" onclick="openModeOverlay('beck')" data-master="beck">
     <div class="circle" style="background:#E0E8F0;color:#4A6B8C;">Bk</div>
     <div class="info">
       <div class="name">贝克</div>
       <div class="desc">认知行为 · 自动思维 · 认知歪曲 · 合作经验主义 · 行为实验</div>
     </div>
     <span class="arrow">前往 →</span>
-  </a>
+  </div>
 
-  <a class="card" href="master-chat.html?master=yalom" target="_self">
+  <div class="card" onclick="openModeOverlay('yalom')" data-master="yalom">
     <div class="circle" style="background:#F0E8F0;color:#8C4A6B;">Y</div>
     <div class="info">
       <div class="name">亚隆</div>
       <div class="desc">存在主义 · 四大终极关怀 · 此时此刻 · 人际动力 · 故事疗愈</div>
     </div>
     <span class="arrow">前往 →</span>
-  </a>
+  </div>
 
   <div class="msg-section">
     <p>你还想与哪位大师对话？写下名字发送给我们</p>
@@ -146,10 +158,10 @@
     </div>
   </div>
 
-  <div style="margin-top:20px;padding:12px 16px;background:#faf8f5;border:1px solid #ece4d8;border-radius:12px;text-align:center;font-size:12px;color:#8b7355;line-height:1.8;">
-    <p style="margin:0 0 6px;">📢 关注公众号 <strong style="color:#a6845b;font-size:13px;">MindMeetsHeart</strong> · 每周精神分析深度内容</p>
+  <div style="margin-top:20px;padding:12px 16px;background:var(--light-accent);border:1px solid var(--border);border-radius:12px;text-align:center;font-size:12px;color:var(--muted);line-height:1.8;">
+    <p style="margin:0 0 6px;">📢 关注公众号 <strong style="color:var(--accent);font-size:13px;">MindMeetsHeart</strong> · 每周精神分析深度内容</p>
     <div style="display:flex;gap:12px;justify-content:center;">
-      <a href="https://757b6f9d7772430ab0dba04609cfa611.app.codebuddy.work" target="_blank" style="color:#a6845b;text-decoration:none;">📖 了解作者</a>
+      <a href="https://757b6f9d7772430ab0dba04609cfa611.app.codebuddy.work" target="_blank" style="color:var(--accent);text-decoration:none;">📖 了解作者</a>
       <a href="#" onclick="showRewardMS();return false;" style="color:var(--muted);text-decoration:none;">☕ 打赏</a>
     </div>
   </div>
@@ -168,6 +180,106 @@ function sendSuggestion() {
 }
 function showRewardMS() { document.getElementById('rewardOverlayMS').style.display='flex'; }
 function closeRewardMS() { document.getElementById('rewardOverlayMS').style.display='none'; }
+
+var MODE_OPTIONS = {
+  winnicott: {
+    name: '温尼科特 / 拉康',
+    url: 'winnicott-chat.html',
+    modes: [
+      {temp:20, title:'你来，我听着', sub:'像一次温和的咨询，他说得少、听得多，回应简短温暖', persona:'winnicott'},
+      {temp:60, title:'喝杯茶聊聊', sub:'情感陪伴与理论思考各半，适中的深度', persona:'winnicott'},
+      {temp:90, title:'进书房坐', sub:'深入探讨客体关系、过渡现象、真假自体等概念', persona:'winnicott'}
+    ]
+  },
+  freud: {
+    name: '弗洛伊德',
+    url: 'master-chat.html?master=freud',
+    modes: [
+      {temp:20, title:'沙发上的倾诉', sub:'自由联想式的倾听，简短温暖的回应'},
+      {temp:60, title:'释梦与解析', sub:'无意识的经典探索路径'},
+      {temp:90, title:'元心理学研讨', sub:'从《释梦》到《超越快乐原则》的系统讨论'}
+    ]
+  },
+  klein: {
+    name: '克莱因',
+    url: 'master-chat.html?master=klein',
+    modes: [
+      {temp:20, title:'内在小孩的声音', sub:'关注早期焦虑与无意识幻想'},
+      {temp:60, title:'偏执-分裂与抑郁', sub:'客体关系视角的临床对话'},
+      {temp:90, title:'投射性认同研讨', sub:'克莱因理论体系的系统探讨'}
+    ]
+  },
+  jung: {
+    name: '荣格',
+    url: 'master-chat.html?master=jung',
+    modes: [
+      {temp:20, title:'做个梦给我听', sub:'倾听你的梦境与内在意象'},
+      {temp:60, title:'原型与象征', sub:'集体无意识与心理类型探索'},
+      {temp:90, title:'分析心理学论争', sub:'原型理论、共时性到炼金术'}
+    ]
+  },
+  bion: {
+    name: '比昂',
+    url: 'master-chat.html?master=bion',
+    modes: [
+      {temp:20, title:'容纳你的困惑', sub:'不急于解释，让思考自然浮现'},
+      {temp:60, title:'α功能与转化', sub:'容器-容纳模型的实践对话'},
+      {temp:90, title:'走向O', sub:'晚期比昂思想，无记忆无欲望的探索'}
+    ]
+  },
+  rogers: {
+    name: '罗杰斯',
+    url: 'master-chat.html?master=rogers',
+    modes: [
+      {temp:20, title:'我在听', sub:'无条件积极关注，不评判的陪伴'},
+      {temp:60, title:'一起探索', sub:'以人为中心的成长对话'},
+      {temp:90, title:'人本主义研讨', sub:'共情、真诚、自我实现的理论实践'}
+    ]
+  },
+  beck: {
+    name: '贝克',
+    url: 'master-chat.html?master=beck',
+    modes: [
+      {temp:20, title:'理一理思路', sub:'识别自动思维，温和的认知梳理'},
+      {temp:60, title:'检验这个信念', sub:'苏格拉底式对话与合作经验主义'},
+      {temp:90, title:'认知疗法研讨', sub:'从认知歪曲到图式治疗的系统方法'}
+    ]
+  },
+  yalom: {
+    name: '亚隆',
+    url: 'master-chat.html?master=yalom',
+    modes: [
+      {temp:20, title:'坐下来聊聊生死', sub:'存在议题的温和触碰'},
+      {temp:60, title:'此时此地', sub:'人际动力与存在关怀并行'},
+      {temp:90, title:'存在主义研讨', sub:'死亡、自由、孤独、无意义的系统探讨'}
+    ]
+  }
+};
+
+function openModeOverlay(id) {
+  var M = MODE_OPTIONS[id];
+  if (!M) return;
+  document.getElementById('modeMasterName').textContent = M.name;
+  var btnsHtml = '';
+  M.modes.forEach(function(m) {
+    var href = M.url;
+    if (m.persona) {
+      href += '?persona=' + m.persona + '&temp=' + m.temp;
+    } else {
+      href += '&temp=' + m.temp;
+    }
+    btnsHtml += '<button class="mode-btn" onclick="location.href=\'' + href + '\'">'
+      + '<span class="m-title">' + m.title + '</span>'
+      + '<span class="m-sub">' + m.sub + '</span>'
+      + '</button>';
+  });
+  document.getElementById('modeBtns').innerHTML = btnsHtml;
+  document.getElementById('modeOverlay').classList.add('show');
+}
+
+function closeModeOverlay() {
+  document.getElementById('modeOverlay').classList.remove('show');
+}
 </script>
 
 <div class="reward-overlay" id="rewardOverlayMS" onclick="if(event.target===this)closeRewardMS()">
@@ -176,6 +288,14 @@ function closeRewardMS() { document.getElementById('rewardOverlayMS').style.disp
     <p>这网站免费用，但 API 调一次几毛钱<br>如果你聊得开心，可以打赏点 token 钱</p>
     <img src="reward-qr.jpg" alt="打赏二维码">
     <button onclick="closeRewardMS()">收到，关掉</button>
+  </div>
+</div>
+
+<div class="mode-overlay" id="modeOverlay" onclick="if(event.target===this)closeModeOverlay()">
+  <div class="mode-box">
+    <h3 id="modeMasterName"></h3>
+    <div id="modeBtns"></div>
+    <button class="mode-close" onclick="closeModeOverlay()">返回</button>
   </div>
 </div>
 

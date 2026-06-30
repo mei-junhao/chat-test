@@ -6,108 +6,230 @@
 <title>AI 临床督导</title>
 <style>
   :root {
-    --bg: #f7f4f0; --card: #fff; --text: #2c2416; --muted: #8b7355;
-    --accent: #6b8f71; --accent-hover: #5a7d60; --light-accent: #edf5ee;
-    --border: #d5e0d8; --danger: #c0392b; --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --bg: #f8f6f2; --card: #fffdfb; --text: #2d2925; --muted: #8f857d;
+    --accent: #6b8f71; --accent-hover: #5a7d60; --light-accent: #eef4ee;
+    --border: #dfe6df; --danger: #b85450; --shadow-sm: 0 1px 3px rgba(45,41,37,0.04);
+    --shadow: 0 2px 12px rgba(45,41,37,0.05), 0 8px 24px rgba(45,41,37,0.04);
+    --radius-sm: 10px; --radius: 14px; --radius-lg: 18px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
     font-family:"Noto Serif SC","STSong",Georgia,serif;
     background:var(--bg); color:var(--text); min-height:100vh;
-    display:flex; justify-content:center; line-height:1.8;
+    display:flex; justify-content:center; line-height:1.85;
+    -webkit-font-smoothing:antialiased;
   }
-  .app { width:100%; max-width:680px; padding:20px; display:flex; flex-direction:column; gap:20px; }
+  .app { width:100%; max-width:680px; padding:32px 20px 48px; display:flex; flex-direction:column; gap:32px; }
+
+  /* Phase sections */
+  .phase { display:flex; flex-direction:column; gap:16px; }
+  .phase-label {
+    font-size:11px; text-transform:uppercase; letter-spacing:0.12em;
+    color:var(--muted); opacity:0.6; margin-bottom:-8px;
+  }
+  .phase-divider { height:1px; background:var(--border); margin:0; opacity:0.4; }
 
   /* Password gate */
   .gate { display:flex; flex-direction:column; align-items:center; justify-content:center;
-    min-height:60vh; text-align:center; gap:20px; }
-  .gate h1 { font-size:22px; font-weight:500; color:var(--accent); }
-  .gate p { font-size:13px; color:var(--muted); max-width:400px; }
+    min-height:60vh; text-align:center; gap:24px; }
+  .gate h1 { font-size:24px; font-weight:500; color:var(--accent); letter-spacing:0.05em; }
+  .gate p { font-size:14px; color:var(--muted); max-width:460px; line-height:1.9; }
   .gate input {
-    padding:12px 16px; border:1px solid var(--border); border-radius:10px;
-    font-size:16px; text-align:center; outline:none; width:220px;
-    font-family:inherit; letter-spacing:4px;
+    padding:14px 18px; border:1px solid var(--border); border-radius:var(--radius);
+    font-size:16px; text-align:center; outline:none; width:240px;
+    font-family:inherit; letter-spacing:4px; transition:var(--transition); background:var(--card);
   }
-  .gate input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(107,143,113,0.15); }
+  .gate input:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(107,143,113,0.1); }
   .gate button {
-    padding:10px 36px; border:none; border-radius:10px; background:var(--accent);
-    color:white; font-size:14px; cursor:pointer; font-family:inherit;
+    padding:14px 48px; border:none; border-radius:var(--radius); background:var(--accent);
+    color:white; font-size:15px; cursor:pointer; font-family:inherit; transition:var(--transition); letter-spacing:0.04em;
   }
-  .gate button:hover { background:var(--accent-hover); }
-  .gate .error { color:var(--danger); font-size:12px; display:none; }
+  .gate button:hover { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 4px 20px rgba(107,143,113,0.2); }
+  .gate .error { color:var(--danger); font-size:13px; display:none; }
 
-  /* Main interface (hidden until authenticated) */
+  /* Main interface */
   .main { display:none; }
 
-  .header { text-align:center; padding-bottom:12px; border-bottom:1px solid var(--border); }
-  .header h1 { font-size:20px; font-weight:500; color:var(--accent); }
-  .header p { font-size:12px; color:var(--muted); margin-top:4px; }
+  .header { text-align:center; padding-bottom:20px; border-bottom:1px solid var(--border); }
+  .header h1 { font-size:22px; font-weight:500; color:var(--accent); letter-spacing:0.04em; }
+  .header p { font-size:13px; color:var(--muted); margin-top:8px; line-height:1.8; max-width:480px; margin-left:auto; margin-right:auto; }
 
-  /* Upload area */
-  .upload-zone {
-    border:2px dashed var(--border); border-radius:12px; padding:30px 20px;
-    text-align:center; cursor:pointer; transition:0.2s;
+  /* Back link */
+  .back-link { display:inline-block; color:var(--muted); text-decoration:none; font-size:12px; margin-bottom:2px; transition:var(--transition); }
+  .back-link:hover { color:var(--accent); }
+
+  /* Upload zone — collapsible */
+  .upload-toggle {
+    display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--muted);
+    cursor:pointer; font-family:inherit; border:none; background:none; padding:2px 0;
+    transition:var(--transition);
   }
+  .upload-toggle:hover { color:var(--accent); }
+  .upload-zone {
+    border:2px dashed var(--border); border-radius:var(--radius); padding:18px 24px;
+    text-align:center; cursor:pointer; transition:var(--transition); background:var(--card);
+    display:none; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap;
+  }
+  .upload-zone.open { display:flex; }
   .upload-zone:hover { border-color:var(--accent); background:var(--light-accent); }
-  .upload-zone p { font-size:13px; color:var(--muted); }
-  .upload-zone .hint { font-size:11px; color:#aaa; margin-top:4px; }
-  #fileInfo { display:none; font-size:12px; color:var(--accent); margin-top:8px; }
+  .upload-zone .icon { font-size:18px; opacity:0.7; }
+  .upload-zone p { font-size:13px; color:var(--muted); margin:0; }
+  .upload-zone .hint { font-size:11px; color:var(--muted); opacity:0.6; }
+  #fileInfo { display:none; font-size:12px; color:var(--accent); margin-top:8px; padding:8px 12px; background:var(--light-accent); border-radius:var(--radius-sm); }
 
   /* Text area */
   textarea {
-    width:100%; min-height:200px; border:1px solid var(--border); border-radius:10px;
-    padding:14px 16px; font-size:14px; font-family:inherit; resize:vertical;
-    outline:none; background:var(--card); color:var(--text);
+    width:100%; min-height:200px; border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px 22px; font-size:15px; font-family:inherit; resize:vertical;
+    outline:none; background:var(--card); color:var(--text); line-height:2;
+    transition:var(--transition);
   }
-  textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(107,143,113,0.1); }
+  textarea:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(107,143,113,0.08); }
 
-  .btn-row { display:flex; gap:10px; flex-wrap:wrap; }
-  .btn-row button {
-    padding:12px 24px; border:none; border-radius:10px; font-size:14px;
-    cursor:pointer; font-family:inherit; transition:0.2s;
+  /* Char count */
+  .char-count { text-align:right; font-size:11px; color:var(--muted); margin-top:-8px; padding-right:4px; }
+
+  /* Button row */
+  .btn-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .btn-primary {
+    padding:13px 28px; border:none; border-radius:var(--radius); background:var(--accent);
+    color:white; font-size:14px; cursor:pointer; font-family:inherit; transition:var(--transition);
+    letter-spacing:0.03em; flex:1; min-width:160px; font-weight:500;
   }
-  .btn-primary { background:var(--accent); color:white; flex:1; }
-  .btn-primary:hover { background:var(--accent-hover); }
-  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
-  .btn-secondary { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
+  .btn-primary:hover { background:var(--accent-hover); box-shadow:0 4px 20px rgba(107,143,113,0.2); transform:translateY(-1px); }
+  .btn-primary:disabled { opacity:0.4; cursor:not-allowed; filter:grayscale(0.2); transform:none; box-shadow:none; }
 
-  /* Output */
+  .btn-aux {
+    display:inline-flex; align-items:center; gap:4px; padding:7px 14px;
+    border:1px solid var(--border); border-radius:20px; background:var(--card);
+    color:var(--muted); font-size:12px; cursor:pointer; font-family:inherit;
+    transition:var(--transition); white-space:nowrap;
+  }
+  .btn-aux:hover { border-color:var(--accent); color:var(--accent); background:var(--light-accent); }
+  .btn-aux.danger:hover { border-color:var(--danger); color:var(--danger); }
+
+  /* Reply length — inline compact */
+  .len-inline {
+    display:flex; align-items:center; gap:8px; padding:7px 14px;
+    border:1px solid var(--border); border-radius:20px; background:var(--card);
+    font-size:12px; color:var(--muted); white-space:nowrap;
+  }
+  .len-inline label { opacity:0.7; flex-shrink:0; }
+  .len-inline select {
+    border:none; outline:none; font-size:12px; font-family:inherit; color:var(--accent);
+    cursor:pointer; background:transparent; font-weight:600; padding:0;
+    -webkit-appearance:none; appearance:none;
+  }
+
+  /* Output box */
   .output-box {
-    background:var(--card); border:1px solid var(--border); border-radius:12px;
-    padding:20px 24px; display:none; line-height:2; font-size:15px;
-    white-space:pre-wrap; box-shadow:var(--shadow);
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:24px 28px; display:none; line-height:2; font-size:15px;
+    white-space:pre-wrap; box-shadow:var(--shadow); transition:var(--transition);
   }
-  .output-box h3 { font-size:15px; color:var(--accent); margin-bottom:12px; font-weight:500; }
-  .output-box .label { font-weight:600; color:var(--text); margin-top:14px; display:block; }
+  .output-box .ob-header {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--border);
+  }
+  .output-box .ob-header h3 { font-size:16px; color:var(--accent); font-weight:500; margin:0; letter-spacing:0.03em; }
+  .toggle-btn {
+    display:inline-flex; align-items:center; gap:4px; padding:5px 14px;
+    border:1px solid var(--border); border-radius:20px; background:var(--card);
+    color:var(--muted); font-size:11px; cursor:pointer; font-family:inherit;
+    transition:var(--transition); white-space:nowrap;
+  }
+  .toggle-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--light-accent); }
+  .output-box .label { font-weight:600; color:var(--text); margin-top:16px; display:block; }
+  .output-box.collapsed .impression-body { display:none; }
+  .output-box.collapsed .ob-header { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+  .output-box.collapsed { padding:16px 28px; }
 
   /* Chat area */
-  .chat-area { display:none; flex-direction:column; gap:12px; }
-  .chat-messages { max-height:400px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
-  .chat-msg { padding:12px 16px; border-radius:12px; font-size:14px; line-height:1.7; }
-  .chat-msg.user { background:var(--light-accent); align-self:flex-end; max-width:85%; }
-  .chat-msg.ai { background:var(--card); border:1px solid var(--border); max-width:90%; }
-  .chat-input-wrap { display:flex; gap:8px; }
-  .chat-input-wrap textarea { min-height:44px; max-height:100px; flex:1; }
-  .chat-input-wrap button {
-    padding:8px 20px; border:none; border-radius:10px; background:var(--accent);
-    color:white; font-size:13px; cursor:pointer; font-family:inherit;
-    align-self:flex-end;
+  .chat-area { display:none; flex-direction:column; gap:16px; }
+  .chat-messages { max-height:520px; overflow-y:auto; display:flex; flex-direction:column; gap:14px; padding:4px 0; }
+  .chat-msg {
+    padding:14px 18px; border-radius:14px; font-size:14px; line-height:1.9;
+    animation:fadeUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .chat-input-wrap button:disabled { opacity:0.5; cursor:not-allowed; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  .chat-msg.user { background:var(--light-accent); align-self:flex-end; max-width:80%; border-bottom-right-radius:4px; }
+  .chat-msg.ai { background:var(--card); border:1px solid var(--border); max-width:88%; border-bottom-left-radius:4px; box-shadow:var(--shadow-sm); }
+  .chat-msg.typing { color:var(--muted); font-size:13px; font-style:italic; background:transparent; border:none; box-shadow:none; padding:8px 18px; }
+  .chat-input-wrap { display:flex; gap:10px; align-items:flex-end; }
+  .chat-input-wrap textarea { min-height:48px; max-height:100px; flex:1; font-size:14px; padding:12px 16px; }
+  .chat-input-wrap button {
+    padding:11px 24px; border:none; border-radius:var(--radius); background:var(--accent);
+    color:white; font-size:14px; cursor:pointer; font-family:inherit;
+    transition:var(--transition); flex-shrink:0; letter-spacing:0.03em; font-weight:500;
+  }
+  .chat-input-wrap button:hover { background:var(--accent-hover); box-shadow:0 4px 14px rgba(107,143,113,0.15); }
+  .chat-input-wrap button:disabled { opacity:0.4; cursor:not-allowed; filter:grayscale(0.2); transform:none; }
 
-  .typing { color:var(--muted); font-size:13px; font-style:italic; padding:8px 0; }
+  .disclaimer { text-align:center; font-size:11px; color:var(--muted); padding:8px 0; opacity:0.55; }
 
-  .back-link { display:inline-block; color:var(--muted); text-decoration:none; font-size:12px; margin-bottom:8px; }
-  .back-link:hover { color:var(--accent); }
+  /* History overlay */
+  .history-overlay {
+    display:none; position:fixed; inset:0; z-index:300;
+    background:rgba(45,41,37,0.2); align-items:center; justify-content:center;
+    backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+  }
+  .history-overlay.show { display:flex; }
+  .history-panel {
+    background:var(--card); border-radius:var(--radius-lg); padding:32px 28px 24px;
+    max-width:480px; width:92%; max-height:70vh; display:flex; flex-direction:column;
+    box-shadow:0 8px 48px rgba(45,41,37,0.12); animation:scaleIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes scaleIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+  .history-panel .hp-header {
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-shrink:0;
+  }
+  .history-panel .hp-header h3 { margin:0; font-size:18px; font-weight:500; color:var(--text); }
+  .history-panel .hp-close {
+    width:32px; height:32px; border-radius:50%; border:1px solid var(--border);
+    background:var(--card); color:var(--muted); font-size:14px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:var(--transition);
+  }
+  .history-panel .hp-close:hover { background:var(--bg); color:var(--text); }
+  .history-list { overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch; }
+  .history-item {
+    display:flex; justify-content:space-between; align-items:center; gap:14px;
+    padding:16px 0; border-bottom:1px solid var(--border); transition:var(--transition);
+  }
+  .history-item:hover { background:var(--light-accent); margin:0 -14px; padding:16px 14px; border-radius:var(--radius-sm); }
+  .history-item:last-child { border-bottom:none; }
+  .history-item .hi-info { flex:1; min-width:0; }
+  .history-item .hi-title {
+    font-size:14px; font-weight:500; white-space:nowrap; overflow:hidden;
+    text-overflow:ellipsis; margin-bottom:4px; color:var(--text);
+  }
+  .history-item .hi-meta { font-size:11px; color:var(--muted); }
+  .history-item .hi-actions { display:flex; gap:6px; flex-shrink:0; }
+  .hi-btn {
+    padding:6px 16px; border-radius:16px; font-size:11px; cursor:pointer;
+    font-family:inherit; transition:0.15s; border:none;
+  }
+  .hi-btn-load { background:var(--accent); color:#fff; }
+  .hi-btn-load:hover { background:var(--accent-hover); }
+  .hi-btn-del { background:none; border:1px solid var(--border); color:var(--muted); }
+  .hi-btn-del:hover { border-color:var(--danger); color:var(--danger); }
+  .history-empty { text-align:center; padding:48px 24px; color:var(--muted); font-size:14px; }
+  .history-empty .he-icon { font-size:44px; margin-bottom:12px; opacity:0.45; }
 
-  .disclaimer { text-align:center; font-size:11px; color:var(--muted); padding:12px 0; }
+  /* Responsive */
+  @media (max-width: 576px) {
+    .app { padding:24px 16px 40px; gap:24px; }
+    .output-box { padding:20px 20px; }
+    .btn-row { gap:8px; }
+    .btn-primary { padding:12px 20px; font-size:13px; }
+  }
 </style>
 </head>
 <body>
 <div class="app">
   <!-- ====== PASSWORD GATE ====== -->
   <div class="gate" id="gate">
-    <h1>🧑‍⚕️ AI 临床督导（测试版）</h1>
+    <h1>AI 临床督导（测试版）</h1>
     <p>基于温尼科特框架的团体心理督导方法论。上传逐字稿、案例报告或反移情困惑，AI 将输出整体印象并展开督导对话。</p>
     <input type="password" id="pwdInput" placeholder="输入密码" onkeydown="if(event.key==='Enter')verifyPassword()">
     <button onclick="verifyPassword()">进入</button>
@@ -116,52 +238,53 @@
 
   <!-- ====== MAIN INTERFACE ====== -->
   <div class="main" id="main">
-    <a class="back-link" href="master-select.html">← 返回主页</a>
+    <a class="back-link" href="master-select.html">&larr; 返回主页</a>
+
+    <!-- ====== PHASE 1: INPUT ====== -->
     <div class="header">
-      <h1>🧑‍⚕️ AI 临床督导</h1>
+      <h1>AI 临床督导</h1>
       <p>请上传或粘贴临床材料（逐字稿 / 案例报告 / 反移情困惑）</p>
     </div>
 
-    <!-- Upload -->
-    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-      <p>📎 点击上传文件</p>
-      <p class="hint">支持 .txt / .md / .docx，限 4000 字</p>
-      <input type="file" id="fileInput" accept=".txt,.md,.docx" style="display:none" onchange="handleFile(event)">
-      <div id="fileInfo"></div>
-    </div>
+    <div class="phase">
+      <!-- Upload toggle + zone (collapsible) -->
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="upload-toggle" onclick="toggleUpload()" id="uploadToggleBtn">&plus; 上传文件</button>
+      </div>
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <span class="icon">&#x1F4CE;</span><span>点击上传文件</span><span class="hint">（.txt / .md / .docx，建议 4000 字以内）</span>
+        <input type="file" id="fileInput" accept=".txt,.md,.docx" style="display:none" onchange="handleFile(event)">
+        <div id="fileInfo"></div>
+      </div>
 
-    <!-- Text input -->
-    <textarea id="materialText" placeholder="或者直接粘贴临床材料……
+      <!-- Text input -->
+      <textarea id="materialText" placeholder="或者直接粘贴临床材料……
 
 逐字稿格式示例：
 T（治疗师）：你今天看起来不太开心。
 P（来访者）：是的，我一直在想上周你说的话……"></textarea>
+      <div class="char-count" id="charCount"></div>
+    </div>
 
-    <!-- Buttons -->
+    <!-- ====== PHASE 2: CONTROLS ====== -->
+    <div class="phase-divider"></div>
     <div class="btn-row">
-      <button class="btn-primary" id="analyzeBtn" onclick="generateImpression()">🔍 生成整体印象</button>
-      <button class="btn-secondary" onclick="clearAll()">清空</button>
+      <button class="btn-primary" id="analyzeBtn" onclick="generateImpression()">&#x1F50D; 生成整体印象</button>
+      <div class="len-inline">
+        <label>&#x270D;&#xFE0F;</label>
+        <select id="lenSelect" onchange="updateLength(this.value)">
+          <option value="0">简洁</option>
+          <option value="1" selected>适中</option>
+          <option value="2">详细</option>
+        </select>
+      </div>
+      <button class="btn-aux" onclick="showHistory()">&#x1F4C2; 历史</button>
+      <button class="btn-aux danger" onclick="clearAll()">清空</button>
     </div>
 
-    <!-- Reply length -->
-    <div style="margin-bottom:6px;">
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;">
-        <span>✍️ 回复长度</span>
-        <span id="lenLabel" style="color:var(--accent);font-weight:600;font-size:12px;">适中</span>
-      </div>
-      <input type="range" id="lenSlider" min="0" max="2" value="1"
-        onchange="updateLength(this.value)"
-        style="width:100%;height:4px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right, var(--accent) 50%, #e5d9c8 50%);border-radius:2px;outline:none;cursor:pointer;">
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:#c9b99d;margin-top:4px;">
-        <span>简洁</span>
-        <span>详细</span>
-      </div>
-    </div>
-
-    <!-- Output -->
+    <!-- ====== PHASE 3: OUTPUT ====== -->
     <div class="output-box" id="outputBox"></div>
 
-    <!-- Chat -->
     <div class="chat-area" id="chatArea">
       <div class="chat-messages" id="chatMessages"></div>
       <div class="chat-input-wrap">
@@ -171,12 +294,36 @@ P（来访者）：是的，我一直在想上周你说的话……"></textarea>
     </div>
 
     <div class="disclaimer">
-      ⚠️ 此 AI 督导为辅助工具，不能替代真人督导。如涉及危机情境，请立即寻求专业支持。
+      &#x26A0;&#xFE0F; 此 AI 督导为辅助工具，不能替代真人督导。如涉及危机情境，请立即寻求专业支持。
+    </div>
+
+    <!-- History overlay -->
+    <div class="history-overlay" id="historyOverlay" onclick="if(event.target===this)closeHistory()">
+      <div class="history-panel">
+        <div class="hp-header">
+          <h3>&#x1F4C2; 历史对话</h3>
+          <button class="hp-close" onclick="closeHistory()">&times;</button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+// ==================== UPLOAD TOGGLE ====================
+function toggleUpload() {
+  var zone = document.getElementById('uploadZone');
+  var btn = document.getElementById('uploadToggleBtn');
+  if (zone.classList.contains('open')) {
+    zone.classList.remove('open');
+    btn.innerHTML = '&plus; 上传文件';
+  } else {
+    zone.classList.add('open');
+    btn.innerHTML = '&minus; 收起上传';
+  }
+}
+
 // ==================== PASSWORD ====================
 var PASSWORD_HASH = '8b67f39584c2f28d3f9b78b2899528ed49b230172f8fd6d74439ab1488840fcb';
 
@@ -196,25 +343,29 @@ async function verifyPassword() {
   }
 }
 
-// Auto-auth if already verified this session
 if (sessionStorage.getItem('supervisor_auth') === '1') {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('main').style.display = 'block';
 }
 
+var _savedId = sessionStorage.getItem('supervisor_current_id');
+if (_savedId) {
+  _currentHistoryId = _savedId;
+}
+
 // ==================== REPLY LENGTH ====================
-var _maxTokens = 0;  // 0 = model default (适中), 1024 = 简洁, 4096 = 详细
+var _maxTokens = 0;
 function updateLength(val) {
-  var labels = ['简洁', '适中', '详细'];
   var tokens = [1024, 0, 4096];
   _maxTokens = tokens[parseInt(val)];
-  document.getElementById('lenLabel').textContent = labels[parseInt(val)];
-  var pct = (parseInt(val) / 2 * 100) + '%';
-  document.getElementById('lenSlider').style.background = 'linear-gradient(to right, var(--accent) ' + pct + ', #e5d9c8 ' + pct + ')';
 }
 
 // ==================== FILE HANDLING ====================
 function handleFile(e) {
+  // Auto-open upload zone when file chosen
+  document.getElementById('uploadZone').classList.add('open');
+  document.getElementById('uploadToggleBtn').innerHTML = '&minus; 收起上传';
+
   var file = e.target.files[0];
   if (!file) return;
   var ext = file.name.split('.').pop().toLowerCase();
@@ -228,10 +379,13 @@ function handleFile(e) {
   var reader = new FileReader();
   reader.onload = function() {
     var text = reader.result;
-    if (text.length > 4000) {
-      text = text.substring(0, 4000) + '\n\n[内容超过4000字，已截断]';
-    }
     document.getElementById('materialText').value = text;
+    var fi = document.getElementById('fileInfo');
+    if (text.length > 4000) {
+      fi.innerHTML = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--danger);">&#x26A0;&#xFE0F; 文件共 ' + text.length + ' 字，建议控制在 4000 字以内以确保分析质量</span>';
+    } else {
+      fi.textContent = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+    }
   };
 
   if (ext === 'docx') {
@@ -251,8 +405,13 @@ function readDocx(file) {
         return zip.file('word/document.xml').async('string');
       }).then(function(xml) {
         var text = xml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-        if (text.length > 4000) text = text.substring(0, 4000) + '\n\n[内容超过4000字，已截断]';
         document.getElementById('materialText').value = text;
+        var fi = document.getElementById('fileInfo');
+        if (text.length > 4000) {
+          fi.innerHTML = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--danger);">&#x26A0;&#xFE0F; 文件共 ' + text.length + ' 字，建议控制在 4000 字以内以确保分析质量</span>';
+        } else {
+          fi.textContent = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+        }
       }).catch(function() {
         document.getElementById('materialText').value = '[无法解析 .docx 文件，请尝试粘贴文本]';
       });
@@ -269,10 +428,22 @@ function clearAll() {
   document.getElementById('fileInfo').style.display = 'none';
   document.getElementById('outputBox').style.display = 'none';
   document.getElementById('chatArea').style.display = 'none';
+  document.getElementById('charCount').textContent = '';
+  // Collapse upload zone
+  document.getElementById('uploadZone').classList.remove('open');
+  document.getElementById('uploadToggleBtn').innerHTML = '&plus; 上传文件';
+  _currentHistoryId = null;
+  sessionStorage.removeItem('supervisor_current_id');
 }
 
+document.getElementById('materialText').addEventListener('input', function() {
+  var len = this.value.length;
+  var cc = document.getElementById('charCount');
+  cc.textContent = len + ' 字';
+  cc.style.color = len > 4000 ? 'var(--danger)' : 'var(--muted)';
+});
+
 // ==================== SYSTEM PROMPT ====================
-// 从 alice-perspective-full.md 加载完整 SKILL.md（直接从 Marvis skills 复制）
 var SYSTEM_PROMPT = '督导系统加载中……';
 
 async function loadSupervisorPrompt() {
@@ -287,6 +458,7 @@ loadSupervisorPrompt();
 
 // ==================== API ====================
 var TIERS = [
+  { api:'https://api.deepseek.com/v1/chat/completions', key:'sk-7adbf5d8592f415893086e21cf84f1b8', model:'deepseek-chat', name:'DeepSeek Official' },
   { api:'https://api.kkdmx.com/v1/chat/completions', key:'sk-JvknFamMM2OEcIYgT02gbR4rKvacIM4Vy4CTPdDVe22DROJR', model:'deepseek-ai/deepseek-v4-pro', name:'DeepSeek Pro' },
   { api:'https://api.kkdmx.com/v1/chat/completions', key:'sk-VKinfjJwko8RneSWuppXp8CuCcHGHFd9K9Uaq32VwgmIIX21', model:'deepseek-ai/deepseek-v4-flash', name:'DeepSeek Flash' },
   { api:'https://api.kkdmx.com/v1/chat/completions', key:'sk-8sPbqqYiQIRh8ScEcbX7FDELlg5LXpjJxO2hBnwsfCxooKvD', model:'minimaxai/minimax-m3', name:'MiniMax M3' },
@@ -295,6 +467,7 @@ var TIERS = [
 var apiTier = 0;
 var isLoading = false;
 var chatMessages = [];
+var _currentHistoryId = null;
 
 // ==================== IMPRESSION GENERATION ====================
 var isGenerating = false;
@@ -303,14 +476,13 @@ async function generateImpression() {
   if (isGenerating) return;
   var text = document.getElementById('materialText').value.trim();
   if (!text) { alert('请粘贴或上传临床材料'); return; }
-  if (text.length > 4000) text = text.substring(0, 4000) + '\n\n[内容超过4000字，已截断]';
 
   isGenerating = true;
   var btn = document.getElementById('analyzeBtn');
   btn.disabled = true; btn.textContent = '分析中……';
   var outputBox = document.getElementById('outputBox');
   outputBox.style.display = 'block';
-  outputBox.innerHTML = '<h3>🔍 正在生成整体印象……</h3><div class="typing">阅读材料中……</div>';
+  outputBox.innerHTML = '<div class="ob-header"><h3>&#x1F50D; 整体印象</h3><button onclick="toggleImpression()" id="impressionToggle" class="toggle-btn">收起 &#x25B2;</button></div><div class="impression-body"><div class="chat-msg ai typing">阅读材料中……</div></div>';
 
   try {
 
@@ -349,15 +521,14 @@ async function generateImpression() {
   apiTier = 0;
   var gotContent = false;
   var finalReply = '';
-  var lastLineBreak = false;  // 跟踪是否已追加分隔符
+  var lastLineBreak = false;
 
   while (!gotContent && apiTier < TIERS.length) {
     var tier = TIERS[apiTier];
 
-    // 切换线路时在已有内容后追加提示，不清屏
     if (apiTier > 0 && finalReply) {
-      var switchNote = '\n\n<span style="color:var(--muted);font-size:11px;">⚠️ 线路 ' + apiTier + ' 中断，切换至 ' + tier.name + '……</span>\n';
-      outputBox.innerHTML = '<h3>🔍 整体印象</h3>' + escapeHtml(finalReply).replace(/\n/g,'<br>') + switchNote + '<span style="color:var(--accent);">▍</span>';
+      var switchNote = '\n\n<span style="color:var(--muted);font-size:11px;">&#x26A0;&#xFE0F; 线路 ' + apiTier + ' 中断，切换至 ' + tier.name + '……</span>\n';
+      outputBox.innerHTML = '<div class="ob-header"><h3>&#x1F50D; 整体印象</h3><button onclick="toggleImpression()" id="impressionToggle" class="toggle-btn">收起 &#x25B2;</button></div><div class="impression-body">' + escapeHtml(finalReply).replace(/\n/g,'<br>') + switchNote + '<span style="color:var(--accent);">&#x258D;</span></div>';
     }
 
     try {
@@ -371,7 +542,7 @@ async function generateImpression() {
 
       var reader = res.body.getReader();
       var decoder = new TextDecoder();
-      var tierReply = '';   // 本条线路新产生的内容
+      var tierReply = '';
       var buffer = '';
       var streamFailed = false;
 
@@ -394,7 +565,7 @@ async function generateImpression() {
               if (content) {
                 tierReply += content;
                 var display = finalReply + tierReply;
-                outputBox.innerHTML = '<h3>🔍 整体印象</h3>' + escapeHtml(display).replace(/\n/g,'<br>') + '<span style="color:var(--accent);">▍</span>';
+                outputBox.innerHTML = '<div class="ob-header"><h3>&#x1F50D; 整体印象</h3><button onclick="toggleImpression()" id="impressionToggle" class="toggle-btn">收起 &#x25B2;</button></div><div class="impression-body">' + escapeHtml(display).replace(/\n/g,'<br>') + '<span style="color:var(--accent);">&#x258D;</span></div>';
               }
             } catch(e) {}
           }
@@ -403,19 +574,17 @@ async function generateImpression() {
       }
 
       if (gotContent) {
-        // 正常完成：合并所有内容
         finalReply += tierReply;
-        outputBox.innerHTML = '<h3>🔍 整体印象</h3>' + escapeHtml(finalReply).replace(/\n/g,'<br>');
+        outputBox.innerHTML = '<div class="ob-header"><h3>&#x1F50D; 整体印象</h3><button onclick="toggleImpression()" id="impressionToggle" class="toggle-btn">收起 &#x25B2;</button></div><div class="impression-body">' + escapeHtml(finalReply).replace(/\n/g,'<br>') + '</div>';
         document.getElementById('chatArea').style.display = 'flex';
         chatMessages = [
           { role:'system', content:SYSTEM_PROMPT },
           { role:'assistant', content:finalReply }
         ];
       } else {
-        // 流中断但有部分内容 → 立即固化显示，再切下一条
         if (tierReply) {
           finalReply += tierReply;
-          outputBox.innerHTML = '<h3>🔍 整体印象（生成中……）</h3>' + escapeHtml(finalReply).replace(/\n/g,'<br>') + '<span style="color:var(--accent);">▍</span>';
+          outputBox.innerHTML = '<div class="ob-header"><h3>&#x1F50D; 整体印象（生成中……）</h3><button onclick="toggleImpression()" id="impressionToggle" class="toggle-btn">收起 &#x25B2;</button></div><div class="impression-body">' + escapeHtml(finalReply).replace(/\n/g,'<br>') + '<span style="color:var(--accent);">&#x258D;</span></div>';
         }
         apiTier++;
       }
@@ -427,8 +596,7 @@ async function generateImpression() {
   if (!gotContent && !finalReply) {
     outputBox.innerHTML = '<p style="color:var(--danger)">所有线路均不可用，请稍后重试。</p>';
   } else if (!gotContent && finalReply) {
-    // 所有线路都尝试了，有部分内容但没完整结束
-    outputBox.innerHTML = '<h3>🔍 整体印象（部分）</h3>' + escapeHtml(finalReply).replace(/\n/g,'<br>') + '<p style="color:var(--muted);margin-top:12px">⚠️ 所有线路均中断，以上为已获取的部分内容。</p>';
+    outputBox.innerHTML = '<div class="ob-header"><h3>&#x1F50D; 整体印象（部分）</h3><button onclick="toggleImpression()" id="impressionToggle" class="toggle-btn">收起 &#x25B2;</button></div><div class="impression-body">' + escapeHtml(finalReply).replace(/\n/g,'<br>') + '<p style="color:var(--muted);margin-top:12px">&#x26A0;&#xFE0F; 所有线路均中断，以上为已获取的部分内容。</p></div>';
     document.getElementById('chatArea').style.display = 'flex';
     chatMessages = [
       { role:'system', content:SYSTEM_PROMPT },
@@ -438,7 +606,8 @@ async function generateImpression() {
 
   } finally {
     isGenerating = false;
-    btn.disabled = false; btn.textContent = '🔍 生成整体印象';
+    btn.disabled = false; btn.textContent = '\u{1F50D} 生成整体印象';
+    autoSave();
   }
 }
 
@@ -466,14 +635,13 @@ async function sendChat() {
   apiTier = 0;
   var gotContent = false;
   var finalReply = '';
-  var msgDiv = null;  // 单气泡复用，避免重试时创建多个空白气泡（撤回假象）
+  var msgDiv = null;
 
   while (!gotContent && apiTier < TIERS.length) {
     var tier = TIERS[apiTier];
 
-    // 切换线路：在已有 msgDiv 末尾追加提示，不创建新气泡
     if (apiTier > 0 && msgDiv && finalReply) {
-      msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>') + '<div style="color:var(--muted);font-size:11px;margin-top:6px">⚠️ 切换至 ' + tier.name + '……</div>';
+      msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>') + '<div style="color:var(--muted);font-size:11px;margin-top:6px">&#x26A0;&#xFE0F; 切换至 ' + tier.name + '……</div>';
     }
 
     try {
@@ -533,7 +701,7 @@ async function sendChat() {
       } else {
         if (tierReply) {
           finalReply += tierReply;
-          msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>') + '<div style="color:var(--muted);font-size:11px;margin-top:6px">⚠️ 流中断，切换中……</div>';
+          msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>') + '<div style="color:var(--muted);font-size:11px;margin-top:6px">&#x26A0;&#xFE0F; 流中断，切换中……</div>';
         }
         apiTier++;
       }
@@ -547,15 +715,147 @@ async function sendChat() {
     chatDiv.innerHTML += '<div class="chat-msg ai" style="color:var(--danger)">所有线路均不可用，请稍后重试。</div>';
   } else if (!gotContent && finalReply) {
     chatMessages.push({ role:'assistant', content:finalReply });
-    msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>') + '<div style="color:var(--muted);font-size:11px;margin-top:6px">⚠️ 所有线路中断，以上为已获取部分。</div>';
+    msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>') + '<div style="color:var(--muted);font-size:11px;margin-top:6px">&#x26A0;&#xFE0F; 所有线路中断，以上为已获取部分。</div>';
   }
 
   isLoading = false; chatSendBtn.disabled = false;
   chatDiv.scrollTop = chatDiv.scrollHeight;
+  autoSave();
 }
 
 function escapeHtml(t) {
   return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toggleImpression() {
+  var box = document.getElementById('outputBox');
+  var btn = document.getElementById('impressionToggle');
+  box.classList.toggle('collapsed');
+  if (box.classList.contains('collapsed')) {
+    btn.textContent = '展开 \u25BC';
+  } else {
+    btn.textContent = '收起 \u25B2';
+  }
+}
+
+// ==================== AUTO SAVE & HISTORY ====================
+function autoSave() {
+  var impressionText = (document.getElementById('outputBox').textContent || '').trim();
+  if (!impressionText || impressionText.indexOf('阅读材料中') !== -1) return;
+  var material = document.getElementById('materialText').value.trim();
+  if (!material) return;
+
+  var title = material.replace(/\s+/g, ' ').substring(0, 30);
+  var history = JSON.parse(localStorage.getItem('supervisor_history') || '[]');
+
+  if (_currentHistoryId) {
+    for (var i = 0; i < history.length; i++) {
+      if (history[i].id === _currentHistoryId) {
+        history[i].time = new Date().toISOString();
+        history[i].title = title;
+        history[i].material = material;
+        history[i].impression = document.getElementById('outputBox').innerHTML;
+        history[i].chatMessages = chatMessages.slice();
+        break;
+      }
+    }
+  } else {
+    _currentHistoryId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    sessionStorage.setItem('supervisor_current_id', _currentHistoryId);
+    history.push({
+      id: _currentHistoryId,
+      time: new Date().toISOString(),
+      title: title,
+      material: material,
+      impression: document.getElementById('outputBox').innerHTML,
+      chatMessages: chatMessages.slice()
+    });
+  }
+  if (history.length > 50) history = history.slice(-50);
+  localStorage.setItem('supervisor_history', JSON.stringify(history));
+}
+
+function showHistory() {
+  var overlay = document.getElementById('historyOverlay');
+  var list = document.getElementById('historyList');
+  var history = JSON.parse(localStorage.getItem('supervisor_history') || '[]');
+  history.reverse();
+  if (history.length === 0) {
+    list.innerHTML = '<div class="history-empty"><div class="he-icon">&#x1F4ED;</div>暂无历史记录</div>';
+  } else {
+    var html = '';
+    for (var i = 0; i < history.length; i++) {
+      var h = history[i];
+      var msgCount = h.chatMessages ? h.chatMessages.filter(function(m){ return m.role === 'user' || m.role === 'assistant'; }).length : 0;
+      var timeStr = new Date(h.time).toLocaleString('zh-CN');
+      html += '<div class="history-item">';
+      html += '<div class="hi-info">';
+      html += '<div class="hi-title">' + escapeHtml(h.title) + '</div>';
+      html += '<div class="hi-meta">' + timeStr + ' · ' + msgCount + ' 条消息</div>';
+      html += '</div>';
+      html += '<div class="hi-actions">';
+      html += '<button onclick="loadHistory(\'' + h.id + '\')" class="hi-btn hi-btn-load">加载</button>';
+      html += '<button onclick="deleteHistory(\'' + h.id + '\')" class="hi-btn hi-btn-del">删除</button>';
+      html += '</div></div>';
+    }
+    list.innerHTML = html;
+  }
+  overlay.classList.add('show');
+}
+
+function loadHistory(id) {
+  var history = JSON.parse(localStorage.getItem('supervisor_history') || '[]');
+  var record = null;
+  for (var i = 0; i < history.length; i++) {
+    if (history[i].id === id) { record = history[i]; break; }
+  }
+  if (!record) return;
+
+  document.getElementById('materialText').value = record.material;
+  document.getElementById('charCount').textContent = record.material.length + ' 字';
+  document.getElementById('charCount').style.color = record.material.length > 4000 ? 'var(--danger)' : 'var(--muted)';
+
+  var outputBox = document.getElementById('outputBox');
+  outputBox.style.display = 'block';
+  outputBox.innerHTML = record.impression;
+  outputBox.classList.remove('collapsed');
+  var btn = document.getElementById('impressionToggle');
+  if (btn) btn.textContent = '收起 \u25B2';
+
+  var chatArea = document.getElementById('chatArea');
+  chatArea.style.display = 'flex';
+  chatMessages = record.chatMessages ? record.chatMessages.slice() : [];
+  var chatDiv = document.getElementById('chatMessages');
+  chatDiv.innerHTML = '';
+  for (var j = 0; j < chatMessages.length; j++) {
+    var m = chatMessages[j];
+    if (m.role === 'user') {
+      chatDiv.innerHTML += '<div class="chat-msg user">' + escapeHtml(m.content) + '</div>';
+    } else if (m.role === 'assistant') {
+      chatDiv.innerHTML += '<div class="chat-msg ai">' + escapeHtml(m.content).replace(/\n/g,'<br>') + '</div>';
+    }
+  }
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+
+  _currentHistoryId = id;
+  sessionStorage.setItem('supervisor_current_id', id);
+  closeHistory();
+}
+
+function deleteHistory(id) {
+  if (!confirm('确定删除这条历史记录？')) return;
+  var history = JSON.parse(localStorage.getItem('supervisor_history') || '[]');
+  history = history.filter(function(h){ return h.id !== id; });
+  localStorage.setItem('supervisor_history', JSON.stringify(history));
+  if (_currentHistoryId === id) {
+    _currentHistoryId = null;
+    sessionStorage.removeItem('supervisor_current_id');
+  }
+  showHistory();
+}
+
+function closeHistory() {
+  document.getElementById('historyOverlay').classList.remove('show');
 }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
