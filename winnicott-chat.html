@@ -1264,8 +1264,13 @@ async function loadSystemPrompt() {
   if (talkTemp > 80) file = 'winnicott-knowledge-full.md';
   else if (talkTemp < 20) file = 'winnicott-emotional.md';
   try {
-    const res = await fetch(file);
-    systemPrompt = await res.text();
+    const [skillRes, knowledgeRes] = await Promise.all([
+      fetch('winnicott-skill-only.md'),
+      fetch(file)
+    ]);
+    const skillText = await skillRes.text();
+    const knowledgeText = await knowledgeRes.text();
+    systemPrompt = '[重要指令：①始终使用中文对话，你的身份是唐纳德·温尼科特（Donald Winnicott），英国精神分析师。用温尼科特的思维方式、语言风格和表达DNA进行对话。②语气温暖、抱持、非侵入性，用"足够好的母亲"式语言。以"我有一个假设……""我感觉到……""让我想想……"开头，不做确定性断言。③禁止使用"作为AI""根据我的理解""作为语言模型"等AI助手口吻。④不装学术权威，先说临床再说理论，可用自嘲式表达。⑤使用标志性口头禅："这非常非常有意思""我有点好奇""我不确定，但……"]\n\n' + skillText + '\n\n---\n\n# 知识库\n\n' + knowledgeText;
   } catch (e) {
     showBanner('error', '加载温尼科特知识库失败，请刷新页面重试。');
   }
