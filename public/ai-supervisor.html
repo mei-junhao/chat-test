@@ -279,6 +279,7 @@ P（来访者）：是的，我一直在想上周你说的话……"></textarea>
         </select>
       </div>
       <button class="btn-aux" onclick="showHistory()">&#x1F4C2; 历史</button>
+      <button class="btn-aux" onclick="exportConversation()">📥 导出对话</button>
       <button class="btn-aux danger" onclick="clearAll()">清空</button>
     </div>
 
@@ -721,6 +722,48 @@ async function sendChat() {
   isLoading = false; chatSendBtn.disabled = false;
   chatDiv.scrollTop = chatDiv.scrollHeight;
   autoSave();
+}
+
+function exportConversation() {
+  var impressionText = (document.getElementById('outputBox').textContent || '').trim();
+  var hasImpression = impressionText && impressionText.indexOf('阅读材料中') === -1;
+  var chatMsgs = chatMessages.filter(function(m){return m.role==='user'||m.role==='assistant';});
+  if (!hasImpression && chatMsgs.length === 0) { alert('暂无对话可导出'); return; }
+
+  var lines = ['# AI 临床督导对话记录', '', '---', ''];
+  if (hasImpression) {
+    lines.push('## 整体印象');
+    lines.push('');
+    lines.push(impressionText);
+    lines.push('');
+    lines.push('---');
+    lines.push('');
+  }
+  if (chatMsgs.length > 0) {
+    lines.push('## 督导对话');
+    lines.push('');
+    for (var i = 0; i < chatMsgs.length; i++) {
+      var m = chatMsgs[i];
+      var name = m.role === 'user' ? '治疗师' : 'AI 督导师';
+      lines.push('### ' + name);
+      lines.push('');
+      lines.push(m.content);
+      lines.push('');
+      lines.push('---');
+      lines.push('');
+    }
+  }
+  lines.push('_导出时间: ' + new Date().toLocaleString() + '_');
+  var text = lines.join('\n');
+  var blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'ai-supervisor-' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function escapeHtml(t) {
