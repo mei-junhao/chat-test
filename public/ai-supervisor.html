@@ -822,14 +822,36 @@ function exportConversation() {
   }
   lines.push('_导出时间: ' + new Date().toLocaleString() + '_');
   var text = lines.join('\n');
+  var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+  var fileName = 'ai-supervisor-' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.md';
+
+  if (isWeChat) {
+    var dataUri = 'data:text/markdown;charset=utf-8,' + encodeURIComponent(text);
+    var a = document.createElement('a');
+    a.href = dataUri;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); alert('已导出并复制到剪贴板（微信中可能需手动粘贴到备忘录保存）'); }
+      catch(e) { alert('导出完成。如未自动下载，请在微信中长按链接选择「在浏览器打开」'); }
+      document.body.removeChild(ta);
+    }, 300);
+    return;
+  }
+
   var blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
   var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'ai-supervisor-' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.md';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  var a2 = document.createElement('a');
+  a2.href = url;
+  a2.download = fileName;
+  document.body.appendChild(a2);
+  a2.click();
+  document.body.removeChild(a2);
   URL.revokeObjectURL(url);
 }
 function emailConversation() {

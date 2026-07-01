@@ -237,18 +237,21 @@
     </div>
 
     <hr style="border:0;border-top:1px solid var(--border);margin:12px 0;">
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-      <button onclick="exportConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="export-btn">📥 导出对话</button>
-      <button onclick="emailConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="email-btn">📧 发送到邮箱</button>
-      <button onclick="showChangelog()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="changelog-btn">📋 更新日志</button>
-    <div id="historyContent" class="history-content">
-      <div class="history-empty" id="historyEmpty" data-i18n="history-empty">暂无历史对话</div>
+    <div class="btn-row" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:6px;">
+      <button onclick="showHistory()" style="background:none;border:1px solid var(--border);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;">📂 历史</button>
+      <button onclick="saveChat()" style="background:none;border:1px solid var(--border);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;">💾 保存到历史</button>
+      <button onclick="resetConversation()" style="background:none;border:1px solid var(--border);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--danger);font-family:inherit;">🗑 清空</button>
+      <button onclick="exportConversation()" style="background:none;border:1px solid var(--border);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="export-btn">📥 导出对话</button>
+      <button onclick="emailConversation()" style="background:none;border:1px solid var(--border);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="email-btn">📧 发送到邮箱</button>
     </div>
-      <button onclick="resetConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--accent);font-family:inherit;" data-i18n="reset-btn">🔄 新对话</button>
-      <button onclick="showHistory()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="history-btn">📋 对话历史</button>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button onclick="showChangelog()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="changelog-btn">📋 更新日志</button>
       <button onclick="openFeedback()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="feedback-btn">💡 反馈</button>
       <a href="index.html" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;text-decoration:none;" data-i18n="switch-master">🎭 换大师</a>
       <a href="ai-supervisor.html" target="_blank" style="background:none;border:1px solid #6b8f71;padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:#6b8f71;font-family:inherit;text-decoration:none;display:inline-block;" data-i18n="supervisor-link">🧑‍⚕️ AI督导</a>
+    </div>
+    <div id="historyContent" class="history-content" style="margin-top:8px;">
+      <div class="history-empty" id="historyEmpty" data-i18n="history-empty">暂无历史对话</div>
     </div>
     <div id="changelogContent" style="display:none;margin-top:10px;background:var(--light-accent);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text);line-height:1.8;max-height:180px;overflow-y:auto;">
       <p><strong style="color:var(--text);">v4.1</strong> (2026-06-29)<br>
@@ -933,12 +936,35 @@ function exportConversation() {
     lines.push('');
   }
   lines.push('---\n_'+ '导出时间: ' + new Date().toLocaleString() + '_');
-  var blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  var text = lines.join('\n');
+  var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+  var fileName = masterKey + '-chat-' + new Date().toISOString().replace(/[:-]/g,'').slice(0,14) + '.md';
+
+  if (isWeChat) {
+    var dataUri = 'data:text/markdown;charset=utf-8,' + encodeURIComponent(text);
+    var a = document.createElement('a');
+    a.href = dataUri;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); showBanner('已导出并复制到剪贴板（微信中可能需手动粘贴到备忘录保存）'); }
+      catch(e) { showBanner('导出完成。如未自动下载，请在微信中长按选择「在浏览器打开」'); }
+      document.body.removeChild(ta);
+    }, 300);
+    return;
+  }
+
+  var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
   var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = masterKey + '-chat-' + new Date().toISOString().replace(/[:-]/g,'').slice(0,14) + '.md';
-  a.click(); URL.revokeObjectURL(url);
+  var a2 = document.createElement('a');
+  a2.href = url;
+  a2.download = fileName;
+  a2.click(); URL.revokeObjectURL(url);
   showBanner('对话已导出 📥');
 }
 function emailConversation() {
