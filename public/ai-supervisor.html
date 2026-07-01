@@ -837,6 +837,7 @@ function emailConversation() {
   var hasImpression = impressionText && impressionText.indexOf('阅读材料中') === -1;
   var chatMsgs = chatMessages.filter(function(m){return m.role==='user'||m.role==='assistant';});
   if (!hasImpression && chatMsgs.length === 0) { alert('暂无对话可发送'); return; }
+
   var body = 'AI 临床督导对话记录\n\n';
   var today = new Date().toLocaleString();
   if (hasImpression) {
@@ -848,17 +849,64 @@ function emailConversation() {
     body += '【' + name + '】\n' + m.content + '\n\n---\n\n';
   }
   body += '导出时间: ' + today + '\n';
-  var mailtoUrl = 'mailto:?subject=' + encodeURIComponent('AI 临床督导对话记录') + '&body=' + encodeURIComponent(body);
-  if (mailtoUrl.length > 2000) {
+
+  // 检测微信内置浏览器：mailto: 和 Blob 下载均不可靠
+  var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+
+  if (isWeChat) {
+    // 微信环境：使用 textarea + execCommand('copy') 兜底方案
     var ta = document.createElement('textarea');
     ta.value = body;
-    ta.style.position = 'fixed'; ta.style.left = '-9999px';
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); alert('对话内容已复制到剪贴板，请粘贴到邮件中发送'); } catch(e) { alert('复制失败，请手动复制'); }
+    ta.style.position = 'fixed'; ta.style.left = '-9999px'; ta.style.top = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try {
+      var copied = document.execCommand('copy');
+      if (copied) {
+        alert('对话内容已复制到剪贴板！请在微信中打开「QQ邮箱」或任意邮件App，粘贴内容发送。');
+      } else {
+        // execCommand 返回 false，尝试 navigator.clipboard（微信中通常也不可用）
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(body).then(function() {
+            alert('对话内容已复制到剪贴板！请在微信中打开「QQ邮箱」或任意邮件App，粘贴内容发送。');
+          }).catch(function() {
+            fallbackShowInNewWindow(body);
+          });
+        } else {
+          fallbackShowInNewWindow(body);
+        }
+      }
+    } catch(e) {
+      fallbackShowInNewWindow(body);
+    }
     document.body.removeChild(ta);
+    return;
+  }
+
+  // 非微信环境：mailto: 优先
+  var mailtoUrl = 'mailto:?subject=' + encodeURIComponent('AI 临床督导对话记录') + '&body=' + encodeURIComponent(body);
+  if (mailtoUrl.length > 2000) {
+    var ta2 = document.createElement('textarea');
+    ta2.value = body;
+    ta2.style.position = 'fixed'; ta2.style.left = '-9999px';
+    document.body.appendChild(ta2); ta2.select();
+    try { document.execCommand('copy'); alert('对话内容已复制到剪贴板，请粘贴到邮件中发送'); } catch(e) { alert('复制失败，请手动复制'); }
+    document.body.removeChild(ta2);
   } else {
     window.location.href = mailtoUrl;
   }
+}
+
+function fallbackShowInNewWindow(content) {
+  var w = window.open('', '_blank', 'width=600,height=500');
+  if (!w) { alert('弹窗被拦截，请允许弹窗后重试，或手动复制下方内容'); return; }
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>对话内容</title><style>body{font-family:sans-serif;padding:20px;line-height:1.8;white-space:pre-wrap;word-break:break-word;}button{display:block;margin:20px auto;padding:12px 32px;font-size:16px;border:none;border-radius:8px;background:#6b8f71;color:#fff;cursor:pointer;}</style></head><body>');
+  w.document.write('<button onclick="copyAndClose()">📋 一键复制全部内容</button>');
+  w.document.write('<hr><pre>' + content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>');
+  w.document.write('<script>function copyAndClose(){var ta=document.createElement("textarea");ta.value=' + JSON.stringify(content) + ';ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);alert("已复制！请粘贴到微信邮件中发送。");}<\/script>');
+  w.document.write('</body></html>');
+  w.document.close();
 }
 
 function escapeHtml(t) {

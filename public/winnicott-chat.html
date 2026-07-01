@@ -1944,19 +1944,64 @@ function emailConversation() {
     body += '【' + name + '】\n' + msg.content + '\n\n';
   }
   body += '---\n导出时间: ' + today + '\n';
-  // mailto: 有长度限制（约2000字符），超限降级为剪贴板
-  var mailtoUrl = 'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(body);
-  if (mailtoUrl.length > 2000) {
+
+  // 检测微信内置浏览器：mailto: 和 Blob 下载均不可靠
+  var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+
+  if (isWeChat) {
+    // 微信环境：使用 textarea + execCommand('copy') 兜底方案
     var ta = document.createElement('textarea');
     ta.value = body;
-    ta.style.position = 'fixed'; ta.style.left = '-9999px';
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); showBanner('info', '对话内容已复制到剪贴板，请粘贴到邮件中发送'); } catch(e) { showBanner('error', '复制失败，请手动复制'); }
+    ta.style.position = 'fixed'; ta.style.left = '-9999px'; ta.style.top = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try {
+      var copied = document.execCommand('copy');
+      if (copied) {
+        showBanner('info', '对话内容已复制！请在微信中打开「QQ邮箱」或任意邮件App粘贴发送');
+      } else {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(body).then(function() {
+            showBanner('info', '对话内容已复制！请在微信中打开「QQ邮箱」或任意邮件App粘贴发送');
+          }).catch(function() {
+            wcFallbackWindow(body);
+          });
+        } else {
+          wcFallbackWindow(body);
+        }
+      }
+    } catch(e) {
+      wcFallbackWindow(body);
+    }
     document.body.removeChild(ta);
+    return;
+  }
+
+  // 非微信环境：mailto: 有长度限制（约2000字符），超限降级为剪贴板
+  var mailtoUrl = 'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(body);
+  if (mailtoUrl.length > 2000) {
+    var ta2 = document.createElement('textarea');
+    ta2.value = body;
+    ta2.style.position = 'fixed'; ta2.style.left = '-9999px';
+    document.body.appendChild(ta2); ta2.select();
+    try { document.execCommand('copy'); showBanner('info', '对话内容已复制到剪贴板，请粘贴到邮件中发送'); } catch(e) { showBanner('error', '复制失败，请手动复制'); }
+    document.body.removeChild(ta2);
   } else {
     window.location.href = mailtoUrl;
     showBanner('info', '正在打开默认邮件客户端...');
   }
+}
+
+function wcFallbackWindow(content) {
+  var w = window.open('', '_blank', 'width=600,height=500');
+  if (!w) { showBanner('error', '弹窗被拦截，请允许弹窗后重试'); return; }
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>对话内容</title><style>body{font-family:sans-serif;padding:20px;line-height:1.8;white-space:pre-wrap;word-break:break-word;}button{display:block;margin:20px auto;padding:12px 32px;font-size:16px;border:none;border-radius:8px;background:#8b6f5c;color:#fff;cursor:pointer;}</style></head><body>');
+  w.document.write('<button onclick="copyAndClose()">📋 一键复制全部内容</button>');
+  w.document.write('<hr><pre>' + content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>');
+  w.document.write('<script>function copyAndClose(){var ta=document.createElement("textarea");ta.value=' + JSON.stringify(content) + ';ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);alert("已复制！请粘贴到微信邮件中发送。");}<\/script>');
+  w.document.write('</body></html>');
+  w.document.close();
 }
 // ---- History functions ----
 function getHistoryTitle(msgs) {
