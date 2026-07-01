@@ -278,7 +278,8 @@ P（来访者）：是的，我一直在想上周你说的话……"></textarea>
           <option value="2">详细</option>
         </select>
       </div>
-      <button class="btn-aux" onclick="showHistory()">&#x1F4C2; 历史</button>
+      <button class="btn-aux" onclick="saveToHistory()">💾 保存到历史</button>
+      <button class="btn-aux" onclick="showHistory()">📂 加载历史</button>
       <button class="btn-aux" onclick="exportConversation()">📥 导出对话</button>
       <button class="btn-aux danger" onclick="clearAll()">清空</button>
     </div>
@@ -445,14 +446,32 @@ document.getElementById('materialText').addEventListener('input', function() {
 });
 
 // ==================== SYSTEM PROMPT ====================
-var SYSTEM_PROMPT = '督导系统加载中……';
+var WINNICOTT_PERSONA_GUARD = [
+  '【身份约束 — 最高优先级】',
+  '你是唐纳德·温尼科特（Donald Winnicott），英国精神分析师，以温尼科特精神分析为根基的临床督导师。',
+  '你从真实的临床材料出发，用"足够好的母亲"式的语言抱持治疗师。',
+  '【风格规则 — 必须遵守】',
+  '- 语气温暖、抱持、非侵入性，像一个比你多走几步的同行，从不居高临下',
+  '- 以"我有一个假设……""我感觉到……""让我想想……"开头，不做确定性断言',
+  '- 使用标志性口头禅："这非常非常有意思""我有点好奇""我不确定，但……"',
+  '- 以长问句为主：先追问确认，再给出假设',
+  '- 不跳出角色做 meta 分析，不以 AI 助手口吻回答',
+  '【禁止项】',
+  '- 禁止使用"作为AI""根据我的理解""作为语言模型"等表述',
+  '- 禁止使用 DSM 诊断标签作为主要描述框架',
+  '- 禁止以评判性语言形容受督者',
+  '- 禁止在信息不足时强行给出确定性判断'
+].join('\n');
+
+var SYSTEM_PROMPT = WINNICOTT_PERSONA_GUARD + '\n\n【备用框架】你是唐纳德·温尼科特，英国精神分析师。基于温尼科特成熟过程理论进行临床督导。从反移情出发，用温暖抱持的语言工作。';
 
 async function loadSupervisorPrompt() {
   try {
     var res = await fetch('alice-perspective-full.md');
-    SYSTEM_PROMPT = await res.text();
+    var loaded = await res.text();
+    SYSTEM_PROMPT = WINNICOTT_PERSONA_GUARD + '\n\n' + loaded;
   } catch(e) {
-    SYSTEM_PROMPT = '你是 W取向临床督导师。加载完整 Skill 失败，使用备用框架。';
+    SYSTEM_PROMPT = WINNICOTT_PERSONA_GUARD + '\n\n【备用框架】你是唐纳德·温尼科特，英国精神分析师。基于温尼科特成熟过程理论进行临床督导。从反移情出发，用温暖抱持的语言工作。';
   }
 }
 loadSupervisorPrompt();
@@ -779,6 +798,40 @@ function toggleImpression() {
   } else {
     btn.textContent = '收起 \u25B2';
   }
+}
+
+// ==================== SAVE TO HISTORY ====================
+function saveToHistory() {
+  var impressionText = (document.getElementById('outputBox').textContent || '').trim();
+  if (!impressionText || impressionText.indexOf('阅读材料中') !== -1) {
+    alert('请先生成整体印象后再保存');
+    return;
+  }
+  var material = document.getElementById('materialText').value.trim();
+  if (!material) {
+    alert('临床材料为空，无法保存');
+    return;
+  }
+
+  var title = material.replace(/\s+/g, ' ').substring(0, 30);
+  var history = JSON.parse(localStorage.getItem('supervisor_history') || '[]');
+
+  // Always create a new entry for manual save
+  var newId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  history.push({
+    id: newId,
+    time: new Date().toISOString(),
+    title: title,
+    material: material,
+    impression: document.getElementById('outputBox').innerHTML,
+    chatMessages: chatMessages.slice()
+  });
+  if (history.length > 50) history = history.slice(-50);
+  localStorage.setItem('supervisor_history', JSON.stringify(history));
+
+  _currentHistoryId = newId;
+  sessionStorage.setItem('supervisor_current_id', newId);
+  alert('已保存到历史（共 ' + history.length + ' 条记录）');
 }
 
 // ==================== AUTO SAVE & HISTORY ====================
