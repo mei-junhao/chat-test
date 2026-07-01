@@ -355,6 +355,29 @@
   }
   .reward-btn:hover { color:var(--accent); transform:scale(1.1); }
 
+  .export-header-btn {
+    position:absolute; right: 95px; top: 14px;
+    background:none; border:1px solid var(--border); border-radius:6px;
+    padding:4px 8px; font-size:15px; cursor:pointer; color:var(--muted);
+    font-family:inherit; line-height:1.4; transition:color 0.2s, border-color 0.2s;
+  }
+  .export-header-btn:hover { color:var(--accent); border-color:var(--accent); }
+  .email-header-btn {
+    position:absolute; right: 135px; top: 14px;
+    background:none; border:1px solid var(--border); border-radius:6px;
+    padding:4px 8px; font-size:15px; cursor:pointer; color:var(--muted);
+    font-family:inherit; line-height:1.4; transition:color 0.2s, border-color 0.2s;
+  }
+  .email-header-btn:hover { color:var(--accent); border-color:var(--accent); }
+  .header.compact .export-header-btn { top:8px; right:80px; }
+  .header.compact .email-header-btn { top:8px; right:116px; }
+  @media (max-width: 480px) {
+    .export-header-btn { right:75px; top:12px; font-size:13px; padding:3px 6px; }
+    .email-header-btn { right:110px; top:12px; font-size:13px; padding:3px 6px; }
+    .header.compact .export-header-btn { top:6px; right:65px; }
+    .header.compact .email-header-btn { top:6px; right:95px; }
+  }
+
   /* Dark mode */
   .dark { --bg: #1a1614; --card: #241f1c; --text: #d4cfca; --muted: #8f857d;
     --accent: #a0806a; --accent-hover: #8e705c; --light-accent: #2c2622; --bubble-user: #2c2622;
@@ -477,6 +500,8 @@
     <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
     <h1 id="headerTitle">与温尼科特对话</h1>
     <p id="headerSub">一个观察了六十年婴儿的儿科医生，用日常语言讨论人类经验</p>
+    <button class="export-header-btn" onclick="exportConversation()" title="导出对话">📥</button>
+    <button class="email-header-btn" onclick="emailConversation()" title="发送到邮箱">📧</button>
     <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()" data-i18n="settings-btn">⚙️ 设置</button>
   </div>
 
@@ -557,8 +582,6 @@
       <button onclick="showChangelog()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="changelog-btn">📋 更新日志</button>
       <button onclick="resetConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--accent);font-family:inherit;" data-i18n="reset-btn">🔄 新对话</button>
       <button onclick="showHistory()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="history-btn">📋 对话历史</button>
-      <button onclick="exportConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="export-btn">📥 导出对话</button>
-      <button onclick="emailConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="email-btn">📧 发送到邮箱</button>
       <button onclick="openFeedback()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="feedback-btn">💡 反馈</button>
       <a href="ai-supervisor.html" target="_blank" style="background:none;border:1px solid var(--accent);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--accent);font-family:inherit;text-decoration:none;display:inline-block;">🧑‍⚕️ AI督导</a>
       <a href="master-select.html" target="_self" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;text-decoration:none;display:inline-block;">🧑‍🎨 更多大师</a>
