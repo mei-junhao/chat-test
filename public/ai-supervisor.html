@@ -141,13 +141,17 @@
   }
   .toggle-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--light-accent); }
   .output-box .label { font-weight:600; color:var(--text); margin-top:16px; display:block; }
-  .output-box.collapsed .impression-body { display:none; }
+  .impression-body { max-height:5000px; overflow:hidden; transition:max-height 0.45s cubic-bezier(0.4,0,0.2,1),opacity 0.3s ease; }
+  .impression-summary { display:none; cursor:pointer; color:var(--muted); font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; user-select:none; }
+  .output-box.collapsed .impression-body { max-height:0; opacity:0; }
+  .output-box.collapsed .impression-summary { display:block; }
   .output-box.collapsed .ob-header { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+  .output-box.collapsed .ob-header h3 { font-size:13px; color:var(--muted); font-weight:400; }
   .output-box.collapsed { padding:16px 28px; }
 
   /* Chat area */
   .chat-area { display:none; flex-direction:column; gap:16px; }
-  .chat-messages { max-height:520px; overflow-y:auto; display:flex; flex-direction:column; gap:14px; padding:4px 0; }
+  .chat-messages { max-height:520px; overflow-y:auto; display:flex; flex-direction:column; gap:14px; padding:4px 0; scroll-behavior:smooth; -webkit-overflow-scrolling:touch; }
   .chat-msg {
     padding:14px 18px; border-radius:14px; font-size:14px; line-height:1.9;
     animation:fadeUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -637,6 +641,8 @@ async function sendChat() {
   var text = input.value.trim();
   if (!text || isLoading) return;
 
+  autoCollapseImpression();
+
   input.value = '';
   chatMessages.push({ role:'user', content:text });
 
@@ -647,7 +653,7 @@ async function sendChat() {
   typingDiv.className = 'chat-msg ai typing';
   typingDiv.textContent = '思考中……';
   chatDiv.appendChild(typingDiv);
-  chatDiv.scrollTop = chatDiv.scrollHeight;
+  typingDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
   var chatSendBtn = document.getElementById('chatSendBtn');
   isLoading = true; chatSendBtn.disabled = true;
@@ -706,7 +712,7 @@ async function sendChat() {
                 tierReply += content;
                 var display = finalReply + tierReply;
                 msgDiv.innerHTML = escapeHtml(display).replace(/\n/g,'<br>');
-                chatDiv.scrollTop = chatDiv.scrollHeight;
+                msgDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
               }
             } catch(e) {}
           }
@@ -739,7 +745,7 @@ async function sendChat() {
   }
 
   isLoading = false; chatSendBtn.disabled = false;
-  chatDiv.scrollTop = chatDiv.scrollHeight;
+  if (chatDiv.lastElementChild) chatDiv.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
   autoSave();
 }
 
@@ -794,10 +800,48 @@ function toggleImpression() {
   var btn = document.getElementById('impressionToggle');
   box.classList.toggle('collapsed');
   if (box.classList.contains('collapsed')) {
-    btn.textContent = '展开 \u25BC';
+    var bodyEl = box.querySelector('.impression-body');
+    var plainText = bodyEl ? (bodyEl.textContent || '').trim() : '';
+    var preview = plainText.substring(0, 80);
+    if (plainText.length > 80) preview += '...';
+    var summaryEl = box.querySelector('.impression-summary');
+    if (!summaryEl) {
+      summaryEl = document.createElement('div');
+      summaryEl.className = 'impression-summary';
+      summaryEl.onclick = toggleImpression;
+      box.appendChild(summaryEl);
+    }
+    summaryEl.textContent = preview + ' ▼展开';
+    btn.textContent = '展开 ▼';
   } else {
-    btn.textContent = '收起 \u25B2';
+    btn.textContent = '收起 ▲';
   }
+}
+
+function autoCollapseImpression() {
+  var outputBox = document.getElementById('outputBox');
+  if (outputBox.style.display !== 'block') return;
+  if (outputBox.classList.contains('collapsed')) return;
+
+  var bodyEl = outputBox.querySelector('.impression-body');
+  var plainText = bodyEl ? (bodyEl.textContent || '').trim() : '';
+  if (!plainText) return;
+
+  var summaryEl = outputBox.querySelector('.impression-summary');
+  if (!summaryEl) {
+    summaryEl = document.createElement('div');
+    summaryEl.className = 'impression-summary';
+    summaryEl.onclick = toggleImpression;
+    outputBox.appendChild(summaryEl);
+  }
+
+  var preview = plainText.substring(0, 80);
+  if (plainText.length > 80) preview += '...';
+  summaryEl.textContent = preview + ' ▼展开';
+
+  outputBox.classList.add('collapsed');
+  var btn = document.getElementById('impressionToggle');
+  if (btn) btn.textContent = '展开 ▼';
 }
 
 // ==================== SAVE TO HISTORY ====================
@@ -931,7 +975,7 @@ function loadHistory(id) {
       chatDiv.innerHTML += '<div class="chat-msg ai">' + escapeHtml(m.content).replace(/\n/g,'<br>') + '</div>';
     }
   }
-  chatDiv.scrollTop = chatDiv.scrollHeight;
+  if (chatDiv.lastElementChild) chatDiv.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
   _currentHistoryId = id;
   sessionStorage.setItem('supervisor_current_id', id);
