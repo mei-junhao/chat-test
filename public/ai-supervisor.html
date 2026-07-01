@@ -286,6 +286,7 @@ P（来访者）：是的，我一直在想上周你说的话……"></textarea>
       <button class="btn-aux" onclick="saveToHistory()">💾 保存到历史</button>
       <button class="btn-aux danger" onclick="clearAll()">清空</button>
       <button class="btn-aux" onclick="exportConversation()">📥 导出对话</button>
+      <button class="btn-aux" onclick="emailConversation()">📧 发送到邮箱</button>
     </div>
 
     <!-- ====== PHASE 3: OUTPUT ====== -->
@@ -830,6 +831,34 @@ function exportConversation() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+function emailConversation() {
+  var impressionText = (document.getElementById('outputBox').textContent || '').trim();
+  var hasImpression = impressionText && impressionText.indexOf('阅读材料中') === -1;
+  var chatMsgs = chatMessages.filter(function(m){return m.role==='user'||m.role==='assistant';});
+  if (!hasImpression && chatMsgs.length === 0) { alert('暂无对话可发送'); return; }
+  var body = 'AI 临床督导对话记录\n\n';
+  var today = new Date().toLocaleString();
+  if (hasImpression) {
+    body += '【整体印象】\n' + impressionText + '\n\n---\n\n';
+  }
+  for (var i = 0; i < chatMsgs.length; i++) {
+    var m = chatMsgs[i];
+    var name = m.role === 'user' ? '治疗师' : 'AI 督导师';
+    body += '【' + name + '】\n' + m.content + '\n\n---\n\n';
+  }
+  body += '导出时间: ' + today + '\n';
+  var mailtoUrl = 'mailto:?subject=' + encodeURIComponent('AI 临床督导对话记录') + '&body=' + encodeURIComponent(body);
+  if (mailtoUrl.length > 2000) {
+    var ta = document.createElement('textarea');
+    ta.value = body;
+    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); alert('对话内容已复制到剪贴板，请粘贴到邮件中发送'); } catch(e) { alert('复制失败，请手动复制'); }
+    document.body.removeChild(ta);
+  } else {
+    window.location.href = mailtoUrl;
+  }
 }
 
 function escapeHtml(t) {

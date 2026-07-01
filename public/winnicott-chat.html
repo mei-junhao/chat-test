@@ -557,6 +557,8 @@
       <button onclick="showChangelog()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="changelog-btn">📋 更新日志</button>
       <button onclick="resetConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--accent);font-family:inherit;" data-i18n="reset-btn">🔄 新对话</button>
       <button onclick="showHistory()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="history-btn">📋 对话历史</button>
+      <button onclick="exportConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="export-btn">📥 导出对话</button>
+      <button onclick="emailConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="email-btn">📧 发送到邮箱</button>
       <button onclick="openFeedback()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="feedback-btn">💡 反馈</button>
       <a href="ai-supervisor.html" target="_blank" style="background:none;border:1px solid var(--accent);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--accent);font-family:inherit;text-decoration:none;display:inline-block;">🧑‍⚕️ AI督导</a>
       <a href="master-select.html" target="_self" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;text-decoration:none;display:inline-block;">🧑‍🎨 更多大师</a>
@@ -877,6 +879,8 @@ var i18n = {
   'temp-hint-left-lacan': { zh: '◉ 直白解析', en: 'Plain' },
   'temp-hint-right-lacan': { zh: '◈ 形式化推演', en: 'Formalized' },
   'changelog-btn': { zh: '📋 更新日志', en: '📋 Changelog' },
+  'export-btn': { zh: '📥 导出对话', en: '📥 Export' },
+  'email-btn': { zh: '📧 发送到邮箱', en: '📧 Send Email' },
   'save-history': { zh: '📥 保存到历史', en: '📥 Save' },
   'reset-btn': { zh: '🔄 新对话', en: '🔄 New Chat' },
   'history-btn': { zh: '📋 对话历史', en: '📋 History' },
@@ -1928,6 +1932,31 @@ function exportConversation() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showBanner('info', '对话已导出 📥');
+}
+function emailConversation() {
+  if (conversation.length === 0) { showBanner('error', '暂无对话可发送'); return; }
+  var title = _persona === 'lacan' ? '与拉康对话记录' : '与温尼科特对话记录';
+  var today = new Date().toLocaleString();
+  var body = title + '\n日期: ' + today + '\n\n';
+  for (var i = 0; i < conversation.length; i++) {
+    var msg = conversation[i];
+    var name = msg.role === 'user' ? '我' : (_persona === 'lacan' ? '拉康' : '温尼科特');
+    body += '【' + name + '】\n' + msg.content + '\n\n';
+  }
+  body += '---\n导出时间: ' + today + '\n';
+  // mailto: 有长度限制（约2000字符），超限降级为剪贴板
+  var mailtoUrl = 'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(body);
+  if (mailtoUrl.length > 2000) {
+    var ta = document.createElement('textarea');
+    ta.value = body;
+    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); showBanner('info', '对话内容已复制到剪贴板，请粘贴到邮件中发送'); } catch(e) { showBanner('error', '复制失败，请手动复制'); }
+    document.body.removeChild(ta);
+  } else {
+    window.location.href = mailtoUrl;
+    showBanner('info', '正在打开默认邮件客户端...');
+  }
 }
 // ---- History functions ----
 function getHistoryTitle(msgs) {

@@ -239,6 +239,7 @@
     <hr style="border:0;border-top:1px solid var(--border);margin:12px 0;">
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button onclick="exportConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="export-btn">📥 导出对话</button>
+      <button onclick="emailConversation()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="email-btn">📧 发送到邮箱</button>
       <button onclick="showChangelog()" style="background:none;border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;" data-i18n="changelog-btn">📋 更新日志</button>
     <div id="historyContent" class="history-content">
       <div class="history-empty" id="historyEmpty" data-i18n="history-empty">暂无历史对话</div>
@@ -814,6 +815,7 @@ var i18n = {
   'reward-btn': { zh: '☕ 打赏', en: '☕ Tip' },
   'save-btn': { zh: '💾 保存', en: '💾 Save' },
   'export-btn': { zh: '📥 导出对话', en: '📥 Export' },
+  'email-btn': { zh: '📧 发送到邮箱', en: '📧 Send Email' },
   'changelog-btn': { zh: '📋 更新日志', en: '📋 Changelog' },
   'reset-btn': { zh: '🔄 新对话', en: '🔄 New Chat' },
   'history-btn': { zh: '📋 对话历史', en: '📋 History' },
@@ -938,6 +940,30 @@ function exportConversation() {
   a.download = masterKey + '-chat-' + new Date().toISOString().replace(/[:-]/g,'').slice(0,14) + '.md';
   a.click(); URL.revokeObjectURL(url);
   showBanner('对话已导出 📥');
+}
+function emailConversation() {
+  if (conversation.length === 0) { showBanner('暂无对话可发送'); return; }
+  var title = '与' + M.name + '的对话';
+  var today = new Date().toLocaleString();
+  var body = title + '\n日期: ' + today + '\n\n';
+  for (var i = 0; i < conversation.length; i++) {
+    var msg = conversation[i];
+    var name = msg.role === 'user' ? '我' : M.name;
+    body += '【' + name + '】\n' + msg.content + '\n\n';
+  }
+  body += '---\n导出时间: ' + today + '\n';
+  var mailtoUrl = 'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(body);
+  if (mailtoUrl.length > 2000) {
+    var ta = document.createElement('textarea');
+    ta.value = body;
+    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); showBanner('对话内容已复制到剪贴板，请粘贴到邮件中发送'); } catch(e) { showBanner('复制失败，请手动复制'); }
+    document.body.removeChild(ta);
+  } else {
+    window.location.href = mailtoUrl;
+    showBanner('正在打开默认邮件客户端...');
+  }
 }
 function showRewardModal(auto) { document.getElementById('rewardOverlay').classList.add('show'); }
 function closeReward() { document.getElementById('rewardOverlay').classList.remove('show'); }
