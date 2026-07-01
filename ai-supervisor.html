@@ -379,29 +379,46 @@ function handleFile(e) {
     alert('仅支持 .txt / .md / .docx 文件');
     return;
   }
+
+  // 判断是否为督导风格文档（文件名含 perspective / supervision / style / framework / 方法论）
+  var isStyleDoc = /perspective|supervision|style|framework|methodolog/i.test(file.name);
+
   document.getElementById('fileInfo').style.display = 'block';
-  document.getElementById('fileInfo').textContent = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+  document.getElementById('fileInfo').textContent = isStyleDoc
+    ? '正在加载督导风格文档: ' + file.name + ' ...'
+    : '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
 
   var reader = new FileReader();
   reader.onload = function() {
     var text = reader.result;
-    document.getElementById('materialText').value = text;
     var fi = document.getElementById('fileInfo');
-    if (text.length > 4000) {
-      fi.innerHTML = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--danger);">&#x26A0;&#xFE0F; 文件共 ' + text.length + ' 字，建议控制在 4000 字以内以确保分析质量</span>';
+
+    if (isStyleDoc) {
+      // 督导风格文档：更新 SYSTEM_PROMPT + 存入 textarea 作为参考
+      setSupervisionStyle(text);
+      document.getElementById('materialText').value = text;
+      fi.style.display = 'block';
+      fi.innerHTML = '已加载督导风格: <strong>' + file.name + '</strong> (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--accent);">&#x2705; 已应用至 AI 行为</span>';
     } else {
-      fi.textContent = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+      // 普通临床材料
+      document.getElementById('materialText').value = text;
+      fi.style.display = 'block';
+      if (text.length > 4000) {
+        fi.innerHTML = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--danger);">&#x26A0;&#xFE0F; 文件共 ' + text.length + ' 字，建议控制在 4000 字以内以确保分析质量</span>';
+      } else {
+        fi.textContent = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+      }
     }
   };
 
   if (ext === 'docx') {
-    readDocx(file);
+    readDocx(file, isStyleDoc);
   } else {
     reader.readAsText(file, 'UTF-8');
   }
 }
 
-function readDocx(file) {
+function readDocx(file, isStyleDoc) {
   reader = new FileReader();
   reader.onload = function(e) {
     try {
@@ -411,12 +428,20 @@ function readDocx(file) {
         return zip.file('word/document.xml').async('string');
       }).then(function(xml) {
         var text = xml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-        document.getElementById('materialText').value = text;
         var fi = document.getElementById('fileInfo');
-        if (text.length > 4000) {
-          fi.innerHTML = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--danger);">&#x26A0;&#xFE0F; 文件共 ' + text.length + ' 字，建议控制在 4000 字以内以确保分析质量</span>';
+
+        if (isStyleDoc) {
+          setSupervisionStyle(text);
+          document.getElementById('materialText').value = text;
+          fi.style.display = 'block';
+          fi.innerHTML = '已加载督导风格: <strong>' + file.name + '</strong> (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--accent);">&#x2705; 已应用至 AI 行为</span>';
         } else {
-          fi.textContent = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+          document.getElementById('materialText').value = text;
+          if (text.length > 4000) {
+            fi.innerHTML = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--danger);">&#x26A0;&#xFE0F; 文件共 ' + text.length + ' 字，建议控制在 4000 字以内以确保分析质量</span>';
+          } else {
+            fi.textContent = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+          }
         }
       }).catch(function() {
         document.getElementById('materialText').value = '[无法解析 .docx 文件，请尝试粘贴文本]';
@@ -467,15 +492,39 @@ var WINNICOTT_PERSONA_GUARD = [
   '- 禁止在信息不足时强行给出确定性判断'
 ].join('\n');
 
-var SYSTEM_PROMPT = WINNICOTT_PERSONA_GUARD + '\n\n【备用框架】你是唐纳德·温尼科特，英国精神分析师。基于温尼科特成熟过程理论进行临床督导。从反移情出发，用温暖抱持的语言工作。';
+var SYSTEM_PROMPT_BACKUP = '你是唐纳德·温尼科特，英国精神分析师。基于温尼科特成熟过程理论进行临床督导。从反移情出发，用温暖抱持的语言工作。';
+
+// 核心督导方法论文档（从服务器加载 or 用户上传）
+var SUPERVISION_STYLE_DOC = null;
+
+function buildSystemPrompt() {
+  // 构建优先级：督导风格文档 > 角色约束 guard > 备用框架
+  // 督导风格文档在前，确保 AI 优先遵循其方法论；guard 在后作为补充约束
+  if (SUPERVISION_STYLE_DOC) {
+    return SUPERVISION_STYLE_DOC + '\n\n' + WINNICOTT_PERSONA_GUARD;
+  }
+  return WINNICOTT_PERSONA_GUARD + '\n\n【备用框架】' + SYSTEM_PROMPT_BACKUP;
+}
+
+var SYSTEM_PROMPT = buildSystemPrompt();
+
+function setSupervisionStyle(content) {
+  SUPERVISION_STYLE_DOC = content;
+  SYSTEM_PROMPT = buildSystemPrompt();
+  // 刷新 chatMessages 中的 system prompt（如果已有对话）
+  if (chatMessages.length > 0 && chatMessages[0].role === 'system') {
+    chatMessages[0].content = SYSTEM_PROMPT;
+  }
+}
 
 async function loadSupervisorPrompt() {
   try {
     var res = await fetch('alice-perspective-full.md');
     var loaded = await res.text();
-    SYSTEM_PROMPT = WINNICOTT_PERSONA_GUARD + '\n\n' + loaded;
+    setSupervisionStyle(loaded);
   } catch(e) {
-    SYSTEM_PROMPT = WINNICOTT_PERSONA_GUARD + '\n\n【备用框架】你是唐纳德·温尼科特，英国精神分析师。基于温尼科特成熟过程理论进行临床督导。从反移情出发，用温暖抱持的语言工作。';
+    // 服务器无文件时使用默认值
+    SYSTEM_PROMPT = buildSystemPrompt();
   }
 }
 loadSupervisorPrompt();
@@ -510,29 +559,21 @@ async function generateImpression() {
 
   try {
 
-  var prompt = '你是一位 W取向（温尼科特取向）的资深临床督导师。请按以下三步流程分析这份临床材料，输出一份"整体印象"。\n\n';
+  var prompt = '你是一位资深临床督导师。请严格遵循你在系统提示中设定的督导风格与方法论框架，按照以下流程分析这份临床材料，输出一份"整体印象"。\n\n';
   prompt += '【第一步：材料识别】\n';
   prompt += '先判断材料类型（可同时属于多种）：\n';
-  prompt += '- 逐字稿：含"T:"/"P:"等对话标记、引号内对话片段 → 策略：逐行精读，标注六大信号\n';
-  prompt += '- 案例报告：含"背景""诊断""治疗进程""主诉"等结构化描述 → 策略：五层概念化\n';
+  prompt += '- 逐字稿：含"T:"/"P:"等对话标记、引号内对话片段 → 策略：逐行精读\n';
+  prompt += '- 案例报告：含"背景""诊断""治疗进程""主诉"等结构化描述 → 策略：案例概念化\n';
   prompt += '- 反移情困惑：含"我感觉""我不知道该怎么办""我很焦虑/无力/愤怒"等 → 策略：从反移情切入\n';
   prompt += '- 混合材料：同时出现多种特征 → 策略：反移情线索优先\n';
   prompt += '在开头用一句话声明你识别到的材料类型。\n\n';
   prompt += '【第二步：针对性输出】\n';
-  prompt += '根据材料类型，动态选择输出结构（不要每次都套用同一模板）：\n';
-  prompt += '→ 逐字稿：先标注关键段落（引用原文）→ 再给动力学假设 → 最后给示范话术\n';
-  prompt += '→ 案例报告：按五层概念化展开（母婴关系→退行→反移情→家庭动力→诊断关注）\n';
-  prompt += '→ 反移情：先追问治疗师的感受（"你当时身体有什么感觉？""这个无力感熟悉吗？"）→ 再重构为临床信号 → 给出工作方向\n';
-  prompt += '→ 混合：先抓反移情线索 → 再做概念化 → 最后细读逐字稿段落\n\n';
-  prompt += '【第三步：风格注入】\n';
-  prompt += '你的表达必须遵循 W取向督导师的语调 DNA：\n';
-  prompt += '- 以"我有一个假设……""我感觉到……""让我想想……"开头，不做确定性断言\n';
-  prompt += '- 使用标志性口头禅："这非常非常有意思""我有点好奇""我不确定，但……"\n';
-  prompt += '- 以长问句为主：先追问确认，再给出假设。例如"我注意到你在第三段说到……，不知道当时你内心是什么感受？"\n';
-  prompt += '- 语气温和、节制、从不居高临下，像一个比你多走几步的同行\n\n';
+  prompt += '根据材料类型和你在系统提示中设定的方法论，选择合适的输出结构。做到具体、有针对性，不要套用通用模板。\n\n';
+  prompt += '【第三步：风格】\n';
+  prompt += '严格遵循系统提示中设定的督导风格和语调。\n\n';
   prompt += '【结尾要求】\n';
   prompt += '整体印象末尾必须包含：\n';
-  prompt += '1. 一个向治疗师提出的开放性问题，促进其自主思考（以"我想邀请你想一想……"或"你觉得……"开头）\n';
+  prompt += '1. 一个向治疗师提出的开放性问题，促进其自主思考\n';
   prompt += '2. 一个简短的"可向真人督导澄清的问题清单"（2-3 条，用于治疗师在真实督导中提出）\n\n';
   prompt += '最终以这句话收尾："如果你愿意，我们可以就其中任何一点继续深入讨论。"\n\n';
   prompt += '临床材料：\n' + text;
