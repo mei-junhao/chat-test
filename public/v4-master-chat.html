@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -250,22 +250,29 @@
       <a href="ai-supervisor.html" target="_blank" style="background:none;border:1px solid #6b8f71;padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:#6b8f71;font-family:inherit;text-decoration:none;display:inline-block;" data-i18n="supervisor-link">🧑‍⚕️ AI督导</a>
     </div>
     <div id="changelogContent" style="display:none;margin-top:10px;background:#faf8f5;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:#5c4c38;line-height:1.8;max-height:180px;overflow-y:auto;">
-      <p><strong style="color:#1a1510;">v4.1</strong> (2026-06-29)<br>
-      • 新增：7位大师头像——弗洛伊德/克莱因/荣格/比昂/罗杰斯/贝克/亚隆真实肖像<br>
-      • 新增：✂️ 转发选择模式——勾选多条对话生成分享卡片，长按保存分享朋友圈<br>
-      • 新增：📥 导出对话到本地文件<br>
-      • 新增：📋 对话历史面板——浏览、加载、删除历史记录<br>
-      • 新增：🌐 中英语言切换——设置面板文字 + 头部按钮中英切换<br>
-      • 新增：🧑‍⚕️ AI督导跳转链接<br>
-      • 新增：☕ 打赏增强版弹窗<br>
-      • 改进：底部按钮排版优化，对齐温尼科特界面</p>
-      <p><strong style="color:#1a1510;">v4.0</strong> (2026-06-28)<br>
-      • 新增：更多大师入驻——比昂、罗杰斯、贝克、亚隆<br>
-      • 新增：自用 API 模式——自定义地址/Key/模型<br>
-      • 新增：API 健康状态检测 · 深色模式 · 字体大小调节</p>
-      <p><strong style="color:#1a1510;">v1.0</strong> (2026-06-23)<br>
-      • 弗洛伊德/克莱因/荣格对话 · 共享聊天模板<br>
-      • 四层 API 路由 · 流式输出 · 对话历史 · 设置面板</p>
+      <p><strong style="color:#1a1510;">v4.1</strong> (2026-07-03)<br>
+      • AI 督导新增自用 API 功能（DeepSeek/OpenAI/硅基流动三预设）<br>
+      • 全站大师正念冥想约束（荣格可推荐、比昂可讨论学理、贝克可提及MBCT、其余全禁）<br>
+      • master-chat 按大师动态生成约束提示词<br>
+      • v4 双版本同步添加正念约束<br>
+      • 主页 & master-select 页面添加更新日志展示区块</p>
+      <p><strong style="color:#1a1510;">v4.0</strong> (2026-07-01 ~ 07-02)<br>
+      • AI 临床督导界面上线（上传区折叠、回复长度内联、32px段间距）<br>
+      • 导出对话按钮 + 保存/加载历史对话<br>
+      • 微信浏览器导出适配 + 所有对话框统一按钮排序<br>
+      • AI 督导表达风格约束 + 首页底部添加 AI 督导入口<br>
+      • 温尼科特角色约束修复（WINNICOTT_PERSONA_GUARD）</p>
+      <p><strong style="color:#1a1510;">v3.3</strong> (2026-06-30)<br>
+      • AI 督导界面去拥挤化重构（折叠上传区、内联回复长度、32px段间距、8px网格设计系统）</p>
+      <p><strong style="color:#1a1510;">v3.2</strong> (2026-06-29)<br>
+      • 新增大师选择页面（master-select），设为首页<br>
+      • 支持弗洛伊德、克莱因、荣格、比昂、罗杰斯、贝克、亚隆七位大师<br>
+      • 迁移到 GitHub Pages 部署<br>
+      • AI 督导提示词修复 + 流式输出断开修复 + 智能话题切换自动保存<br>
+      • AIGC 水印清理</p>
+      <p><strong style="color:#1a1510;">v3.1</strong> (2026-06-22)<br>
+      • 温尼科特对话网页上线（winnicott-chat v3.1）<br>
+      • EdgeOne Makers 代理，移除硬编码 API Key</p>
     </div>
   </div>
 
@@ -500,7 +507,6 @@ const TIERS = [
 function toggleSettings() {
   var sp = document.getElementById('settingsPanel');
   sp.classList.toggle('open');
-  if (!sp.classList.contains('open')) document.getElementById('changelogContent').style.display = 'none';
 }
 function setMode(m) { apiMode=m; document.getElementById('defaultModeBtn').className='default-btn'+(m==='default'?' active':''); document.getElementById('customModeBtn').className='custom-btn'+(m==='custom'?' active':''); document.getElementById('customFields').style.display=m==='custom'?'block':'none'; }
 function fillPreset(api,model) { document.getElementById('customApi').value=api; document.getElementById('customModel').value=model; if(apiMode!=='custom')setMode('custom'); showBanner('已填入，请填写 Key'); }
@@ -971,12 +977,9 @@ function deleteHistoryItem(id) {
 openHistory = showHistory;
 
 // Override showChangelog to properly toggle
-function showChangelog() {
-  var el = document.getElementById('changelogContent');
-  var isOpen = el.style.display === 'block';
-  toggleSettings();
-  if (isOpen) { el.style.display = 'none'; }
-  else { el.style.display = 'block'; }
+function showChangelog(){
+  var el=document.getElementById('changelogContent');
+  el.style.display=el.style.display==='block'?'none':'block';
 }
 
 </script>

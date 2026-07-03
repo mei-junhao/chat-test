@@ -593,121 +593,32 @@
       📢 关注公众号 <strong style="color:var(--accent);">MindMeetsHeart</strong> · 获取更多精神分析内容
     </div>
     <div id="changelogContent" style="display:none;margin-top:10px;background:var(--light-accent);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text);line-height:1.8;max-height:180px;overflow-y:auto;">
-      <p><strong style="color:var(--text);">v4</strong> (2026-06-28)<br>
-      • 新增：大师列表扩充至 8 位——罗杰斯、贝克、亚隆入驻<br>
-      • 新增：与更多大师对话（设置面板 → 大师选择）<br>
-      • 新增：master-chat.html 共享聊天模板，支持 ?master= 参数切换<br>
-      • 新增：比昂入驻大师列表<br>
-      • 更新：弗洛伊德/克莱因/荣格三位大师知识库更新至 v2.0 风格指令</p>
-      <p><strong style="color:var(--text);">v3</strong> (2026-06-27)<br>
-      • 新增：API 线路健康检测（设置面板实时显示各线路状态）<br>
-      • 新增：回复长度控制（简洁/适中/详细）<br>
-      • 新增：自用 API 快速预设（DeepSeek/OpenAI/硅基流动一键填入）<br>
-      • 新增：对话自动章节（根据话题转折插入轮次分隔）<br>
-      • 新增：对话自动保存历史（每 5 轮静默保存一次）<br>
-      • 优化：设置面板按钮支持移动端换行</p>
-      <p><strong style="color:var(--text);">v3.11</strong> (2026-06-27)<br>
-      • 新增：AI督导测试版（独立页面，需密码进入，支持文件上传与整体印象输出）<br>
-      • 新增：在主页面设置面板添加「AI督导」跳转链接</p>
-      <p><strong style="color:var(--text);">v3.10</strong> (2026-06-26)<br>
-      • 新增：四层路由——DeepSeek V4 Pro 主力 → Flash 高速备胎 → MiniMax M3 中文保底 → Agnes 兜底<br>
-      • 新增：DeepSeek V4 Pro（增强版）替换 Kimi 为 MiniMax M3</p>
-      <p><strong style="color:var(--text);">v3.9</strong> (2026-06-26)<br>
-      • 公告：即日起对话不限上下文，100 轮内体验最佳，超过可能受模型限制降低回复质量</p>
-      <p><strong style="color:var(--text);">v3.8</strong> (2026-06-26)<br>
-      • 优化：移除上下文长度限制，受益于模型能力增长，不再截断长对话<br>
-      • 优化：上下文窗口从最近 10 条扩展到最近 30 条</p>
-      <p><strong style="color:var(--text);">v3.7</strong> (2026-06-25)<br>
-      • 新增：三层模型自动切换——DeepSeek → Kimi K2.6 → Agnes，不可用时自动降级<br>
-      • 新增：Kimi K2.6 模型接入，作为 DeepSeek 的备用路线<br>
-      • 优化：同一对话中保持当前线路，新对话从线路一重新尝试<br>
-      • 优化：滑动消息或点击输入框时自动收起设置面板<br>
-      • 优化：复制按钮始终可见，不再需要悬停<br>
-      • 优化：模型切换提示改为"DeepSeek 繁忙"等模型名，无红色报错</p>
-      <p><strong style="color:var(--text);">v3.6</strong> (2026-06-25)<br>
-      • 新增：双人物模式——在温尼科特与拉康之间自由切换<br>
-      • 新增：拉康模式专属冷峻主题（深色/几何/锐利）<br>
-      • 新增：拉康知识库（整合拉康 SKILL + 5 个心智模型）<br>
-      • 新增：拉康版温度调节——直白解析到形式化推演<br>
-      • 新增：设置面板内人物切换开关<br>
-      • 优化：切换人物时自动清空对话并保存历史</p>
-      <p><strong style="color:var(--text);">v3.5</strong> (2026-06-24)<br>
-      • 新增：对话历史——自动保存多条对话记录，随时回顾与加载<br>
-      • 新增：一键加载历史对话、删除单条记录<br>
-      • 优化：新对话前自动询问是否保存当前对话到历史<br>
-      • 优化：对话列表显示标题、消息数、时间</p>
-      <p><strong style="color:var(--text);">v3.4</strong> (2026-06-23)<br>
-      • 重构：默认模型切换——优先调用 DeepSeek（本地代理），不可用时自动降级 Agnes<br>
-      • 新增：本地代理方案——家庭 PC 跑 Python 代理 + cloudflared 隧道，Key 不暴露前端<br>
-      • 重构：知识库全面升级——新版温尼科特 Skill（角色纯度、两段式回答、反面教材、自检清单、经典引语）<br>
-      • 新增：智能降级——本地代理离线时自动切 Agnes 云端，用户无感<br>
-      • 修复：新对话按钮点击无反应（移除自定义弹窗，改用直接清除）<br>
-      • 修复：模型返回为空时自动重试 1 次<br>
-      • 优化：A−/A+ 字体调节回滚至稳定版本<br>
-      • 优化：底部栏移除 Enter 提示文字</p>
-      <p><strong style="color:var(--text);">v3.3</strong> (2026-06-23)<br>
-      • 修复：A−/A+ 字体调节无效（CSS 变量 + inline style 双重兜底）<br>
-      • 修复：底部"此对话/了解作者"仍会滚动（body 加 height:100vh + overflow:hidden）<br>
-      • 修复：🔌 API 按钮点击不展开配置面板（改为直接切换内联样式）<br>
-      • 新增：A+/A− 字体大小调节<br>
-      • 重构：API 设置与功能按钮合并至同一行<br>
-      • 优化：温度滑块数字不再遮挡下方文字<br>
-      • 优化：设置面板视觉重新梳理</p>
-      <p><strong style="color:var(--text);">v3.2</strong> (2026-06-23)<br>
-      • 重构：UI 按钮全部移入设置面板，使用汉字按钮<br>
-      • 新增：对话自动保存 localStorage，刷新可恢复<br>
-      • 新增：转发选择模式——勾选多条对话生成卡片图<br>
-      • 新增：分享卡片底部二维码，扫码直达开始对话<br>
-      • 新增：对话开始后头部自动收起，释放屏幕空间<br>
-      • 优化：移动端触控区全部 ≥44px<br>
-      • 优化：适配 iPhone SE 到 Pro Max 两级断点<br>
-      • 优化：输入框 sticky 固定底部，键盘弹起不遮挡<br>
-      • 优化：设置面板可滚动 + API 设置折叠收起<br>
-      • 优化：更新日志点击自动打开面板并展开</p>
+      <p><strong style="color:var(--text);">v4.1</strong> (2026-07-03)<br>
+      • AI 督导新增自用 API 功能（DeepSeek/OpenAI/硅基流动三预设）<br>
+      • 全站大师正念冥想约束（荣格可推荐、比昂可讨论学理、贝克可提及MBCT、其余全禁）<br>
+      • master-chat 按大师动态生成约束提示词<br>
+      • v4 双版本同步添加正念约束<br>
+      • 主页 & master-select 页面添加更新日志展示区块</p>
+      <p><strong style="color:var(--text);">v4.0</strong> (2026-07-01 ~ 07-02)<br>
+      • AI 临床督导界面上线（上传区折叠、回复长度内联、32px段间距）<br>
+      • 导出对话按钮 + 保存/加载历史对话<br>
+      • 微信浏览器导出适配 + 所有对话框统一按钮排序<br>
+      • AI 督导表达风格约束 + 首页底部添加 AI 督导入口<br>
+      • 温尼科特角色约束修复（WINNICOTT_PERSONA_GUARD）<br>
+      • 修复所有大师同时加载知识文档与技能文档<br>
+      • AI 督导新问题自动折叠印象区域 + 平滑滚动<br>
+      • 确保上传的督导风格文档正确加载到系统提示词</p>
+      <p><strong style="color:var(--text);">v3.3</strong> (2026-06-30)<br>
+      • AI 督导界面去拥挤化重构（折叠上传区、内联回复长度、32px段间距、8px网格设计系统）</p>
+      <p><strong style="color:var(--text);">v3.2</strong> (2026-06-29)<br>
+      • 新增大师选择页面（master-select），设为首页<br>
+      • 支持弗洛伊德、克莱因、荣格、比昂、罗杰斯、贝克、亚隆七位大师<br>
+      • 迁移到 GitHub Pages 部署<br>
+      • AI 督导提示词修复 + 流式输出断开修复 + 智能话题切换自动保存<br>
+      • AIGC 水印清理</p>
       <p><strong style="color:var(--text);">v3.1</strong> (2026-06-22)<br>
-      • 重构：SSE 流式输出——回复逐字出现，不再卡等<br>
-      • 新增：✂️ 转发——勾选对话生成卡片图，长按保存分享朋友圈<br>
-      • 新增：☕ 打赏按钮（顶部咖啡杯图标）<br>
-      • 新增：聊到 15 轮自动弹打赏二维码<br>
-      • 新增：自定义打赏模态框（带柔光弹动效）</p>
-      <p><strong style="color:var(--text);">v3.0</strong> (2026-06-22)<br>
-      • 优化：设置面板不再遮挡底部操作按钮<br>
-      • 优化：移动端复制按钮始终可见<br>
-      • 优化：自定义确认弹窗替换原生 confirm<br>
-      • 优化：导出文件名包含时分秒<br>
-      • 优化：输入框高度上限提升至180px<br>
-      • 优化：温度滑块增加20/60/80刻度标记<br>
-      • 优化：上下文使用量指示器<br>
-      • 优化：错误提示区分场景（Key无效/额度不足/超长）<br>
-      • 优化：回复不再输出 markdown 符号<br>
-      • 优化：分隔线改为柔和留空<br>
-      • 优化：增加温尼科特标志性口癖（I wonder/在我看来等）<br>
-      • 更换：默认模型切换为 DeepSeek V4 Flash</p>
-      <p><strong style="color:var(--text);">v2.6</strong> (2026-06-22)<br>
-      • 优化：心事模式只回复情感内容，删除分隔线和理论部分<br>
-      • 新增：进入对话时选择模式（心事/专业/随便聊聊）</p>
-      <p><strong style="color:var(--text);">v2.5</strong> (2026-06-22)<br>
-      • 新增：对话温度调节（情感↔知识可调）<br>
-      • 新增：导出对话到本地<br>
-      • 新增：对话上下文自动精简</p>
-      <p><strong style="color:var(--text);">v2.4</strong> (2026-06-22)<br>
-      • 新增：知识问答模式自动加载完整知识库（181KB）<br>
-      • 优化：移除引导问题按钮</p>
-      <p><strong style="color:var(--text);">v2.3</strong> (2026-06-22)<br>
-      • 新增：更新日志 & 了解作者<br>
-      • 优化：桌面端字体放大<br>
-      • 新增：访问统计</p>
-      <p><strong style="color:var(--text);">v2.2</strong> (2026-06-22)<br>
-      • 优化：回答增加英文提示<br>
-      • 优化：温度调节联动知识库切换</p>
-      <p><strong style="color:var(--text);">v2.1</strong> (2026-06-22)<br>
-      • 新增：自定义 API 设置<br>
-      • 新增：新对话按钮</p>
-      <p><strong style="color:var(--text);">v2.0</strong> (2026-06-22)<br>
-      • 重构：对话上下文自动精简<br>
-      • 优化：长对话自动提示重置</p>
-      <p><strong style="color:var(--text);">v1.0</strong> (2026-06-21)<br>
-      • 首发：温尼科特思维框架对话</p>
+      • 温尼科特对话网页上线（winnicott-chat v3.1）<br>
+      • EdgeOne Makers 代理，移除硬编码 API Key</p>
     </div>
     <div id="historyContent" class="history-content">
       <div class="history-empty" id="historyEmpty" data-i18n="history-empty">暂无历史对话</div>
@@ -1914,12 +1825,7 @@ function updateLength(val) {
 })();
 function showChangelog() {
   var el = document.getElementById('changelogContent');
-  // If settings panel is closed, open it first
-  var panel = document.getElementById('settingsPanel');
-  if (!panel.classList.contains('open')) {
-    settingsBtn.click();
-  }
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
 }
 function resetConversation() {
   conversation = [];
