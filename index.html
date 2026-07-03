@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -50,6 +50,17 @@
   .reward-box img { width:200px; height:200px; border-radius:var(--radius-sm); }
   .reward-box button { margin-top:12px; background:none; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 20px; font-size:12px; cursor:pointer; color:var(--muted); font-family:inherit; transition:var(--transition); }
   .reward-box button:hover { border-color:var(--accent); color:var(--accent); }
+
+  .changelog-overlay { position:fixed; inset:0; z-index:998; background:rgba(45,41,37,0.2); display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); }
+  .changelog-box { background:var(--card); border-radius:var(--radius); padding:28px 24px; max-width:480px; width:90%; max-height:80vh; overflow-y:auto; box-shadow:var(--shadow); }
+  .changelog-box h3 { font-size:16px; font-weight:500; margin:0 0 16px; color:var(--text); letter-spacing:0.04em; text-align:center; }
+  .changelog-box .cl-version { font-size:14px; font-weight:500; color:var(--accent); margin:16px 0 6px; letter-spacing:0.03em; }
+  .changelog-box .cl-version:first-of-type { margin-top:0; }
+  .changelog-box .cl-date { font-size:11px; color:var(--muted); margin-bottom:6px; }
+  .changelog-box .cl-item { font-size:12px; color:var(--text); margin-bottom:3px; padding-left:12px; position:relative; line-height:1.7; }
+  .changelog-box .cl-item::before { content:"·"; position:absolute; left:0; color:var(--muted); }
+  .changelog-box button { margin-top:16px; background:none; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 20px; font-size:12px; cursor:pointer; color:var(--muted); font-family:inherit; transition:var(--transition); display:block; margin-left:auto; margin-right:auto; }
+  .changelog-box button:hover { border-color:var(--accent); color:var(--accent); }
 </style>
 <script src="https://beacon.cdn.qq.com/sdk/4.5.9/beacon_web.min.js"></script>
 <script>
@@ -163,6 +174,7 @@
     <div style="display:flex;gap:12px;justify-content:center;">
       <a href="https://757b6f9d7772430ab0dba04609cfa611.app.codebuddy.work" target="_blank" style="color:var(--accent);text-decoration:none;">📖 了解作者</a>
       <a href="#" onclick="showRewardMS();return false;" style="color:var(--muted);text-decoration:none;">☕ 打赏</a>
+      <a href="#" onclick="showChangelog();return false;" style="color:var(--muted);text-decoration:none;font-size:11px;">v4.1</a>
     </div>
   </div>
 
@@ -189,6 +201,8 @@ function sendSuggestion() {
 }
 function showRewardMS() { document.getElementById('rewardOverlayMS').style.display='flex'; }
 function closeRewardMS() { document.getElementById('rewardOverlayMS').style.display='none'; }
+function showChangelog() { document.getElementById('changelogOverlay').style.display='flex'; }
+function closeChangelog() { document.getElementById('changelogOverlay').style.display='none'; }
 
 var MODE_OPTIONS = {
   winnicott: {
@@ -305,6 +319,44 @@ function closeModeOverlay() {
     <h3 id="modeMasterName"></h3>
     <div id="modeBtns"></div>
     <button class="mode-close" onclick="closeModeOverlay()">返回</button>
+  </div>
+</div>
+
+<div class="changelog-overlay" id="changelogOverlay" onclick="if(event.target===this)closeChangelog()">
+  <div class="changelog-box">
+    <h3>更新日志</h3>
+    <div class="cl-version">v4.1</div>
+    <div class="cl-date">2026-07-03</div>
+    <div class="cl-item">AI 督导新增自用 API 功能（DeepSeek/OpenAI/硅基流动三预设）</div>
+    <div class="cl-item">全站大师正念冥想约束（荣格可推荐、比昂可讨论学理、贝克可提及MBCT、其余全禁）</div>
+    <div class="cl-item">master-chat 按大师动态生成约束提示词</div>
+    <div class="cl-item">v4 双版本同步添加正念约束</div>
+    <div class="cl-item">主页 & master-select 页面添加更新日志展示区块</div>
+    <div class="cl-version">v4.0</div>
+    <div class="cl-date">2026-07-01 ~ 07-02</div>
+    <div class="cl-item">AI 临床督导界面上线（上传区折叠、回复长度内联、32px段间距）</div>
+    <div class="cl-item">导出对话按钮 + 保存/加载历史对话</div>
+    <div class="cl-item">微信浏览器导出适配 + 所有对话框统一按钮排序</div>
+    <div class="cl-item">AI 督导表达风格约束 + 首页底部添加 AI 督导入口</div>
+    <div class="cl-item">温尼科特角色约束修复（WINNICOTT_PERSONA_GUARD）</div>
+    <div class="cl-item">修复所有大师同时加载知识文档与技能文档</div>
+    <div class="cl-item">AI 督导新问题自动折叠印象区域 + 平滑滚动</div>
+    <div class="cl-item">确保上传的督导风格文档正确加载到系统提示词</div>
+    <div class="cl-version">v3.3</div>
+    <div class="cl-date">2026-06-30</div>
+    <div class="cl-item">AI 督导界面去拥挤化重构（折叠上传区、内联回复长度、32px段间距、8px网格设计系统）</div>
+    <div class="cl-version">v3.2</div>
+    <div class="cl-date">2026-06-29</div>
+    <div class="cl-item">新增大师选择页面（master-select），设为首页</div>
+    <div class="cl-item">支持弗洛伊德、克莱因、荣格、比昂、罗杰斯、贝克、亚隆七位大师</div>
+    <div class="cl-item">迁移到 GitHub Pages 部署</div>
+    <div class="cl-item">AI 督导提示词修复 + 流式输出断开修复 + 智能话题切换自动保存</div>
+    <div class="cl-item">AIGC 水印清理</div>
+    <div class="cl-version">v3.1</div>
+    <div class="cl-date">2026-06-22</div>
+    <div class="cl-item">温尼科特对话网页上线（winnicott-chat v3.1）</div>
+    <div class="cl-item">EdgeOne Makers 代理，移除硬编码 API Key</div>
+    <button onclick="closeChangelog()">关闭</button>
   </div>
 </div>
 
