@@ -924,6 +924,7 @@ function toggleSettings() {
   // 防抖：transition 期间跳过重复触发
   if (settingsPanel._toggling) return;
   settingsPanel._toggling = true;
+  settingsPanel._lastOpenTime = Date.now();
   settingsPanel.classList.toggle('open');
   if (!settingsPanel.classList.contains('open')) {
     document.getElementById('changelogContent').style.display = 'none';
@@ -933,9 +934,11 @@ function toggleSettings() {
 }
 
 // Auto-close settings panel on scroll messages only
+// 600ms 防抖：避免面板展开时的 reflow 触发自动关闭
 function autoCloseSettings() {
   var sp = document.getElementById('settingsPanel');
   if (sp && sp.classList.contains('open')) {
+    if (sp._lastOpenTime && Date.now() - sp._lastOpenTime < 600) return;
     sp.classList.remove('open');
     var cc = document.getElementById('changelogContent');
     if (cc) cc.style.display = 'none';

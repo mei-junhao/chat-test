@@ -220,6 +220,28 @@
   .history-empty { text-align:center; padding:48px 24px; color:var(--muted); font-size:14px; }
   .history-empty .he-icon { font-size:44px; margin-bottom:12px; opacity:0.45; }
 
+  /* Settings panel */
+  .settings-btn { position:absolute; right:12px; top:4px; background:none; border:1px solid var(--border); border-radius:6px; padding:3px 8px; font-size:11px; cursor:pointer; color:var(--muted); font-family:inherit; line-height:1.4; }
+  .settings-btn:hover { background:var(--light-accent); }
+  .settings-btn.custom { border-color:var(--accent); color:var(--accent); }
+  .settings-panel { max-height:0; overflow:hidden; transition:max-height 0.3s ease, padding 0.3s ease; background:var(--card); border-bottom:1px solid var(--border); padding:0 20px; }
+  .settings-panel.open { max-height:70vh; padding:16px 20px; overflow-y:auto; }
+  .settings-panel h3 { font-size:13px; font-weight:500; margin-bottom:10px; color:var(--muted); }
+  .mode-toggle { display:flex; gap:0; margin-bottom:10px; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+  .mode-toggle button { flex:1; padding:7px 0; border:none; font-size:12px; cursor:pointer; font-family:inherit; transition:0.2s; }
+  .mode-toggle .default-btn { background:var(--light-accent); color:var(--text); }
+  .mode-toggle .default-btn.active { background:var(--accent); color:white; }
+  .mode-toggle .custom-btn { background:var(--bg); color:var(--text); }
+  .mode-toggle .custom-btn.active { background:#d4a056; color:white; }
+  .settings-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .settings-row label { font-size:11px; color:var(--muted); width:60px; flex-shrink:0; }
+  .settings-row input { flex:1; padding:6px 10px; border:1px solid var(--border); border-radius:8px; font-size:12px; outline:none; background:var(--bg); font-family:monospace; color:var(--text); }
+  .preset-row { display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; }
+  .preset-row button { font-size:10px; padding:3px 8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); cursor:pointer; font-family:inherit; color:var(--muted); }
+  .preset-row button:hover { border-color:var(--accent); }
+  .api-save-btn { margin-top:6px; width:100%; padding:6px; border:none; border-radius:8px; background:var(--accent); color:white; font-size:12px; cursor:pointer; font-family:inherit; }
+  .api-save-btn:hover { background:var(--accent-hover); }
+
   /* Responsive */
   @media (max-width: 576px) {
     .app { padding:24px 16px 40px; gap:24px; }
@@ -248,6 +270,26 @@
     <div class="header">
       <h1>AI 临床督导</h1>
       <p>请上传或粘贴临床材料（逐字稿 / 案例报告 / 反移情困惑）</p>
+    </div>
+
+    <div class="settings-panel" id="settingsPanel">
+      <h3>API 设置</h3>
+      <div class="mode-toggle">
+        <button class="default-btn active" id="defaultModeBtn" onclick="setMode('default')">默认 API</button>
+        <button class="custom-btn" id="customModeBtn" onclick="setMode('custom')">自用 API</button>
+      </div>
+      <div id="customFields" style="display:none;">
+        <div class="settings-row"><label>API 地址</label><input id="customApi" placeholder="https://api.openai.com/v1/chat/completions"></div>
+        <div class="settings-row"><label>API Key</label><input id="customKey" placeholder="sk-..."></div>
+        <div class="settings-row"><label>模型</label><input id="customModel" placeholder="gpt-4o"></div>
+        <div class="preset-row">
+          <button onclick="fillPreset('https://api.deepseek.com/v1/chat/completions','deepseek-chat')">DeepSeek</button>
+          <button onclick="fillPreset('https://api.openai.com/v1/chat/completions','gpt-4o')">OpenAI</button>
+          <button onclick="fillPreset('https://api.siliconflow.cn/v1/chat/completions','deepseek-ai/DeepSeek-V3')">硅基流动</button>
+        </div>
+        <button class="api-save-btn" onclick="saveSettings()">保存设置</button>
+        <span id="settingsSaved" style="font-size:12px;color:var(--accent);margin-left:10px;display:none;">已保存</span>
+      </div>
     </div>
 
     <div class="phase">
@@ -287,6 +329,7 @@ P（来访者）：是的，我一直在想上周你说的话……"></textarea>
       <button class="btn-aux danger" onclick="clearAll()">清空</button>
       <button class="btn-aux" onclick="exportConversation()">📥 导出对话</button>
       <button class="btn-aux" onclick="emailConversation()">📧 发送到邮箱</button>
+      <button class="btn-aux" onclick="toggleSettings()" id="settingsBtn">⚙️ API 设置</button>
     </div>
 
     <!-- ====== PHASE 3: OUTPUT ====== -->
@@ -556,6 +599,53 @@ var apiTier = 0;
 var isLoading = false;
 var chatMessages = [];
 var _currentHistoryId = null;
+var apiMode = 'default';
+var customApi = localStorage.getItem('sv_api') || '';
+var customKey = localStorage.getItem('sv_key') || '';
+var customModel = localStorage.getItem('sv_model') || '';
+
+function toggleSettings() {
+  var sp = document.getElementById('settingsPanel');
+  sp.classList.toggle('open');
+  if (!sp.classList.contains('open')) {
+    restoreForm();
+  }
+}
+function setMode(m) {
+  apiMode = m;
+  document.getElementById('defaultModeBtn').className = 'default-btn' + (m === 'default' ? ' active' : '');
+  document.getElementById('customModeBtn').className = 'custom-btn' + (m === 'custom' ? ' active' : '');
+  document.getElementById('customFields').style.display = m === 'custom' ? 'block' : 'none';
+  if (m === 'custom') { restoreForm(); }
+}
+function restoreForm() {
+  document.getElementById('customApi').value = customApi;
+  document.getElementById('customKey').value = customKey;
+  document.getElementById('customModel').value = customModel;
+  setMode(apiMode);
+}
+function saveSettings() {
+  customApi = document.getElementById('customApi').value.trim();
+  customKey = document.getElementById('customKey').value.trim();
+  customModel = document.getElementById('customModel').value.trim() || 'gpt-4o';
+  if (customApi) localStorage.setItem('sv_api', customApi); else localStorage.removeItem('sv_api');
+  if (customKey) localStorage.setItem('sv_key', customKey); else localStorage.removeItem('sv_key');
+  localStorage.setItem('sv_model', customModel);
+  var el = document.getElementById('settingsSaved');
+  el.style.display = 'inline';
+  setTimeout(function () { el.style.display = 'none'; }, 2000);
+}
+function fillPreset(api, model) {
+  document.getElementById('customApi').value = api;
+  document.getElementById('customModel').value = model;
+  if (apiMode !== 'custom') setMode('custom');
+}
+function getActiveConfig() {
+  if (apiMode === 'custom' && customApi && customKey) return { api: customApi, key: customKey, model: customModel };
+  return TIERS[apiTier] || TIERS[0];
+}
+// Init restore
+restoreForm();
 
 // ==================== IMPRESSION GENERATION ====================
 var isGenerating = false;
@@ -603,8 +693,8 @@ async function generateImpression() {
   var finalReply = '';
   var lastLineBreak = false;
 
-  while (!gotContent && apiTier < TIERS.length) {
-    var tier = TIERS[apiTier];
+  while (!gotContent && (apiMode === 'custom' ? apiTier < 1 : apiTier < TIERS.length)) {
+    var tier = apiMode === 'custom' ? getActiveConfig() : TIERS[apiTier];
 
     if (apiTier > 0 && finalReply) {
       var switchNote = '\n\n<span style="color:var(--muted);font-size:11px;">&#x26A0;&#xFE0F; 线路 ' + apiTier + ' 中断，切换至 ' + tier.name + '……</span>\n';
@@ -719,8 +809,8 @@ async function sendChat() {
   var finalReply = '';
   var msgDiv = null;
 
-  while (!gotContent && apiTier < TIERS.length) {
-    var tier = TIERS[apiTier];
+  while (!gotContent && (apiMode === 'custom' ? apiTier < 1 : apiTier < TIERS.length)) {
+    var tier = apiMode === 'custom' ? getActiveConfig() : TIERS[apiTier];
 
     if (apiTier > 0 && msgDiv && finalReply) {
       msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>') + '<div style="color:var(--muted);font-size:11px;margin-top:6px">&#x26A0;&#xFE0F; 切换至 ' + tier.name + '……</div>';
