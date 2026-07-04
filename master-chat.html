@@ -532,14 +532,19 @@ document.getElementById('langTip').textContent = M.langTip;
 document.getElementById('disclaimer').textContent = M.disclaimer;
 
 // Build greeting buttons
+var modeLabels = {20:'咨询师',60:'适中',90:'教师'};
 var hintsHtml = '';
 M.modes.forEach(function(m) {
   hintsHtml += '<button class="start-btn" onclick="startChat('+m.temp+')">'
+    + '<span style="font-size:10px;color:var(--accent);display:block;margin-bottom:2px;font-weight:600;">'+(modeLabels[m.temp]||'')+'</span>'
     + '<span>'+m.title+'</span>'
     + '<span style="font-size:11px;color:var(--muted);display:block;margin-top:4px;">'+m.sub+'</span>'
     + '</button>';
 });
 document.getElementById('greetingBtns').innerHTML = hintsHtml;
+document.getElementById('greetingBtns').insertAdjacentHTML('beforeend',
+  '<div style="margin-top:10px;text-align:center;font-size:11px;color:var(--muted);">'
+  + '💡 对话风格（咨询师 / 适中 / 教师）可在⚙️设置中自由切换</div>');
 
 // ====== State ======
 var conversation = [];

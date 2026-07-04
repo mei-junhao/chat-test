@@ -300,22 +300,8 @@ var MODE_OPTIONS = {
 function openModeOverlay(id) {
   var M = MODE_OPTIONS[id];
   if (!M) return;
-  document.getElementById('modeMasterName').textContent = M.name;
-  var btnsHtml = '';
-  M.modes.forEach(function(m) {
-    var href = M.url;
-    if (m.persona) {
-      href += '?persona=' + m.persona + '&temp=' + m.temp;
-    } else {
-      href += '&temp=' + m.temp;
-    }
-    btnsHtml += '<button class="mode-btn" onclick="location.href=\'' + href + '\'">'
-      + '<span class="m-title">' + m.title + '</span>'
-      + '<span class="m-sub">' + m.sub + '</span>'
-      + '</button>';
-  });
-  document.getElementById('modeBtns').innerHTML = btnsHtml;
-  document.getElementById('modeOverlay').classList.add('show');
+  // 直接进入大师对话页，三个风格选项在页面内选择
+  location.href = M.url;
 }
 
 function closeModeOverlay() {

@@ -634,21 +634,25 @@
         <p id="greetingSub" style="font-size:14px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.8;" data-i18n="intro-sub">选一个方向，我来调成最适合聊天的模式</p>
         <div class="hints" id="greetingBtns" style="margin-top:20px;display:flex;flex-direction:column;gap:10px;align-items:center;">
           <button class="greet-btn" onclick="startChat(20)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:var(--btn-radius,22px);background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+            <span style="font-size:10px;color:var(--accent);display:block;margin-bottom:1px;font-weight:600;">咨询师</span>
             <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">❤️</span>
             <span data-i18n="chat-feeling">你来，我听着</span>
-            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;" data-i18n="chat-feeling-sub">温度 20 · 像一次温和的咨询，回应简短温暖</span>
+            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;" data-i18n="chat-feeling-sub">像一次温和的咨询，回应简短温暖</span>
           </button>
           <button class="greet-btn" onclick="startChat(90)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:var(--btn-radius,22px);background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+            <span style="font-size:10px;color:var(--accent);display:block;margin-bottom:1px;font-weight:600;">教师</span>
             <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">📚</span>
             <span data-i18n="chat-professional">进书房坐</span>
-            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;" data-i18n="chat-professional-sub">温度 90 · 深入探讨客体关系等概念</span>
+            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;" data-i18n="chat-professional-sub">深入探讨客体关系等概念</span>
           </button>
           <button class="greet-btn" onclick="startChat(60)" style="display:block;width:220px;padding:12px 0;border:1px solid var(--border);border-radius:var(--btn-radius,22px);background:var(--card);cursor:pointer;font-family:inherit;font-size:15px;color:var(--text);transition:0.2s;">
+            <span style="font-size:10px;color:var(--accent);display:block;margin-bottom:1px;font-weight:600;">适中</span>
             <span style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px;">🫖</span>
             喝杯茶聊聊
-            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">温度 60 · 情感陪伴与理论思考各半</span>
+            <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">情感陪伴与理论思考各半</span>
           </button>
         </div>
+        <div style="margin-top:10px;text-align:center;font-size:11px;color:var(--muted);">💡 对话风格（咨询师 / 适中 / 教师）可在⚙️设置中自由切换</div>
       </div>
       <div id="introL" style="display:none;">
         <div class="icon">🎭</div>
