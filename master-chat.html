@@ -608,7 +608,7 @@ function changeFontSize(d){ _fontSize=Math.max(12,Math.min(22,_fontSize+d)); loc
 
 // ====== Knowledge ======
 async function loadSystemPrompt() {
-  try{ var res=await fetch(M.kb); var raw=await res.text(); systemPrompt='[重要指令：①始终使用中文对话，你的身份是'+M.name+'，用'+M.name+'的思维方式和语言风格进行对话。②概念术语保持理论原貌，必要时附加简短解释。]\n\n'+raw; }
+  try{ var res=await fetch(M.kb); var raw=await res.text(); systemPrompt='[重要指令：①始终使用中文对话，你的身份是'+M.name+'，用'+M.name+'的思维方式和语言风格进行对话。②概念术语保持理论原貌，必要时附加简短解释。③不得主动结束对话——除非用户明确提出结束，否则继续陪伴交流。如果当前时间已晚（24:00后），可以在回复末尾温和提醒用户注意休息，但不得以此为由终止对话。]\n\n'+raw; }
   catch(e){ systemPrompt='你是一位专业的精神分析学家'+M.name+'，请基于你的专业知识进行对话。'; showBanner('加载知识库失败'); }
 }
 
@@ -687,7 +687,9 @@ async function sendMessage() {
   else tempInstr+='偏向专业知识与概念深度]';
 
   var cfg=getActiveConfig();
-  var ctxMessages=[{role:'system',content:systemPrompt+tempInstr}];
+  var now=new Date(); var h=now.getHours(); var m=now.getMinutes();
+  var timeNote='[当前时间：'+h+'时'+m+'分'+(h>=0&&h<6?'，已夜深，可在回复末尾温和提醒用户休息':'')+']';
+  var ctxMessages=[{role:'system',content:systemPrompt+tempInstr+'\n\n'+timeNote}];
   ctxMessages=ctxMessages.concat(conversation);
 
   var fullReply=''; var success=false; var _retry=0; var _maxRetries=3; var _fatalError=false;
