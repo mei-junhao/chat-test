@@ -466,7 +466,9 @@ function handleFile(e) {
       // 普通临床材料
       document.getElementById('materialText').value = text;
       fi.style.display = 'block';
-      if (text.length > 4000) {
+      if (text.length > 10000) {
+        fi.innerHTML = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--danger);">&#x26A0;&#xFE0F; 文字过多（' + text.length + ' 字），可能导致回答质量大幅下降，甚至可能会出现虚构案例内容的情况，请注意甄别</span>';
+      } else if (text.length > 4000) {
         fi.innerHTML = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--danger);">&#x26A0;&#xFE0F; 文件共 ' + text.length + ' 字，建议控制在 4000 字以内以确保分析质量</span>';
       } else {
         fi.textContent = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
@@ -500,7 +502,9 @@ function readDocx(file, isStyleDoc) {
           fi.innerHTML = '已加载督导风格: <strong>' + file.name + '</strong> (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--accent);">&#x2705; 已应用至 AI 行为</span>';
         } else {
           document.getElementById('materialText').value = text;
-          if (text.length > 4000) {
+          if (text.length > 10000) {
+            fi.innerHTML = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--danger);">&#x26A0;&#xFE0F; 文字过多（' + text.length + ' 字），可能导致回答质量大幅下降，甚至可能会出现虚构案例内容的情况，请注意甄别</span>';
+          } else if (text.length > 4000) {
             fi.innerHTML = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB) <span style="color:var(--danger);">&#x26A0;&#xFE0F; 文件共 ' + text.length + ' 字，建议控制在 4000 字以内以确保分析质量</span>';
           } else {
             fi.textContent = '已选择: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
@@ -534,7 +538,15 @@ document.getElementById('materialText').addEventListener('input', function() {
   var len = this.value.length;
   var cc = document.getElementById('charCount');
   cc.textContent = len + ' 字';
-  cc.style.color = len > 4000 ? 'var(--danger)' : 'var(--muted)';
+  if (len > 10000) {
+    cc.style.color = 'var(--danger)';
+    cc.textContent += ' ⚠️ 文字过多，可能导致回答质量大幅下降，甚至可能会出现虚构案例内容的情况，请注意甄别';
+  } else if (len > 4000) {
+    cc.style.color = 'var(--danger)';
+    cc.textContent += ' ⚠️ 建议控制在 4000 字以内以确保分析质量';
+  } else {
+    cc.style.color = 'var(--muted)';
+  }
 });
 
 // ==================== SYSTEM PROMPT ====================
@@ -552,7 +564,8 @@ var WINNICOTT_PERSONA_GUARD = [
   '- 禁止使用"作为AI""根据我的理解""作为语言模型"等表述',
   '- 禁止使用 DSM 诊断标签作为主要描述框架',
   '- 禁止以评判性语言形容受督者',
-  '- 禁止在信息不足时强行给出确定性判断'
+  '- 禁止在信息不足时强行给出确定性判断',
+  '- 禁止编造不存在于用户提交材料中的督导内容或案例细节。只能在用户提供的逐字稿范围内进行分析。'
 ].join('\n');
 
 var SYSTEM_PROMPT_BACKUP = '你是唐纳德·温尼科特，英国精神分析师。基于温尼科特成熟过程理论进行临床督导。从反移情出发，用温暖抱持的语言工作。';
