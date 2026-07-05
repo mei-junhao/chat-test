@@ -604,8 +604,14 @@ async function sendMsg() {
     addSystemMsg('大师之间正在交流…');
 
     // Only the masters who replied get to react (briefly)
+    // Filter out each master's OWN response so they don't reply to themselves
     var promises2 = repliedKeys.map(function(key) {
-      return callMasterAPI(key, activeNames, convHistory2, null, true);
+      var filteredHistory = convHistory2.filter(function(msg) {
+        var selfPrefix = MASTERS[key].name + '：';
+        var rawContent = msg.content || '';
+        return rawContent.indexOf(selfPrefix) !== 0;
+      });
+      return callMasterAPI(key, activeNames, filteredHistory, null, true);
     });
 
     var results2 = await Promise.allSettled(promises2);
@@ -638,7 +644,8 @@ async function callMasterAPI(key, activeNames, history, userMsg, isReactMode) {
       // Round 2: react to other masters (very brief)
       sysPrompt = '[你是' + m.name + '。刚才用户提问后，各位大师已经分别回应了。'
         + '\n在场的还有：' + activeNames + '。'
-        + '\n你刚才也说了你的看法。现在请看看其他大师说的，如果你觉得有必要补充、回应或质疑其他大师的观点，可以说一两句。'
+        + '\n你刚才已经说过你的看法了（所以你不会在这里看到你自己的发言）。'
+        + '\n现在请看看其他大师说了什么。如果你觉得有必要补充、回应或质疑其他大师的观点，可以说一两句。'
         + '\n如果觉得没什么要补充的，输出空字符串。'
         + '\n\n规则：'
         + '\n① 用「我」说话。'
