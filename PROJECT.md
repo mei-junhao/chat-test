@@ -1,7 +1,7 @@
 # Winnicott Chat — 项目手册
 
-> 最后更新：2026-07-04  
-> 当前版本：v4.3  
+> 最后更新：2026-07-05  
+> 当前版本：v5.0  
 > 生产环境：https://mei-junhao.github.io/winnicott-chat/ （GitHub Pages，固定 URL）  
 > 入口文件：index.html（主页，替代已废弃的 master-select.html）  
 > 仓库地址：https://github.com/mei-junhao/winnicott-chat
