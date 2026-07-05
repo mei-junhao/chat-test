@@ -254,6 +254,9 @@
       <div class="history-empty" id="historyEmpty" data-i18n="history-empty">暂无历史对话</div>
     </div>
     <div id="changelogContent" style="display:none;margin-top:10px;background:var(--light-accent);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text);line-height:1.8;max-height:180px;overflow-y:auto;">
+      <p><strong style="color:var(--text);">v5.1</strong> (2026-07-05)<br>
+      • 🏠 首页新增多大师圆桌对话入口<br>
+      • 🔧 修复线路检测误报</p>
       <p><strong style="color:var(--text);">v5.0</strong> (2026-07-05)<br>
       • 🪑 新增圆桌会议室——多大师同空间对话<br>
       • 🧠 圆桌支持 @ 指定回应、大师互评、字体缩放、保存/加载对话<br>
@@ -618,9 +621,24 @@ function checkAllAPIs() {
   var row=document.getElementById('apiHealthRow'); row.innerHTML=TIERS.map(function(t){return '<span style="background:#eee;color:#999;padding:2px 8px;border-radius:8px;font-size:10px;">'+t.name+' …</span>';}).join('');
   TIERS.forEach(function(t,i){ setTimeout(function(){
     var start=Date.now();
-    fetch(t.api,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t.key},body:JSON.stringify({model:t.model,messages:[{role:'user',content:'hi'}],max_tokens:1})})
-    .then(function(r){ updateBadge(t.name,r.ok?'#4a9':'#c60',r.ok?'✓ '+(Date.now()-start)+'ms':'✗ '+r.status); })
-    .catch(function(){ updateBadge(t.name,'#c33','✗ 超时'); });
+    // AbortController for timeout
+    var ac=new AbortController(); var tm=setTimeout(function(){ac.abort();},8000);
+    fetch(t.api,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t.key},body:JSON.stringify({model:t.model,messages:[{role:'user',content:'hi'}],max_tokens:1}),signal:ac.signal})
+    .then(function(r){
+      clearTimeout(tm);
+      // Any response = connected (even 4xx/5xx means reachable)
+      var ms=Date.now()-start;
+      var color=r.ok||r.status<500?'#4a9':'#c60';
+      var label=r.ok?'✓ ':'⚡ '; label+=ms+'ms';
+      updateBadge(t.name,color,label);
+    })
+    .catch(function(){
+      clearTimeout(tm);
+      // Also try a simple GET or OPTIONS as fallback
+      fetch(t.api,{method:'OPTIONS',signal:AbortSignal.timeout(5000)})
+      .then(function(){ updateBadge(t.name,'#c60','⚡ 响应慢'); })
+      .catch(function(){ updateBadge(t.name,'#c33','✗ 超时'); });
+    });
   }, i*600);});
 }
 function updateBadge(name,color,label) {

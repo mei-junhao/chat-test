@@ -183,7 +183,7 @@
     <div style="display:flex;gap:12px;justify-content:center;">
       <a href="https://757b6f9d7772430ab0dba04609cfa611.app.codebuddy.work" target="_blank" style="color:var(--accent);text-decoration:none;">📖 了解作者</a>
       <a href="#" onclick="showRewardMS();return false;" style="color:var(--muted);text-decoration:none;">☕ 打赏</a>
-      <a href="#" onclick="showChangelog();return false;" style="color:var(--muted);text-decoration:none;font-size:11px;">v5.0</a>
+      <a href="#" onclick="showChangelog();return false;" style="color:var(--muted);text-decoration:none;font-size:11px;">v5.1</a>
     </div>
   </div>
 
@@ -192,6 +192,15 @@
     <div style="flex:1;">
       <div style="font-size:15px;font-weight:500;letter-spacing:0.03em;">AI 临床督导</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.6;">见真人督导前的免费梳理工具</div>
+    </div>
+    <span style="font-size:12px;color:var(--muted);transition:transform var(--transition);">前往 →</span>
+  </div>
+
+  <div style="margin-top:16px;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;gap:16px;cursor:pointer;transition:var(--transition);box-shadow:var(--shadow-sm);" onclick="location.href='roundtable.html'" onmouseover="this.style.borderColor='var(--accent)';this.style.boxShadow='var(--shadow)';this.style.transform='translateY(-1px)'" onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='var(--shadow-sm)';this.style.transform='none'">
+    <div style="width:46px;height:46px;border-radius:50%;background:#E8F0E8;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;flex-shrink:0;color:#5B8C6B;letter-spacing:0.04em;">🪑</div>
+    <div style="flex:1;">
+      <div style="font-size:15px;font-weight:500;letter-spacing:0.03em;">多大师圆桌对话</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.6;">多位大师同空间回应，支持 @ 指定</div>
     </div>
     <span style="font-size:12px;color:var(--muted);transition:transform var(--transition);">前往 →</span>
   </div>
@@ -329,6 +338,10 @@ function closeModeOverlay() {
 <div class="changelog-overlay" id="changelogOverlay" onclick="if(event.target===this)closeChangelog()">
   <div class="changelog-box">
     <h3>更新日志</h3>
+    <div class="cl-version">v5.1</div>
+    <div class="cl-date">2026-07-05</div>
+    <div class="cl-item">🏠 首页新增多大师圆桌对话入口</div>
+    <div class="cl-item">🔧 修复线路检测误报</div>
     <div class="cl-version">v5.0</div>
     <div class="cl-date">2026-07-05</div>
     <div class="cl-item">🪑 新增圆桌会议室——多大师同空间对话</div>
