@@ -23,7 +23,7 @@
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: "Noto Serif SC", "Source Han Serif SC", "STSong", Georgia, serif;
+    font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", Georgia, serif;
     background: var(--bg); color: var(--text); min-height: 100vh; height: 100vh;
     display: flex; justify-content: center; line-height: 1.85;
     overflow: hidden; -webkit-font-smoothing: antialiased;
@@ -118,6 +118,7 @@
     max-width: 78%; padding: 14px 18px; border-radius: var(--bubble-radius, 18px);
     font-size: var(--msg-fs, 15px); line-height: 1.85; white-space: pre-wrap; word-break: break-word;
   }
+  .msg .bubble em { font-style: normal; }
   .msg.user .bubble { background: var(--bubble-user); border-radius: 18px 18px 4px 18px; }
   .msg.ai .bubble { background: var(--bubble-ai); box-shadow: var(--shadow); border: 1px solid var(--border); max-width: 90%; }
 
@@ -155,6 +156,7 @@
     transition: background 0.2s; display: flex; align-items: center; justify-content: center;
   }
   .input-wrap button:hover { background: var(--accent-hover); transform: scale(1.05); }
+  .input-wrap button:active { transform: scale(0.95); }
   .input-wrap button:disabled { opacity: 0.5; cursor: not-allowed; }
   .disclaimer {
     text-align: center; padding: 2px 24px 6px; font-size: 11px; color: var(--muted);
