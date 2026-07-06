@@ -177,7 +177,7 @@
     <button onclick="saveHistory()">💾 保存对话</button>
     <button onclick="showHistory()">📋 历史记录</button>
     <span class="rounds-toggle">
-      <input type="checkbox" id="roundsCheck" checked onchange="updateRounds()"><label for="roundsCheck">互评</label>
+      <input type="checkbox" id="roundsCheck" checked onchange="updateRounds()"><label for="roundsCheck">串行</label>
     </span>
     <span class="font-group">
       <button onclick="zoomFont(-1)" title="缩小">A−</button>
@@ -294,7 +294,20 @@ var conversation = [];  // {name, text, time}
 var isLoading = false;
 var respondMode = 'all';  // 'all' | 'mention'
 var fontSize = 100;  // percentage
-var respondRounds = 2;  // 1 = no inter-master dialogue, 2 = with inter-master dialogue
+var respondRounds = 2;  // 1 = no serial rounds, 2 = with serial rounds
+
+// ====== Serial order: Winnicott always last ======
+var SERIAL_ORDER = ['freud','jung','klein','rogers','beck','yalom','adler'];
+
+function getSerialOrder(repliedKeys) {
+  var order = [];
+  SERIAL_ORDER.forEach(function(k) {
+    if (repliedKeys.indexOf(k) !== -1 && k !== 'winnicott') order.push(k);
+  });
+  // Winnicott always last
+  if (repliedKeys.indexOf('winnicott') !== -1) order.push('winnicott');
+  return order;
+}
 
 // ====== Presets ======
 var PRESETS = [
@@ -360,7 +373,7 @@ function loadProfile() {
 // ====== Rounds toggle ======
 function updateRounds() {
   respondRounds = document.getElementById('roundsCheck').checked ? 2 : 1;
-  showBanner(respondRounds === 2 ? '大师互评已开启' : '大师互评已关闭');
+  showBanner(respondRounds === 2 ? '串行回合已开启（大师逐一回应）' : '串行回合已关闭（仅一轮回应）');
 }
 
 // ====== TIERS (API config) ======
@@ -709,38 +722,103 @@ async function sendMsg() {
     }
   });
 
-  // Round 2 (P2): Inter-master dialogue - masters can briefly react to each other
-  // Only if respondRounds > 1, at least 2 masters replied, and user didn't @-mention
-  if (respondRounds > 1 && repliedKeys.length >= 2 && mentioned.length === 0) {
-    // Rebuild history with the new responses
-    var convHistory2 = conversation.map(function(msg) {
-      var prefix = msg.name === 'user' ? '用户' : MASTERS[msg.name] ? MASTERS[msg.name].name : msg.name;
-      return { role: msg.name === 'user' ? 'user' : 'assistant', content: prefix + '：' + msg.text };
-    });
+  // ====== Round 2+ : Plan B - Sequential reactions ======
+  var isMention = mentioned.length > 0;
 
-    // Show "大师对话" indicator
-    addSystemMsg('大师之间正在交流…');
+  // Build the base history including Round 0 results
+  var convHistory2 = conversation.map(function(msg) {
+    var prefix = msg.name === 'user' ? '用户' : MASTERS[msg.name] ? MASTERS[msg.name].name : msg.name;
+    return { role: msg.name === 'user' ? 'user' : 'assistant', content: prefix + '：' + msg.text };
+  });
 
-    // Only the masters who replied get to react (briefly)
-    // Filter out each master's OWN response so they don't reply to themselves
-    var promises2 = repliedKeys.map(function(key) {
-      var filteredHistory = convHistory2.filter(function(msg) {
-        var selfPrefix = MASTERS[key].name + '：';
-        var rawContent = msg.content || '';
-        return rawContent.indexOf(selfPrefix) !== 0;
-      });
-      return callMasterAPI(key, activeNames, filteredHistory, null, true);
-    });
+  if (respondRounds > 1 && repliedKeys.length >= 2) {
+    addSystemMsg(isMention ? '大师们正在回应……' : '大师之间正在交流…');
 
-    var results2 = await Promise.allSettled(promises2);
-
-    results2.forEach(function(r, i) {
-      var key = repliedKeys[i];
-      if (r.status === 'fulfilled' && r.value && r.value.length > 10) {
-        addMsg(key, r.value);
-        conversation.push({name:key, text:r.value, time:Date.now()});
+    if (isMention && mentioned.length > 0) {
+      // === @mention flow ===
+      // Round 1: Others respond to the @-ed master in parallel
+      var targetKey = mentioned[0];  // the @-ed master
+      var others = repliedKeys.filter(function(k) { return k !== targetKey; });
+      if (others.length > 0) {
+        var mentionPromises = others.map(function(key) {
+          // Only see: user + the @-ed master's Round 0
+          var filtered = convHistory2.filter(function(msg) {
+            var selfPrefix = MASTERS[key].name + '：';
+            var targetPrefix = MASTERS[targetKey].name + '：';
+            var raw = msg.content || '';
+            // Don't see own, DO see the @-ed master
+            if (raw.indexOf(selfPrefix) === 0) return false;
+            // See only user and the target master
+            if (raw.indexOf(targetPrefix) === 0) return true;
+            if (msg.role === 'user') return true;
+            return false;
+          });
+          return callMasterAPI(key, activeNames, filtered, null, true);
+        });
+        var mentionResults = await Promise.allSettled(mentionPromises);
+        mentionResults.forEach(function(r, i) {
+          var key = others[i];
+          if (r.status === 'fulfilled' && r.value) {
+            addMsg(key, r.value);
+            conversation.push({name:key, text:r.value, time:Date.now()});
+          }
+        });
       }
-    });
+      // Round 2: @-ed master does summary
+      var finalHistory = conversation.map(function(msg) {
+        var prefix = msg.name === 'user' ? '用户' : MASTERS[msg.name] ? MASTERS[msg.name].name : msg.name;
+        return { role: msg.name === 'user' ? 'user' : 'assistant', content: prefix + '：' + msg.text };
+      });
+      var finalReply = await callMasterAPI(targetKey, activeNames, finalHistory, null, true);
+      if (finalReply) {
+        addMsg(targetKey, finalReply);
+        conversation.push({name:targetKey, text:finalReply, time:Date.now()});
+      }
+    } else {
+      // === Normal flow: serial rounds ===
+      var serialOrder = getSerialOrder(repliedKeys);
+
+      // Serial: one by one, with delay so bubbles appear one at a time
+      for (var si = 0; si < serialOrder.length; si++) {
+        var sKey = serialOrder[si];
+        var isLast = (si === serialOrder.length - 1);
+
+        // Build current history: exclude all messages from this master
+        var currentHistory = conversation.map(function(msg) {
+          var prefix = msg.name === 'user' ? '用户' : MASTERS[msg.name] ? MASTERS[msg.name].name : msg.name;
+          return { role: msg.name === 'user' ? 'user' : 'assistant', content: prefix + '：' + msg.text };
+        });
+        // Filter out this master's own messages
+        var filtered = currentHistory.filter(function(msg) {
+          var selfPrefix = MASTERS[sKey].name + '：';
+          var raw = msg.content || '';
+          return raw.indexOf(selfPrefix) !== 0;
+        });
+
+        // Add a typing indicator for this master
+        var td = document.createElement('div'); td.className = 'typing'; td.id = 'typing_s_' + sKey;
+        td.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div><span class="typing-label">' + MASTERS[sKey].name + ' 正在回应……</span>';
+        document.getElementById('chatArea').appendChild(td);
+        document.getElementById('chatArea').scrollTop = document.getElementById('chatArea').scrollHeight;
+
+        // Call API (isSummaryMode for last - Winnicott)
+        var sReply = await callMasterAPI(sKey, activeNames, filtered, null, isLast ? 'summary' : true);
+
+        // Remove typing
+        var tdEl = document.getElementById('typing_s_' + sKey);
+        if (tdEl) tdEl.remove();
+
+        if (sReply) {
+          addMsg(sKey, sReply);
+          conversation.push({name:sKey, text:sReply, time:Date.now()});
+        }
+
+        // Brief delay between serial rounds (except last)
+        if (si < serialOrder.length - 1) {
+          await new Promise(function(r) { setTimeout(r, 600); });
+        }
+      }
+    }
   }
 
   isLoading = false;
@@ -758,17 +836,28 @@ async function callMasterAPI(key, activeNames, history, userMsg, isReactMode) {
     var kbContent = await res.text();
 
     var sysPrompt;
-    if (isReactMode) {
-      // Round 2: react to other masters (very brief)
+    if (isReactMode === 'summary') {
+      // Final summary round (Winnicott)
+      sysPrompt = '[你是' + m.name + '，你是这场圆桌讨论的总结者。'
+        + '\n在场的还有：' + activeNames + '。'
+        + '\n\n刚才各位大师围绕用户的问题各自发表了看法，还进行了讨论。'
+        + '\n现在请你作为最后发言的人，对整场讨论做总结性回应。'
+        + '\n\n规则：'
+        + '\n① 用「我」说话。'
+        + '\n② 可以提到其他大师的观点（例如"弗洛伊德刚才提到……我同意他的看法"）。'
+        + '\n③ 控制在120字以内，做一个有温度的收尾。'
+        + '\n④ 不要使用Markdown格式。]\n\n' + kbContent;
+    } else if (isReactMode) {
+      // Serial reaction round
       sysPrompt = '[你是' + m.name + '。刚才用户提问后，各位大师已经分别回应了。'
         + '\n在场的还有：' + activeNames + '。'
-        + '\n你刚才已经说过你的看法了（所以你不会在这里看到你自己的发言）。'
-        + '\n现在请看看其他大师说了什么。如果你觉得有必要补充、回应或质疑其他大师的观点，可以说一两句。'
+        + '\n你刚才已经说过你的看法了。现在请看看其他大师说了什么。'
+        + '\n如果你觉得有必要补充、回应或质疑，可以说一两句。'
         + '\n如果觉得没什么要补充的，输出空字符串。'
         + '\n\n规则：'
         + '\n① 用「我」说话。'
-        + '\n② 可以直接对其他大师说话（例如"弗洛伊德，我不同意你的看法……"）。'
-        + '\n③ 控制在60字以内，简短自然。'
+        + '\n② 可以直接对其他大师说话（例如"温尼科特，我同意你的看法……"）。'
+        + '\n③ 控制在80字以内，简短自然。'
         + '\n④ 不要使用Markdown格式。'
         + '\n⑤ 没什么要说的就输出一个空格。]\n\n' + kbContent;
     } else {
@@ -776,13 +865,11 @@ async function callMasterAPI(key, activeNames, history, userMsg, isReactMode) {
         + '\n在场的还有：' + activeNames + '。'
         + '\n\n规则：'
         + '\n① 用「我」说话。就像你本人坐在房间里一样。'
-        + '\n② 你可以同意、补充、质疑其他大师的观点。'
-        + '\n③ 如果其他大师已经说了你想说的，你可以选择不说或说得更深入。'
-        + '\n④ 每条回应控制在150字以内，自然、口语化。'
-        + '\n⑤ 不要使用Markdown格式。'
-        + '\n⑥ 不要替用户做决定。'
-        + '\n⑦ 保持你的人格和语气——你的经历决定了你如何看待问题。'
-        + '\n⑧ 你可以直接对其他大师说话——例如"荣格，我同意你的看法"或"弗洛伊德，我的角度稍有不同"。]\n\n' + kbContent;
+        + '\n② 独立回应。你正在和所有人同时发言，所以你看不到其他人此刻说了什么。不要假设你知道别人会说什么。'
+        + '\n③ 每条回应控制在150字以内，自然、口语化。'
+        + '\n④ 不要使用Markdown格式。'
+        + '\n⑤ 不要替用户做决定。'
+        + '\n⑥ 保持你的人格和语气——你的经历决定了你如何看待问题。]\n\n' + kbContent;
     }
 
     var msgs = [{ role: 'system', content: sysPrompt }];
