@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跨越时空，与温尼科特对话 — 项目介绍</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"Noto Serif SC","STSong",Georgia,serif; background:#faf8f5; color:#2d2925; line-height:1.9; -webkit-font-smoothing:antialiased; }
+  .container { max-width:680px; margin:0 auto; padding:0 24px; }
+
+  /* Header */
+  .hero { background:#8b6f5c; color:white; padding:60px 24px 48px; text-align:center; }
+  .hero h1 { font-size:26px; font-weight:500; margin-bottom:12px; letter-spacing:0.05em; }
+  .hero p { font-size:14px; opacity:0.85; line-height:1.8; max-width:480px; margin:0 auto; }
+  .hero .tag { display:inline-block; background:rgba(255,255,255,0.15); border-radius:20px; padding:4px 14px; font-size:11px; margin-top:16px; }
+
+  /* Sections */
+  section { padding:48px 0; border-bottom:1px solid #e8e1d9; }
+  section:last-of-type { border-bottom:none; }
+  h2 { font-size:18px; font-weight:500; margin-bottom:20px; color:#2d2925; letter-spacing:0.03em; position:relative; padding-left:16px; }
+  h2::before { content:''; position:absolute; left:0; top:4px; bottom:4px; width:3px; background:#8b6f5c; border-radius:2px; }
+  h3 { font-size:15px; font-weight:500; margin:20px 0 8px; color:#2d2925; }
+  p, li { font-size:14px; color:#4a443e; margin-bottom:12px; }
+
+  /* Quote boxes */
+  .quote { background:#f3ede6; border-radius:10px; padding:16px 20px; margin:16px 0; position:relative; }
+  .quote p { margin:0 0 4px; font-size:13px; line-height:1.8; }
+  .quote .from { font-size:11px; color:#8f857d; text-align:right; }
+
+  .quote-alt { background:#EEEDFE; border-radius:10px; padding:16px 20px; margin:16px 0; }
+  .quote-alt p { margin:0 0 4px; font-size:13px; line-height:1.8; color:#3C3489; }
+
+  /* Feature cards */
+  .feat-grid { display:flex; flex-direction:column; gap:12px; margin:16px 0; }
+  .feat-card { background:white; border:1px solid #e8e1d9; border-radius:10px; padding:16px 20px; }
+  .feat-card .fc-title { font-size:14px; font-weight:500; margin-bottom:4px; }
+  .feat-card .fc-desc { font-size:12px; color:#8f857d; line-height:1.7; }
+
+  /* Three modes */
+  .modes { display:flex; gap:10px; margin:16px 0; }
+  .mode { flex:1; border-radius:10px; padding:16px; text-align:center; border:0.5px solid #e8e1d9; }
+  .mode .mt { font-size:13px; font-weight:500; margin-bottom:4px; }
+  .mode .mt-d { font-size:11px; color:#8f857d; }
+  .mode-0 { background:#f3ede6; border-color:#d5c8b8; }
+  .mode-1 { background:#EEEDFE; border-color:#CECBF6; }
+  .mode-2 { background:#EAF3DE; border-color:#C0DD97; }
+
+  /* Steps */
+  .step { display:flex; gap:14px; margin-bottom:16px; }
+  .step-num { width:28px; height:28px; border-radius:50%; background:#8b6f5c; color:white; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:500; flex-shrink:0; margin-top:2px; }
+  .step-body { flex:1; }
+  .step-body .st { font-size:14px; font-weight:500; margin-bottom:2px; }
+  .step-body .sd { font-size:12px; color:#8f857d; line-height:1.7; }
+
+  /* Tech pipeline */
+  .pipeline { display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:center; margin:16px 0; }
+  .pipe-node { background:#f3ede6; border:0.5px solid #d5c8b8; border-radius:8px; padding:8px 14px; font-size:11px; color:#4a443e; text-align:center; }
+  .pipe-arrow { color:#8f857d; font-size:14px; }
+
+  /* Footer */
+  footer { padding:32px 24px; text-align:center; font-size:12px; color:#8f857d; line-height:1.8; }
+  footer a { color:#8b6f5c; text-decoration:none; }
+  footer a:hover { text-decoration:underline; }
+
+  /* Responsive */
+  @media(max-width:480px){
+    .hero h1 { font-size:22px; }
+    .modes { flex-direction:column; }
+    .pipeline { flex-direction:column; }
+    .pipe-arrow { transform:rotate(90deg); }
+  }
+
+  .divider { text-align:center; color:#e8e1d9; margin:8px 0; font-size:20px; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>跨越时空，与温尼科特对话</h1>
+  <p>一个基于仓颉人格模型，让你跟真实的精神分析大师聊天的人工智能项目</p>
+  <span class="tag">v5.1 · 免费使用</span>
+</div>
+
+<div class="container">
+
+<section>
+  <h2>这件事为什么是可能的</h2>
+  <p>温尼科特在 1971 年去世。他留下了 595 篇论文、一系列临床笔记、自传性文章，以及无数同行和学生对他的访谈记录。</p>
+  <p>过去，这些材料是用来<strong>读</strong>的。你读他的书，理解他的理论，把他的概念应用到自己的思考中。</p>
+  <p>但如果把这些材料全部喂给一个足够聪明的东西，让它不是去"总结"，而是去<strong>长出一个人</strong>呢？</p>
+  <p>这就是"仓颉"在做的事。</p>
+</section>
+
+<section>
+  <h2>仓颉：不是知识库，是人格模型</h2>
+  <p>大部分 AI 聊天产品的底层是知识库——把一个人的著作拆成段落、标上标签、做成可检索的索引。你问问题，它匹配最相似的段落给你看。</p>
+  <p>仓颉不一样。它做的事更接近<strong>蒸馏</strong>——不是提取信息，是提取<strong>一个人为什么会这样想</strong>的底层逻辑。</p>
+
+  <h3>它提取的是这些</h3>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="fc-title">信念是怎么形成的</div>
+      <div class="fc-desc">不告诉你「弗洛伊德认为潜意识决定一切」，而是告诉你「弗洛伊德亲眼看到安娜·欧在催眠中症状消失，从此相信意识只是冰山一角」</div>
+    </div>
+    <div class="feat-card">
+      <div class="fc-title">在真实场景里做了什么决策</div>
+      <div class="fc-desc">面对荣格的离开是什么感受？面对布洛伊尔的退缩是什么反应？仓颉提取的是真实人生中的选择，不是教科书上的结论</div>
+    </div>
+    <div class="feat-card">
+      <div class="fc-title">承认过什么失败和矛盾</div>
+      <div class="fc-desc">一个人最真实的部分不是他的成就，是他承认自己做不到的地方。仓颉专门提取这些</div>
+    </div>
+  </div>
+
+  <h3>对比一下</h3>
+  <div class="quote">
+    <p>弗洛伊德，精神分析创始人，1856年生于弗莱贝格。他提出了潜意识理论、人格结构理论（本我、自我、超我）……</p>
+    <div class="from">——原来的知识库</div>
+  </div>
+  <div class="quote-alt">
+    <p>我是弗赖贝格一个羊毛商人的儿子，四岁时搬到维也纳的犹太人聚居区。母亲叫我「金童」，父亲被反犹者羞辱时只敢捡起自己的帽子——那一刻我发誓不做他那样的人。</p>
+    <div class="from" style="color:#534AB7;">——仓颉人格模型</div>
+  </div>
+
+  <p>同样的素材，完全不同的说话方式。前者是教材，后者是<strong>一个人坐在你对面</strong>。</p>
+</section>
+
+<section>
+  <h2>三种对话模式</h2>
+  <p>温尼科特是唯一拥有完整三种模式的大师。你可以在设置中自由切换：</p>
+
+  <div class="modes">
+    <div class="mode mode-0">
+      <div class="mt">交心</div>
+      <div class="mt-d">温度 0-40</div>
+      <div style="font-size:11px;color:#8f857d;margin-top:6px;">加载仓颉人格模型<br>像跟真人聊天</div>
+    </div>
+    <div class="mode mode-1">
+      <div class="mt">咨询</div>
+      <div class="mt-d">温度 40-70</div>
+      <div style="font-size:11px;color:#8f857d;margin-top:6px;">加载逐字稿蒸馏<br>像专业对话</div>
+    </div>
+    <div class="mode mode-2">
+      <div class="mt">教学</div>
+      <div class="mt-d">温度 70-90</div>
+      <div style="font-size:11px;color:#8f857d;margin-top:6px;">加载风格+知识库<br>系统学习理论</div>
+    </div>
+  </div>
+
+  <p>选「交心」的时候，你听到的不是一个 AI 在复述教科书——你听到的是一个经历了普利茅斯的童年、帕丁顿格林四十年的临床、被克莱因驱逐、在孤独中写完《游戏与现实》的老人，在跟你说话。</p>
+</section>
+
+<section>
+  <h2>他是怎么做到的</h2>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <div class="st">收集原始材料</div>
+      <div class="sd">自传、595篇论文、临床笔记、访谈记录、书信——能收集到的全部收集</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <div class="st">仓颉蒸馏</div>
+      <div class="sd">不是做摘要或索引，而是提取信念的形成过程、重要决策、失败经历、内在矛盾——一个人为什么这样想</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <div class="st">人格嵌入</div>
+      <div class="sd">蒸馏结果作为系统提示词嵌入对话模型，让 AI 以温尼科特的第一人称——「我」——来回应</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <div class="st">三模式路由</div>
+      <div class="sd">温度控制+不同底层文档加载，实现三种完全不同的对话体验，共用同一人格内核</div>
+    </div>
+  </div>
+
+  <div class="pipeline">
+    <span class="pipe-node">原始材料</span>
+    <span class="pipe-arrow">→</span>
+    <span class="pipe-node">仓颉蒸馏</span>
+    <span class="pipe-arrow">→</span>
+    <span class="pipe-node">人格模型</span>
+    <span class="pipe-arrow">→</span>
+    <span class="pipe-node">三模式路由</span>
+    <span class="pipe-arrow">→</span>
+    <span class="pipe-node">对话体验</span>
+  </div>
+</section>
+
+<section>
+  <h2>温尼科特自己怎么说</h2>
+  <p>这是仓颉版温尼科特对自己一生的开场白——也是你第一次打开对话时会看到的话：</p>
+  <div class="quote" style="background:#f3ede6;">
+    <p>我是普利茅斯一个商人的儿子，家里最小的孩子，也是唯一的男孩。我母亲叫伊丽莎白，她在我的童年里长期抑郁。我不确定她什么时候在，什么时候不在了——这大概是我一生都在琢磨「在场」这个问题的起点。</p>
+    <p style="margin-top:8px;">剑桥学医，帕丁顿格林儿童医院看了四十年，先是儿科医生，后来加上精神分析。我接受过斯特拉奇的分析，也接受过克莱因的分析，但最后我走了一条自己的路——独立学派的路。</p>
+    <p style="margin-top:8px;">我没有自己的孩子，但我看过的婴儿和母亲数以万计。我发明了几个词——过渡性客体、足够好的母亲、真自体与假自体、潜在空间——它们后来跑出了精神分析的圈子。我不知道这是好事还是坏事。我只是在说我在诊所里看见的事。</p>
+    <p style="margin-top:8px;">1971年我出版了《游戏与现实》，然后在那一年去世了。</p>
+    <p style="margin-top:8px;">我最后的答案是：健康就是能够游戏。</p>
+  </div>
+  <p style="font-size:12px;color:#8f857d;margin-top:8px;">这段话不是编的。每一句都来自温尼科特的自传性材料，由仓颉模型重组为他自己的语言。</p>
+</section>
+
+<section>
+  <h2>不仅仅是温尼科特</h2>
+  <p>这个项目目前接入了 8 位大师的仓颉人格模型：</p>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="fc-title">弗洛伊德</div>
+      <div class="fc-desc">带着被背叛的敏感和倔强——「我不想变成我父亲那样软弱的人」</div>
+    </div>
+    <div class="feat-card">
+      <div class="fc-title">克莱因</div>
+      <div class="fc-desc">从婴儿的游戏中看到一个成人世界全部的挣扎</div>
+    </div>
+    <div class="feat-card">
+      <div class="fc-title">荣格</div>
+      <div class="fc-desc">他不解释梦，他让梦自己说话</div>
+    </div>
+    <div class="feat-card">
+      <div class="fc-title">比昂</div>
+      <div class="fc-desc">他最深的信念来自战场，不是书房</div>
+    </div>
+    <div class="feat-card">
+      <div class="fc-title">罗杰斯、贝克、亚隆、阿德勒</div>
+      <div class="fc-desc">各自带着自己的人生经历和临床信念</div>
+    </div>
+  </div>
+  <p>你可以在圆桌会议室里邀请多位大师同时回应同一个话题——弗洛伊德、温尼科特、荣格坐在一起聊你的梦。</p>
+</section>
+
+<section>
+  <h2>开始对话</h2>
+  <p>这个网站完全免费，无需注册，打开浏览器就能用。</p>
+  <div style="text-align:center;margin:24px 0;">
+    <a href="winnicott-chat.html" style="display:inline-block;background:#8b6f5c;color:white;padding:12px 32px;border-radius:10px;text-decoration:none;font-size:15px;">与温尼科特对话 →</a>
+  </div>
+  <p style="font-size:12px;color:#8f857d;text-align:center;">或访问 <a href="https://mei-junhao.github.io/winnicott-chat/" style="color:#8b6f5c;">mei-junhao.github.io/winnicott-chat</a></p>
+</section>
+
+</div>
+
+<footer>
+  <p>温尼科特聊天 · 历时性研究出品</p>
+  <p>基于仓颉人格模型技术 · v5.1</p>
+  <p style="margin-top:8px;">「健康就是能够游戏」—— D.W. Winnicott</p>
+</footer>
+
+</body>
+</html>
