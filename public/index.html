@@ -170,6 +170,15 @@
     <span class="arrow">前往 →</span>
   </div>
 
+  <div class="card" onclick="openModeOverlay('susan_johnson')" data-master="susan_johnson">
+    <div class="circle" style="background:#FBEAF0;color:#D4537E;">SJ</div>
+    <div class="info">
+      <div class="name">苏珊·约翰逊</div>
+      <div class="desc">EFT创始人 · 情感聚焦 · 依恋联结 · 爱的修复</div>
+    </div>
+    <span class="arrow">前往 →</span>
+  </div>
+
   <div class="msg-section">
     <p>你还想与哪位大师对话？写下名字发送给我们</p>
     <div class="msg-row">
@@ -302,6 +311,15 @@ var MODE_OPTIONS = {
       {temp:20, title:'聊聊勇气', sub:'温和的个体心理学对话，自卑与超越'},
       {temp:60, title:'改变从今天开始', sub:'目的论视角下的人际关系与自由'},
       {temp:90, title:'个体心理学研讨', sub:'社会兴趣、生活风格、创造性自我的系统探讨'}
+    ]
+  },
+  susan_johnson: {
+    name: '苏珊·约翰逊',
+    url: 'master-chat.html?master=susan_johnson',
+    modes: [
+      {temp:20, title:'情感探索', sub:'跟随情绪线索深入'},
+      {temp:60, title:'关系模式分析', sub:'EFT框架下的关系对话'},
+      {temp:90, title:'EFT理论与实操', sub:'情感聚焦疗法的系统学习'}
     ]
   }
 };
