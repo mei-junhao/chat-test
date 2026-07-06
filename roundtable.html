@@ -286,11 +286,16 @@ var MASTERS = {
     avatar:'', sub:'个体心理学 · 自卑与超越 · 勇气',
     kb:'adler-knowledge.md', accent:'#C49A3C', light:'#F8F0D8',
     hint:'暂未接入仓颉模型，用原文档交流',
-    intro:'我是阿德勒。个体心理学的创始人。我相信人的一切行为都有目的，而自卑感恰恰是推动你超越自己的力量。别问过去为什么，问你现在想成为什么。' }
+    intro:'我是阿德勒。个体心理学的创始人。我相信人的一切行为都有目的，而自卑感恰恰是推动你超越自己的力量。别问过去为什么，问你现在想成为什么。' },
+  susan_johnson: { name:'苏珊·约翰逊', initial:'SJ', icon:'💞',
+    avatar:'', sub:'EFT创始人 · 情感聚焦 · 依恋修复',
+    kb:'sue-johnson-perspective.md', accent:'#D4537E', light:'#FBEAF0',
+    hint:'她的理论来自看伴侣关系中的情绪循环——不是谁对谁错的问题',
+    intro:'我是苏珊·约翰逊。我花了四十年看人在爱里怎么受伤、怎么修复。我不是来告诉你谁对谁错的——我是来看你和你的重要他人之间那个循环是怎么转的。' }
 };
 
 // Masters not suitable per user: Lacan, Bion
-var AVAILABLE_KEYS = ['freud','klein','jung','rogers','beck','yalom','adler'];
+var AVAILABLE_KEYS = ['freud','klein','jung','rogers','beck','yalom','adler','susan_johnson'];
 var PERMANENT_KEY = 'winnicott';
 var allMasterKeys = [PERMANENT_KEY].concat(AVAILABLE_KEYS);
 
@@ -306,7 +311,7 @@ var fontSize = 100;  // percentage
 var respondRounds = 2;  // 1 = no serial rounds, 2 = with serial rounds
 
 // ====== Serial order: Winnicott always last ======
-var SERIAL_ORDER = ['freud','jung','klein','rogers','beck','yalom','adler'];
+var SERIAL_ORDER = ['freud','jung','klein','rogers','beck','yalom','adler','susan_johnson'];
 
 function getSerialOrder(repliedKeys) {
   var order = [];

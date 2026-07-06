@@ -87,6 +87,7 @@
     .messages { padding:14px 14px 145px; } .input-area { padding:6px 10px 10px; } .msg .bubble { max-width:100%; font-size:14px; }
     .header h1 { font-size:16px; } .header.compact h1 { font-size:13px; } .settings-panel.open { padding:12px 14px; }
     .settings-panel h3 { font-size:12px; } .settings-row label { font-size:11px; width:60px; } .settings-row input { font-size:12px; }
+    .disclaimer { font-size:10px; padding:2px 12px 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   }
   @media (max-width:400px) {
     .settings-panel.open { padding:10px 12px; } .settings-row { flex-wrap:wrap; } .settings-row label { width:100%; font-size:11px; }
@@ -254,6 +255,9 @@
       <div class="history-empty" id="historyEmpty" data-i18n="history-empty">暂无历史对话</div>
     </div>
     <div id="changelogContent" style="display:none;margin-top:10px;background:var(--light-accent);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text);line-height:1.8;max-height:180px;overflow-y:auto;">
+      <p><strong style="color:var(--text);">v5.2</strong> (2026-07-06)<br>
+      • 💞 新增大师：苏珊·约翰逊（EFT创始人，情感聚焦疗法）<br>
+      • 📱 移动端底部紧凑化，释放回答区空间</p>
       <p><strong style="color:var(--text);">v5.1</strong> (2026-07-05)<br>
       • 🏠 首页新增多大师圆桌对话入口<br>
       • 🔧 修复线路检测误报<br>
@@ -537,6 +541,28 @@ var MASTERS = {
     ],
     updateTitle:'阿德勒来了！',
     updateMsg:'• 🧭 <strong>新大师入驻</strong>：阿德勒个体心理学正式加入<br>• 💬 <strong>交心模式</strong>：像朋友一样聊聊勇气、自卑与超越<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于个体心理学方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习个体心理学理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
+  },
+  susan_johnson: {
+    name:'苏珊·约翰逊', initial:'SJ', icon:'💞',
+    avatar:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Susan_Johnson.jpg/120px-Susan_Johnson.jpg',
+    sub:'EFT创始人 · 情感聚焦 · 依恋联结 · 爱的修复',
+    kb:'sue-johnson-knowledge.md', kbCangjie:'sue-johnson-perspective.md', title:'与苏珊·约翰逊对话',
+    introTitle:'你在爱里循环的是什么？', introDesc:'情感聚焦疗法（EFT）——看你的情绪如何塑造关系模式',
+    langTip:'💡 一段让你困扰的关系，或一个反复出现的情绪模式，是最好的起点。',
+    disclaimer:'此对话由 AI 模拟苏珊·约翰逊EFT框架生成，非临床治疗建议。',
+    accent:'#D4537E', lightAccent:'#FBEAF0', bg:'#faf0f3', border:'#e8cdd0',
+    hints:[
+      {icon:'💞', text:'关系中的循环', sub:'描述你和伴侣的一个争吵模式'},
+      {icon:'😢', text:'背后的情绪', sub:'那个争吵下你真正感受到的是什么？'},
+      {icon:'🛡️', text:'依恋创伤', sub:'一段让你感到不安全的关系经历'}
+    ],
+    modes:[
+      {temp:20, title:'情感探索', sub:'跟随情绪线索深入'},
+      {temp:60, title:'关系模式分析', sub:'EFT框架下的关系对话'},
+      {temp:90, title:'EFT理论与实操', sub:'情感聚焦疗法的系统学习'}
+    ],
+    updateTitle:'苏珊·约翰逊来了！',
+    updateMsg:'• 💞 <strong>新大师入驻</strong>：EFT创始人苏珊·约翰逊正式加入<br>• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的苏珊一样聊天<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于EFT女娲框架给出关系干预建议<br>• 📖 <strong>教学模式</strong>：系统学习情感聚焦疗法理论<br><br><strong>🆕 更多功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应<br>• 🔐 <strong>自定义API</strong>：保存后自动使用'
   }
 };
 
