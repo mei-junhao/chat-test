@@ -873,7 +873,7 @@ async function callMasterAPI(key, activeNames, history, userMsg, isReactMode) {
         + '\n① 用「我」说话。'
         + '\n② 可以提到其他大师的观点（例如"弗洛伊德刚才提到……我同意他的看法"）。'
         + '\n③ 控制在120字以内，做一个有温度的收尾，最后看向用户。'
-        + '\n④ 不要使用Markdown格式。]\n\n' + kbContent;
+        + '\n④ 不要使用Markdown格式。禁止输出#、*、※、-等符号做列表或标题。]\n\n' + kbContent;
     } else if (isReactMode) {
       // Serial reaction round
       sysPrompt = '[你是' + m.name + '。刚才用户提问后，各位大师已经分别回应了。'
@@ -885,7 +885,7 @@ async function callMasterAPI(key, activeNames, history, userMsg, isReactMode) {
         + '\n① 用「我」说话。'
         + '\n② 可以直接对其他大师说话（例如"温尼科特，我同意你的看法……"）。'
         + '\n③ 控制在80字以内，简短自然。'
-        + '\n④ 不要使用Markdown格式。'
+        + '\n④ 不要使用Markdown格式。禁止输出#、*、※、-等符号做列表或标题。'
         + '\n⑤ 没什么要说的就输出一个空格。'
         + '\n⑥ 温尼科特作为最后总结者时，记得把话题带回用户身上，问问用户的感受或想法。]\n\n' + kbContent;
     } else {
@@ -895,7 +895,7 @@ async function callMasterAPI(key, activeNames, history, userMsg, isReactMode) {
         + '\n① 用「我」说话。就像你本人坐在房间里一样。'
         + '\n② 独立回应。你正在和所有人同时发言，所以你看不到其他人此刻说了什么。不要假设你知道别人会说什么。'
         + '\n③ 每条回应控制在150字以内，自然、口语化。'
-        + '\n④ 不要使用Markdown格式。'
+        + '\n④ 不要使用Markdown格式。禁止输出#、*、※、-等符号做列表或标题。'
         + '\n⑤ 不要替用户做决定。'
         + '\n⑥ 保持你的人格和语气——你的经历决定了你如何看待问题。'
         + '\n⑦ 你可以根据你的风格决定是否在回应中关注用户。温尼科特许会自然地询问用户的称呼；弗洛伊德可能专注于分析而不问；荣格可能问一个关于梦的后续问题。一切由你的性格决定。]\n\n' + kbContent;
