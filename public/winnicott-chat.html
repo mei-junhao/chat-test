@@ -595,7 +595,10 @@
     <div id="changelogContent" style="display:none;margin-top:10px;background:var(--light-accent);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text);line-height:1.8;max-height:180px;overflow-y:auto;">
       <p><strong style="color:var(--text);">v5.1</strong> (2026-07-05)<br>
       • 🏠 首页新增多大师圆桌对话入口<br>
-      • 🔧 修复线路检测误报</p>
+      • 🔧 修复线路检测误报<br>
+      • 🛡️ 默认 API 大师上限 2→3<br>
+      • 🎯 圆桌新增预设组合 + 场景推荐大师<br>
+      • 🔄 圆桌切换方案B-回合制（串行逐一回应，温尼科特最后总结）</p>
       <p><strong style="color:var(--text);">v5.0</strong> (2026-07-05)<br>
       • 🪑 新增圆桌会议室——多大师同空间对话<br>
       • 🧠 圆桌支持 @ 指定回应、大师互评、字体缩放<br>
@@ -1297,15 +1300,15 @@ function closeReward() {
 // Update announcement
 function closeUpdate() {
   document.getElementById('updateOverlay').classList.remove('show');
-  localStorage.setItem('winnicott_last_ver', 'v43');
+  localStorage.setItem('winnicott_last_ver', 'v51');
 }
 (function showUpdateIfNew() {
   var lastVer = localStorage.getItem('winnicott_last_ver') || '';
-  if (lastVer !== 'v43') {
+  if (lastVer !== 'v51') {
     setTimeout(function() {
       var el=document.getElementById('updateOverlay');
       el.querySelector('.u-title').textContent='🎉 温尼科特·升级公告';
-      el.querySelector('.u-msg').innerHTML='• 💬 <strong>交心模式升级</strong>：基于仓颉人格模型深度蒸馏，像跟真实的温尼科特一样聊天——他有自己的经历、伤痛和故事<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于逐字稿蒸馏，像一次次跨越历史的温和对话<br>• 📖 <strong>教学模式</strong>：系统学习温尼科特理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）';
+      el.querySelector('.u-msg').innerHTML='• 💬 <strong>交心模式升级</strong>：基于仓颉人格模型深度蒸馏，像跟真实的温尼科特一样聊天——他有自己的经历、伤痛和故事<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于逐字稿蒸馏，像一次次跨越历史的温和对话<br>• 📖 <strong>教学模式</strong>：系统学习温尼科特理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话，温尼科特常驻<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量';
       el.classList.add('show');
     }, 600);
   }

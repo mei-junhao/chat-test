@@ -256,7 +256,10 @@
     <div id="changelogContent" style="display:none;margin-top:10px;background:var(--light-accent);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text);line-height:1.8;max-height:180px;overflow-y:auto;">
       <p><strong style="color:var(--text);">v5.1</strong> (2026-07-05)<br>
       • 🏠 首页新增多大师圆桌对话入口<br>
-      • 🔧 修复线路检测误报</p>
+      • 🔧 修复线路检测误报<br>
+      • 🛡️ 默认 API 大师上限 2→3<br>
+      • 🎯 圆桌新增预设组合 + 场景推荐大师<br>
+      • 🔄 圆桌切换方案B-回合制（串行逐一回应，温尼科特最后总结）</p>
       <p><strong style="color:var(--text);">v5.0</strong> (2026-07-05)<br>
       • 🪑 新增圆桌会议室——多大师同空间对话<br>
       • 🧠 圆桌支持 @ 指定回应、大师互评、字体缩放、保存/加载对话<br>
@@ -379,7 +382,7 @@ var MASTERS = {
       {temp:90, title:'元心理学研讨', sub:'从《释梦》到《超越快乐原则》'}
     ],
     updateTitle:'弗洛伊德·升级公告',
-    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的弗洛伊德一样聊天——他有自己的经历、伤痛和故事<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于精神分析方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习精神分析理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）'
+    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的弗洛伊德一样聊天——他有自己的经历、伤痛和故事<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于精神分析方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习精神分析理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
   },
   klein: {
     name:'克莱因', initial:'K', icon:'👩',
@@ -401,7 +404,7 @@ var MASTERS = {
       {temp:90, title:'投射性认同研讨', sub:'克莱因理论体系的系统探讨'}
     ],
     updateTitle:'克莱因·升级公告',
-    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的克莱因一样聊天——她的客体关系视角来自真实的临床经历<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于客体关系方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习克莱因理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）'
+    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的克莱因一样聊天——她的客体关系视角来自真实的临床经历<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于客体关系方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习克莱因理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
   },
   jung: {
     name:'荣格', initial:'J', icon:'🔮',
@@ -423,7 +426,7 @@ var MASTERS = {
       {temp:90, title:'分析心理学论争', sub:'原型理论、共时性到炼金术'}
     ],
     updateTitle:'荣格·升级公告',
-    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的荣格一样聊天——他的集体无意识来自一生的探索经历<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于分析心理学方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习分析心理学理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）'
+    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的荣格一样聊天——他的集体无意识来自一生的探索经历<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于分析心理学方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习分析心理学理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
   },
   bion: {
     name:'比昂', initial:'B', icon:'🧠',
@@ -445,7 +448,7 @@ var MASTERS = {
       {temp:90, title:'走向O', sub:'晚期比昂思想，无记忆无欲望的探索'}
     ],
     updateTitle:'比昂·升级公告',
-    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的比昂一样聊天——他的思想来自战争、分析与团体的真实经验<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于比昂方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习比昂思想<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）'
+    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的比昂一样聊天——他的思想来自战争、分析与团体的真实经验<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于比昂方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习比昂思想<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
   },
   rogers: {
     name:'罗杰斯', initial:'R', icon:'🌱',
@@ -467,7 +470,7 @@ var MASTERS = {
       {temp:90, title:'人本主义研讨', sub:'共情、真诚、自我实现的理论实践'}
     ],
     updateTitle:'罗杰斯·升级公告',
-    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的罗杰斯一样聊天——他的以人为中心来自真实的共情实践<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于人本主义方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习人本主义理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）'
+    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的罗杰斯一样聊天——他的以人为中心来自真实的共情实践<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于人本主义方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习人本主义理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
   },
   beck: {
     name:'贝克', initial:'Bk', icon:'🧪',
@@ -489,7 +492,7 @@ var MASTERS = {
       {temp:90, title:'认知疗法研讨', sub:'从认知歪曲到图式治疗的系统方法'}
     ],
     updateTitle:'贝克·升级公告',
-    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的贝克一样聊天——他的认知疗法来自对来访者真实困境的观察<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于认知行为方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习认知疗法理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）'
+    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的贝克一样聊天——他的认知疗法来自对来访者真实困境的观察<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于认知行为方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习认知疗法理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
   },
   yalom: {
     name:'亚隆', initial:'Y', icon:'📖',
@@ -511,7 +514,7 @@ var MASTERS = {
       {temp:90, title:'存在主义研讨', sub:'死亡、自由、孤独、无意义的系统探讨'}
     ],
     updateTitle:'亚隆·升级公告',
-    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的亚隆一样聊天——他的存在主义思考来自几十年与死亡焦虑共处的临床经验<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于存在主义方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习存在主义理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）'
+    updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的亚隆一样聊天——他的存在主义思考来自几十年与死亡焦虑共处的临床经验<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于存在主义方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习存在主义理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
   },
   adler: {
     name:'阿德勒', initial:'A', icon:'🧭',
@@ -533,7 +536,7 @@ var MASTERS = {
       {temp:90, title:'个体心理学研讨', sub:'社会兴趣、生活风格、创造性自我的系统探讨'}
     ],
     updateTitle:'阿德勒来了！',
-    updateMsg:'• 🧭 <strong>新大师入驻</strong>：阿德勒个体心理学正式加入<br>• 💬 <strong>交心模式</strong>：像朋友一样聊聊勇气、自卑与超越<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于个体心理学方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习个体心理学理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）'
+    updateMsg:'• 🧭 <strong>新大师入驻</strong>：阿德勒个体心理学正式加入<br>• 💬 <strong>交心模式</strong>：像朋友一样聊聊勇气、自卑与超越<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于个体心理学方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习个体心理学理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
   }
 };
 
@@ -883,9 +886,9 @@ function showChangelog(){
     document.querySelector('.header').classList.add('compact');
   }
   // Update announcement
-  // Per-master update popup (v4.3)
+  // Per-master update popup (v5.1)
   var mk = 'mc_last_ver_' + masterKey;
-  if(localStorage.getItem(mk) !== 'v43'){
+  if(localStorage.getItem(mk) !== 'v51'){
     setTimeout(function(){
       var el=document.getElementById('updateOverlay');
       el.querySelector('.u-title').textContent=M.updateTitle||'🎉 更新了！';
@@ -895,7 +898,7 @@ function showChangelog(){
   }
   function closeMCUpdate(){
     document.getElementById('updateOverlay').style.display='none';
-    localStorage.setItem(mk,'v43');
+    localStorage.setItem(mk,'v51');
   }
   window.closeMCUpdate = closeMCUpdate;
   // Restore conversation
