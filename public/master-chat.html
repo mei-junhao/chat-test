@@ -48,6 +48,13 @@
   .intro .hints { margin-top:18px; display:flex; flex-direction:column; gap:10px; align-items:center; }
   .intro .start-btn { display:block; width:220px; padding:12px 0; border:1px solid var(--border); border-radius:var(--btn-radius,22px); background:var(--card); cursor:pointer; font-family:inherit; font-size:15px; color:var(--text); transition:0.2s; }
   .intro .start-btn:hover { background:var(--light-accent); }
+  .intro .hint-btn { display:block; width:100%; max-width:280px; padding:10px 14px; border:1px solid var(--border); border-radius:12px; background:var(--card); cursor:pointer; font-family:inherit; font-size:13px; color:var(--text); transition:0.15s; text-align:left; line-height:1.5; }
+  .intro .hint-btn:hover { border-color:var(--accent); background:var(--light-accent); }
+  .intro .hint-btn .hb-icon { font-size:18px; margin-right:8px; }
+  .intro .hint-btn .hb-text { font-weight:500; }
+  .intro .hint-btn .hb-sub { font-size:11px; color:var(--muted); display:block; margin-left:30px; }
+  .intro .back-btn { background:none; border:none; font-size:11px; color:var(--muted); cursor:pointer; font-family:inherit; padding:4px 0; margin-top:4px; }
+  .intro .back-btn:hover { color:var(--text); }
   .intro .lang-tip { font-size:12px; color:var(--muted); margin-top:22px; line-height:1.6; }
 
   .msg { display:flex; gap:12px; animation:fadeIn 0.35s ease; }
@@ -307,6 +314,7 @@
       <h2 id="introTitle">准备开始</h2>
       <p class="sub" id="introDesc"></p>
       <div class="hints" id="greetingBtns"></div>
+      <div class="hints" id="hintBtns" style="display:none;"></div>
       <p class="lang-tip" id="langTip">选择一个话题开始对话</p>
     </div>
   </div>
@@ -375,15 +383,10 @@ var MASTERS = {
     langTip:'💡 自由联想是最好的起点——随意说出脑海中的一切。',
     disclaimer:'此对话由 AI 模拟弗洛伊德思维框架生成，非临床治疗建议。',
     accent:'#5b3a8c', lightAccent:'#EEEDFE', bg:'#f5f0eb', border:'#d5c8e0',
-    hints:[
-      {icon:'🌙', text:'解一个梦', sub:'把你的梦境告诉我'},
-      {icon:'🛋️', text:'自由联想', sub:'随意说出脑海中的一切'},
-      {icon:'🧩', text:'分析口误', sub:'你最近犯过什么有趣的错误？'}
-    ],
     modes:[
-      {temp:20, title:'沙发上的倾诉', sub:'自由联想式的倾听'},
-      {temp:60, title:'释梦与解析', sub:'无意识的经典探索路径'},
-      {temp:90, title:'元心理学研讨', sub:'从《释梦》到《超越快乐原则》'}
+      {temp:20, hints:[{icon:'🌙', text:'解一个梦', sub:'把你的梦境告诉我'},{icon:'🛋️', text:'自由联想', sub:'随意说出脑海中的一切'},{icon:'👶', text:'童年记忆', sub:'你最早的记忆是什么？'}], title:'沙发上的倾诉', sub:'自由联想式的倾听'},
+      {temp:60, hints:[{icon:'🧩', text:'分析口误', sub:'你最近犯过什么有趣的错误？'},{icon:'💤', text:'反复做的梦', sub:'同一个梦出现多次'},{icon:'🔍', text:'日常行为分析', sub:'一个你反复做但不知道为什么的事'}], title:'释梦与解析', sub:'无意识的经典探索路径'},
+      {temp:90, hints:[{icon:'📚', text:'释梦研讨', sub:'从《释梦》第一章开始'},{icon:'🧠', text:'俄狄浦斯情结', sub:'这个理论在今天的争议'},{icon:'🏛️', text:'精神分析运动史', sub:'弗洛伊德与荣格的分裂'}], title:'元心理学研讨', sub:'从《释梦》到《超越快乐原则》'}
     ],
     updateTitle:'弗洛伊德·升级公告',
     updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的弗洛伊德一样聊天——他有自己的经历、伤痛和故事<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于精神分析方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习精神分析理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
@@ -397,15 +400,10 @@ var MASTERS = {
     langTip:'💡 一个童年早期的记忆，或一个孩子的行为片段，是最好的起点。',
     disclaimer:'此对话由 AI 模拟克莱因思维框架生成，非临床治疗建议。',
     accent:'#3a8c5b', lightAccent:'#EAF3DE', bg:'#f0f5ea', border:'#c8ddc0',
-    hints:[
-      {icon:'🧸', text:'分析游戏', sub:'描述一个孩子的玩法'},
-      {icon:'💔', text:'嫉羡与感恩', sub:'谈谈你内心深处的嫉羡'},
-      {icon:'🎭', text:'投射认同', sub:'你在关系中感受到了什么？'}
-    ],
     modes:[
-      {temp:20, title:'内在小孩的声音', sub:'关注早期焦虑与无意识幻想'},
-      {temp:60, title:'偏执-分裂与抑郁', sub:'客体关系视角的临床对话'},
-      {temp:90, title:'投射性认同研讨', sub:'克莱因理论体系的系统探讨'}
+      {temp:20, hints:[{icon:'🧸', text:'分析游戏', sub:'描述一个孩子的玩法'},{icon:'👶', text:'早期记忆', sub:'你最早的童年记忆'},{icon:'💔', text:'内心冲突', sub:'你内心深处的嫉羡或愤怒'}], title:'内在小孩的声音', sub:'关注早期焦虑与无意识幻想'},
+      {temp:60, hints:[{icon:'🎭', text:'投射认同', sub:'你在关系中感受到了什么？'},{icon:'🔄', text:'偏执-分裂位', sub:'描述一段让你分裂的关系'},{icon:'😢', text:'抑郁位', sub:'你什么时候开始感到愧疚？'}], title:'偏执-分裂与抑郁', sub:'客体关系视角的临床对话'},
+      {temp:90, hints:[{icon:'📖', text:'客体关系研讨', sub:'从克莱因到比昂'},{icon:'🧪', text:'儿童分析', sub:'克莱因的游戏技术'},{icon:'🔄', text:'位态理论', sub:'偏执-分裂位与抑郁位的摆动'}], title:'投射性认同研讨', sub:'克莱因理论体系的系统探讨'}
     ],
     updateTitle:'克莱因·升级公告',
     updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的克莱因一样聊天——她的客体关系视角来自真实的临床经历<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于客体关系方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习克莱因理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
@@ -419,15 +417,10 @@ var MASTERS = {
     langTip:'💡 一个梦、一个反复出现的意象、一种难以名状的感觉——都值得探索。',
     disclaimer:'此对话由 AI 模拟荣格分析心理学框架生成，非临床治疗建议。',
     accent:'#8c6b3a', lightAccent:'#FAEEDA', bg:'#f5f0e5', border:'#ddd0b8',
-    hints:[
-      {icon:'🌙', text:'分析梦境', sub:'讲一个你最近做的梦'},
-      {icon:'🔯', text:'探索原型', sub:'你生命中有哪些反复出现的模式？'},
-      {icon:'☯️', text:'自性化', sub:'你在人生的哪个阶段？'}
-    ],
     modes:[
-      {temp:20, title:'做个梦给我听', sub:'倾听你的梦境与内在意象'},
-      {temp:60, title:'原型与象征', sub:'集体无意识与心理类型探索'},
-      {temp:90, title:'分析心理学论争', sub:'原型理论、共时性到炼金术'}
+      {temp:20, hints:[{icon:'🌙', text:'分析梦境', sub:'讲一个你最近做的梦'},{icon:'🔯', text:'探索原型', sub:'你生命中有哪些反复出现的模式？'},{icon:'🎨', text:'主动想象', sub:'尝试一次主动想象练习'}], title:'做个梦给我听', sub:'倾听你的梦境与内在意象'},
+      {temp:60, hints:[{icon:'☯️', text:'自性化', sub:'你在人生的哪个阶段？'},{icon:'🗣️', text:'人格面具与阴影', sub:'你戴着的面具和你藏起的部分'},{icon:'💫', text:'共时性', sub:'你经历过有意义的巧合吗？'}], title:'原型与象征', sub:'集体无意识与心理类型探索'},
+      {temp:90, hints:[{icon:'🧪', text:'原型理论研讨', sub:'阿尼玛/阿尼姆斯到自性'},{icon:'📚', text:'红书探索', sub:'荣格1913-1917年的自我实验'},{icon:'🔮', text:'共时性现象学', sub:'科学之外的知识如何可能？'}], title:'分析心理学论争', sub:'原型理论、共时性到炼金术'}
     ],
     updateTitle:'荣格·升级公告',
     updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的荣格一样聊天——他的集体无意识来自一生的探索经历<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于分析心理学方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习分析心理学理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
@@ -441,15 +434,10 @@ var MASTERS = {
     langTip:'💡 不说论据，不说故事。从你"说不清楚"的地方开始。',
     disclaimer:'此对话由 AI 模拟比昂思维框架生成，非临床治疗建议。',
     accent:'#6B4C8C', lightAccent:'#E8E0F0', bg:'#f4f0f7', border:'#d5c8e5',
-    hints:[
-      {icon:'🫙', text:'容器与容纳', sub:'什么正在压垮你？'},
-      {icon:'🌀', text:'基本假设', sub:'你的团体在逃避什么？'},
-      {icon:'◯', text:'接近 O', sub:'说一件"说不清楚"的事'}
-    ],
     modes:[
-      {temp:20, title:'容纳你的困惑', sub:'不急于解释，让思考自然浮现'},
-      {temp:60, title:'α功能与转化', sub:'容器-容纳模型的实践对话'},
-      {temp:90, title:'走向O', sub:'晚期比昂思想，无记忆无欲望的探索'}
+      {temp:20, hints:[{icon:'🫙', text:'容器与容纳', sub:'什么正在压垮你？'},{icon:'🗣️', text:'说不出口的事', sub:'有一件事你从没对人说过'},{icon:'😶', text:'沉默的感觉', sub:'你什么时候感到语言不够用？'}], title:'容纳你的困惑', sub:'不急于解释，让思考自然浮现'},
+      {temp:60, hints:[{icon:'🌀', text:'基本假设', sub:'你的团体在逃避什么？'},{icon:'⚡', text:'α功能与β元素', sub:'一个难以消化的情绪体验'},{icon:'🔄', text:'容器-容纳', sub:'你在容纳谁的什么？'}], title:'α功能与转化', sub:'容器-容纳模型的实践对话'},
+      {temp:90, hints:[{icon:'◯', text:'接近 O', sub:'说一件说不清楚的事'},{icon:'📖', text:'无记忆无欲望', sub:'晚期比昂思想的实践'},{icon:'🧠', text:'思维理论', sub:'思维的起源与发展的系统探讨'}], title:'走向O', sub:'晚期比昂思想，无记忆无欲望的探索'}
     ],
     updateTitle:'比昂·升级公告',
     updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的比昂一样聊天——他的思想来自战争、分析与团体的真实经验<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于比昂方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习比昂思想<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
@@ -463,15 +451,10 @@ var MASTERS = {
     langTip:'💡 从你的感受开始——不用分析，不用解释。',
     disclaimer:'此对话由 AI 模拟罗杰斯人本主义框架生成，非临床治疗建议。',
     accent:'#B8734A', lightAccent:'#F0E8E0', bg:'#faf5f0', border:'#e0d5c8',
-    hints:[
-      {icon:'🌱', text:'探索自我', sub:'你真正想要的是什么？'},
-      {icon:'🤝', text:'关系困境', sub:'一段让你感到不被接纳的关系'},
-      {icon:'🎭', text:'真实性', sub:'什么时候觉得"不是在做自己"？'}
-    ],
     modes:[
-      {temp:20, title:'我在听', sub:'无条件积极关注，不评判的陪伴'},
-      {temp:60, title:'一起探索', sub:'以人为中心的成长对话'},
-      {temp:90, title:'人本主义研讨', sub:'共情、真诚、自我实现的理论实践'}
+      {temp:20, hints:[{icon:'🌱', text:'探索自我', sub:'你真正想要的是什么？'},{icon:'❤️', text:'真实感受', sub:'此刻你内心最真实的感受'},{icon:'🌀', text:'自我概念', sub:'你觉得真实的你和应该的你差距大吗？'}], title:'我在听', sub:'无条件积极关注，不评判的陪伴'},
+      {temp:60, hints:[{icon:'🤝', text:'关系困境', sub:'一段让你感到不被接纳的关系'},{icon:'🎭', text:'真实性', sub:'什么时候觉得不是在做自己？'},{icon:'🛤️', text:'成长方向', sub:'你感觉自己正往哪个方向走？'}], title:'一起探索', sub:'以人为中心的成长对话'},
+      {temp:90, hints:[{icon:'📚', text:'人本主义研讨', sub:'共情、真诚至自我实现'},{icon:'🧪', text:'来访者中心疗法', sub:'以人为中心治疗的核心条件'},{icon:'🌍', text:'人本主义教育', sub:'罗杰斯对教育的影响'}], title:'人本主义研讨', sub:'共情、真诚、自我实现的理论实践'}
     ],
     updateTitle:'罗杰斯·升级公告',
     updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的罗杰斯一样聊天——他的以人为中心来自真实的共情实践<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于人本主义方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习人本主义理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
@@ -485,15 +468,10 @@ var MASTERS = {
     langTip:'💡 描述一个让你困扰的具体情境。',
     disclaimer:'此对话由 AI 模拟贝克认知治疗框架生成，非临床治疗建议。',
     accent:'#4A6B8C', lightAccent:'#E0E8F0', bg:'#f0f4f8', border:'#c8d5e0',
-    hints:[
-      {icon:'💭', text:'分析自动思维', sub:'一个让你痛苦的念头'},
-      {icon:'🔍', text:'识别认知歪曲', sub:'思维在哪里走偏了'},
-      {icon:'🧪', text:'设计行为实验', sub:'检验一个恐惧的想法'}
-    ],
     modes:[
-      {temp:20, title:'理一理思路', sub:'识别自动思维，温和的认知梳理'},
-      {temp:60, title:'检验这个信念', sub:'苏格拉底式对话与合作经验主义'},
-      {temp:90, title:'认知疗法研讨', sub:'从认知歪曲到图式治疗的系统方法'}
+      {temp:20, hints:[{icon:'💭', text:'分析自动思维', sub:'一个让你痛苦的念头'},{icon:'😰', text:'焦虑时刻', sub:'你在什么情况下最焦虑？'},{icon:'🔄', text:'思维记录', sub:'做一次思维记录练习'}], title:'理一理思路', sub:'识别自动思维，温和的认知梳理'},
+      {temp:60, hints:[{icon:'🔍', text:'识别认知歪曲', sub:'思维在哪里走偏了'},{icon:'⚖️', text:'证据检验', sub:'你有什么证据支持这个想法？'},{icon:'🧪', text:'设计行为实验', sub:'检验一个恐惧的想法'}], title:'检验这个信念', sub:'苏格拉底式对话与合作经验主义'},
+      {temp:90, hints:[{icon:'📖', text:'认知疗法研讨', sub:'从认知歪曲到图式治疗'},{icon:'🧠', text:'自动思维深层分析', sub:'核心信念的识别与修正'},{icon:'🏗️', text:'认知行为体系', sub:'CBT的第三波浪潮'}], title:'认知疗法研讨', sub:'从认知歪曲到图式治疗的系统方法'}
     ],
     updateTitle:'贝克·升级公告',
     updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的贝克一样聊天——他的认知疗法来自对来访者真实困境的观察<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于认知行为方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习认知疗法理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
@@ -507,15 +485,10 @@ var MASTERS = {
     langTip:'💡 此时此刻，你真实的感觉是什么？',
     disclaimer:'此对话由 AI 模拟亚隆存在主义治疗框架生成，非临床治疗建议。',
     accent:'#8C4A6B', lightAccent:'#F0E8F0', bg:'#f8f0f5', border:'#e0c8d5',
-    hints:[
-      {icon:'💀', text:'死亡焦虑', sub:'如果时间有限，你在做真正想做的事吗？'},
-      {icon:'🌊', text:'存在孤独', sub:'那种无人理解的感受'},
-      {icon:'🔄', text:'此时此刻', sub:'此刻你对我有什么感觉？'}
-    ],
     modes:[
-      {temp:20, title:'坐下来聊聊生死', sub:'存在议题的温和触碰'},
-      {temp:60, title:'此时此地', sub:'人际动力与存在关怀并行'},
-      {temp:90, title:'存在主义研讨', sub:'死亡、自由、孤独、无意义的系统探讨'}
+      {temp:20, hints:[{icon:'💀', text:'死亡焦虑', sub:'如果时间有限，你在做真正想做的事吗？'},{icon:'🌊', text:'存在孤独', sub:'那种无人理解的感受'},{icon:'❓', text:'无意义时刻', sub:'你什么时候觉得一切都没意义？'}], title:'坐下来聊聊生死', sub:'存在议题的温和触碰'},
+      {temp:60, hints:[{icon:'🔄', text:'此时此刻', sub:'此刻你对我有什么感觉？'},{icon:'🤝', text:'人际模式', sub:'你在关系中反复遇到的问题'},{icon:'📖', text:'讲个故事', sub:'用故事来描述你当前困境'}], title:'此时此地', sub:'人际动力与存在关怀并行'},
+      {temp:90, hints:[{icon:'📚', text:'存在主义研讨', sub:'死亡自由孤独无意义'},{icon:'🛋️', text:'团体治疗', sub:'亚隆的团体治疗理念'},{icon:'✍️', text:'文学与治疗', sub:'《当尼采哭泣》到《叔本华的治疗》'}], title:'存在主义研讨', sub:'死亡、自由、孤独、无意义的系统探讨'}
     ],
     updateTitle:'亚隆·升级公告',
     updateMsg:'• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的亚隆一样聊天——他的存在主义思考来自几十年与死亡焦虑共处的临床经验<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于存在主义方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习存在主义理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
@@ -529,15 +502,10 @@ var MASTERS = {
     langTip:'💡 如果你改变不了过去，那你要改变什么？',
     disclaimer:'此对话由 AI 模拟阿德勒个体心理学框架生成，非临床治疗建议。',
     accent:'#C49A3C', lightAccent:'#F8F0D8', bg:'#FCF8E8', border:'#E8DDB0',
-    hints:[
-      {icon:'🔥', text:'自卑与超越', sub:'你的自卑感在推动你，还是困住你？'},
-      {icon:'🕊️', text:'被讨厌的勇气', sub:'如果不在意别人的评价，你会怎么活？'},
-      {icon:'🧭', text:'目的论', sub:'不是因为过去才这样——是因为你要这样。'}
-    ],
     modes:[
-      {temp:20, title:'聊聊勇气', sub:'温和的个体心理学对话，自卑与超越'},
-      {temp:60, title:'改变从今天开始', sub:'目的论视角下的人际关系与自由'},
-      {temp:90, title:'个体心理学研讨', sub:'社会兴趣、生活风格、创造性自我的系统探讨'}
+      {temp:20, hints:[{icon:'🔥', text:'自卑与超越', sub:'你的自卑感在推动你还是困住你？'},{icon:'🌟', text:'生活目标', sub:'你目前的生活目标是什么？'},{icon:'👪', text:'家庭排行', sub:'你在家里的位置影响了现在的你吗？'}], title:'聊聊勇气', sub:'温和的个体心理学对话，自卑与超越'},
+      {temp:60, hints:[{icon:'🕊️', text:'被讨厌的勇气', sub:'如果不在意别人的评价你会怎么活？'},{icon:'🧭', text:'目的论', sub:'不是因为过去才这样是因为你要这样'},{icon:'🤝', text:'社会兴趣', sub:'你在多大程度上关心他人？'}], title:'改变从今天开始', sub:'目的论视角下的人际关系与自由'},
+      {temp:90, hints:[{icon:'📖', text:'个体心理学研讨', sub:'社会兴趣生活风格创造性自我'},{icon:'🧠', text:'自卑与超越', sub:'从自卑感到自我实现'},{icon:'🏫', text:'教育心理学', sub:'阿德勒对教育的贡献'}], title:'个体心理学研讨', sub:'社会兴趣、生活风格、创造性自我的系统探讨'}
     ],
     updateTitle:'阿德勒来了！',
     updateMsg:'• 🧭 <strong>新大师入驻</strong>：阿德勒个体心理学正式加入<br>• 💬 <strong>交心模式</strong>：像朋友一样聊聊勇气、自卑与超越<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于个体心理学方法论给出专业建议<br>• 📖 <strong>教学模式</strong>：系统学习个体心理学理论<br><br>三种模式可在 ⚙️ 设置中自由切换，温度默认为 60（咨询模式）<br><br><strong>🆕 更多新功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应，温尼科特最后总结<br>• 🔐 <strong>自定义API</strong>：保存后自动使用，不限大师数量'
@@ -551,15 +519,10 @@ var MASTERS = {
     langTip:'💡 一段让你困扰的关系，或一个反复出现的情绪模式，是最好的起点。',
     disclaimer:'此对话由 AI 模拟苏珊·约翰逊EFT框架生成，非临床治疗建议。',
     accent:'#D4537E', lightAccent:'#FBEAF0', bg:'#faf0f3', border:'#e8cdd0',
-    hints:[
-      {icon:'💞', text:'关系中的循环', sub:'描述你和伴侣的一个争吵模式'},
-      {icon:'😢', text:'背后的情绪', sub:'那个争吵下你真正感受到的是什么？'},
-      {icon:'🛡️', text:'依恋创伤', sub:'一段让你感到不安全的关系经历'}
-    ],
     modes:[
-      {temp:20, title:'情感探索', sub:'跟随情绪线索深入'},
-      {temp:60, title:'关系模式分析', sub:'EFT框架下的关系对话'},
-      {temp:90, title:'EFT理论与实操', sub:'情感聚焦疗法的系统学习'}
+      {temp:20, hints:[{icon:'💞', text:'关系中的循环', sub:'描述你和伴侣的一个争吵模式'},{icon:'😢', text:'背后的情绪', sub:'那个争吵下你真正感受到的是什么？'},{icon:'🛡️', text:'依恋创伤', sub:'一段让你感到不安全的关系经历'}], title:'情感探索', sub:'跟随情绪线索深入'},
+      {temp:60, hints:[{icon:'🔄', text:'情绪循环', sub:'你们之间那个恶性循环怎么转？'},{icon:'🎵', text:'舞步', sub:'谁会先伸手谁会先退？'},{icon:'💔', text:'依恋需求', sub:'那个争吵底下你想要的是什么？'}], title:'关系模式分析', sub:'EFT框架下的关系对话'},
+      {temp:90, hints:[{icon:'📚', text:'EFT理论研讨', sub:'情绪聚焦疗法的核心假设'},{icon:'🔬', text:'研究证据', sub:'EFT的疗效研究概述'},{icon:'🌍', text:'EFT的跨文化应用', sub:'哪些场景和关系适合EFT？'}], title:'EFT理论与实操', sub:'情感聚焦疗法的系统学习'}
     ],
     updateTitle:'苏珊·约翰逊来了！',
     updateMsg:'• 💞 <strong>新大师入驻</strong>：EFT创始人苏珊·约翰逊正式加入<br>• 💬 <strong>交心模式</strong>：基于仓颉人格模型深度蒸馏，像跟真实的苏珊一样聊天<br>• 🧑‍⚕️ <strong>咨询模式</strong>：基于EFT女娲框架给出关系干预建议<br>• 📖 <strong>教学模式</strong>：系统学习情感聚焦疗法理论<br><br><strong>🆕 更多功能</strong><br>• 🪑 <strong>圆桌会议室</strong>：多大师同空间对话<br>• 🎯 <strong>预设组合</strong>：经典搭配一键切换<br>• 🔁 <strong>方案B回合制</strong>：大师串行回应<br>• 🔐 <strong>自定义API</strong>：保存后自动使用'
@@ -702,20 +665,59 @@ async function loadSystemPrompt() {
 function showBanner(t){ var e=document.getElementById('banner'); e.textContent=t; e.style.display='block'; setTimeout(function(){e.style.display='none';},4000); }
 
 // ====== Chat ======
+var _selectedTemp = null;  // mode temperature selected by user
+
 function startChat(tip) {
   if (typeof tip === 'number') {
+    // Mode button clicked: show hints for this mode
     talkTemp = tip;
+    _selectedTemp = tip;
     updateTemp(tip);
-    loadSystemPrompt();  // reload kb based on temp
+    loadSystemPrompt();
+    showModeHints(tip);
+    return;
   }
+  // String tip: direct hint click, start chat immediately
   document.getElementById('intro').style.display='none';
   document.querySelector('.header').classList.add('compact');
-  if (typeof tip === 'string') {
-    inputEl.value = tip;
-    sendMessage();
-  } else {
-    inputEl.focus();
+  inputEl.value = tip;
+  sendMessage();
+}
+
+function showModeHints(temp) {
+  // Find the mode data for this temp
+  var mode = null;
+  for (var i = 0; i < M.modes.length; i++) {
+    if (M.modes[i].temp === temp) { mode = M.modes[i]; break; }
   }
+  if (!mode || !mode.hints || mode.hints.length === 0) {
+    // No hints for this mode, start chat directly
+    document.getElementById('intro').style.display='none';
+    document.querySelector('.header').classList.add('compact');
+    inputEl.focus();
+    return;
+  }
+  // Hide mode buttons, show hint buttons
+  document.getElementById('greetingBtns').style.display = 'none';
+  var hintContainer = document.getElementById('hintBtns');
+  hintContainer.style.display = 'flex';
+  var tmp = '';
+  // Add a "back" button
+  tmp += '<button class="back-btn" onclick="backToModes()">← 返回选择模式</button>';
+  mode.hints.forEach(function(h) {
+    tmp += '<button class="hint-btn" onclick="startChat(\'' + h.text + '\')">'
+      + '<span class="hb-icon">' + h.icon + '</span><span class="hb-text">' + h.text + '</span>'
+      + '<span class="hb-sub">' + h.sub + '</span></button>';
+  });
+  hintContainer.innerHTML = tmp;
+  // Update tip text
+  document.getElementById('langTip').textContent = '选择一个话题，或直接在下方输入你的问题';
+}
+
+function backToModes() {
+  document.getElementById('greetingBtns').style.display = 'flex';
+  document.getElementById('hintBtns').style.display = 'none';
+  document.getElementById('langTip').textContent = '选择一个话题开始对话';
 }
 function escapeHtml(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function scrollToBottom(){ messagesEl.scrollTop=messagesEl.scrollHeight; }
@@ -767,6 +769,8 @@ async function sendMessage() {
   if(!systemPrompt){showBanner('知识库加载中，请稍等');return;}
   inputEl.value=''; appendMessage('user',text); conversation.push({role:'user',content:text});
   _streamIdx++; isLoading=true; sendBtn.disabled=true; showTyping(); document.querySelector('.header').classList.add('compact');
+  // Hide intro if still visible (user typed directly)
+  document.getElementById('intro').style.display='none';
 
   var tempInstr='\n\n[请以'+M.name+'的身份和风格进行回应，用中文。温度权重'+talkTemp+'/100。';
   if(talkTemp<=30) tempInstr+='偏向内心感受与情感陪伴]';
