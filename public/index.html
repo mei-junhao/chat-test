@@ -7,7 +7,7 @@
 <style>
   :root { --bg: #faf8f5; --card: #fffdfb; --text: #2d2925; --muted: #8f857d; --accent: #8b6f5c; --accent-hover: #7a5f4d; --light-accent: #f3ede6; --border: #e8e1d9; --shadow-sm: 0 1px 3px rgba(45,41,37,0.04); --shadow: 0 2px 12px rgba(45,41,37,0.05), 0 8px 24px rgba(45,41,37,0.04); --radius: 14px; --radius-sm: 10px; --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: "Noto Serif SC","STSong",Georgia,serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; justify-content:center; -webkit-font-smoothing:antialiased; }
+  body { font-family: "Noto Serif SC","Source Han Serif SC","Songti SC","STSong",Georgia,serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; justify-content:center; -webkit-font-smoothing:antialiased; }
   .app { width:100%; max-width:600px; padding:48px 20px 40px; min-height:100vh; }
   h1 { font-size:21px; font-weight:500; text-align:center; margin-bottom:6px; letter-spacing:0.06em; }
   .sub { font-size:13px; color:var(--muted); text-align:center; margin-bottom:32px; letter-spacing:0.03em; }
@@ -28,6 +28,7 @@
   .msg-row input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(139,111,92,0.08); }
   .msg-row button { padding:12px 22px; border:none; border-radius:var(--radius-sm); background:var(--accent); color:white; font-size:13px; cursor:pointer; font-family:inherit; transition:var(--transition); letter-spacing:0.04em; }
   .msg-row button:hover { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 4px 12px rgba(139,111,92,0.15); }
+  .msg-row button:active { transform:scale(0.97); }
 
   .back-link { display:block; text-align:center; margin-top:24px; font-size:12px; color:var(--muted); text-decoration:none; transition:var(--transition); }
   .back-link:hover { color:var(--accent); }
