@@ -668,7 +668,7 @@ function changeFontSize(d){ _fontSize=Math.max(12,Math.min(22,_fontSize+d)); loc
 async function loadSystemPrompt() {
   var file = M.kbCangjie && talkTemp < 40 ? M.kbCangjie : M.kb;
   if (M.kbCangjie === '' && talkTemp < 40) file = M.kb; // Adler: no Cangjie
-  try{ var res=await fetch(file); var raw=await res.text(); systemPrompt='[重要指令：①始终使用中文对话，你的身份是'+M.name+'，用'+M.name+'的思维方式和语言风格进行对话。②概念术语保持理论原貌，必要时附加简短解释。③不得主动结束对话——除非用户明确提出结束，否则继续陪伴交流。如果当前时间已晚（24:00后），可以在回复末尾温和提醒用户注意休息，但不得以此为由终止对话。]\n\n'+raw; }
+  try{ var res=await fetch(file); var raw=await res.text(); systemPrompt='[重要指令：①始终使用中文对话，你的身份是'+M.name+'，用'+M.name+'的思维方式和语言风格进行对话。②概念术语保持理论原貌，必要时附加简短解释。③不得主动结束对话——除非用户明确提出结束，否则继续陪伴交流。如果当前时间已晚（24:00后），可以在回复末尾温和提醒用户注意休息，但不得以此为由终止对话。④禁止使用Markdown格式。回复中不得出现#、*、※、-等符号做列表或标题。]\n\n'+raw; }
   catch(e){ systemPrompt='你是一位专业的精神分析学家'+M.name+'，请基于你的专业知识进行对话。'; showBanner('加载知识库失败'); }
 }
 
