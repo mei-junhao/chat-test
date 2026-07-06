@@ -136,6 +136,17 @@
 
   @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
   @keyframes typing { 0%,60%,100%{opacity:0.3;transform:scale(1)} 30%{opacity:1;transform:scale(1.2)} }
+
+  /* Name dialog */
+  .name-overlay { position:fixed; inset:0; z-index:400; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; }
+  .name-box { background:#fffdfb; border-radius:16px; padding:28px 24px; width:90%; max-width:360px; text-align:center; box-shadow:0 8px 40px rgba(0,0,0,0.2); }
+  .name-box .n-avatar { width:48px; height:48px; border-radius:50%; background:#8b6f5c; color:white; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:600; margin:0 auto 12px; }
+  .name-box .n-msg { font-size:14px; color:#2d2925; line-height:1.8; margin-bottom:16px; }
+  .name-box input { width:100%; padding:10px 14px; border:1px solid #e8e1d9; border-radius:10px; font-size:14px; font-family:inherit; outline:none; background:#faf8f5; color:#2d2925; box-sizing:border-box; }
+  .name-box input:focus { border-color:#8b6f5c; }
+  .name-box .n-btn { width:100%; padding:10px; border:none; border-radius:10px; background:#8b6f5c; color:white; font-size:14px; cursor:pointer; font-family:inherit; margin-top:10px; }
+  .name-box .n-btn:hover { background:#7a5f4d; }
+  .name-box .n-btn:disabled { background:#ccc; cursor:not-allowed; }
 </style>
 </head>
 <body>
@@ -231,6 +242,16 @@
 
 <!-- Banner -->
 <div class="banner" id="banner"></div>
+
+<!-- Name dialog -->
+<div class="name-overlay" id="nameOverlay">
+  <div class="name-box">
+    <div class="n-avatar">W</div>
+    <div class="n-msg">你好，我是温尼科特。<br>在你坐下之前，我想先知道——<br>我该怎么称呼你？</div>
+    <input id="nameInput" placeholder="输入你的名字或昵称" onkeydown="if(event.key==='Enter')confirmName()" maxlength="20">
+    <button class="n-btn" id="nameBtn" onclick="confirmName()">好的，我们开始吧</button>
+  </div>
+</div>
 
 <!-- Preset modal -->
 <div class="overlay" id="presetOverlay" onclick="if(event.target===this)closePresets()">
@@ -723,8 +744,8 @@ async function sendMsg() {
 
   // Build conversation history
   var convHistory = conversation.map(function(msg) {
-    var prefix = msg.name === 'user' ? '用户' : MASTERS[msg.name] ? MASTERS[msg.name].name : msg.name;
-    return { role: msg.name === 'user' ? 'user' : 'assistant', content: prefix + '：' + msg.text };
+    var caller = getCallName(); var prefix = msg.name === 'user' ? caller : MASTERS[msg.name] ? MASTERS[msg.name].name : msg.name;
+    return { role: msg.name === 'user' ? 'user' : 'assistant', content: '[' + prefix + '] ' + msg.text };
   });
   var userMsg = { role: 'user', content: '用户：' + text };
   var activeNames = activeMasters.map(function(k) { return MASTERS[k].name; }).join('、');
@@ -761,8 +782,8 @@ async function sendMsg() {
 
   // Build the base history including Round 0 results
   var convHistory2 = conversation.map(function(msg) {
-    var prefix = msg.name === 'user' ? '用户' : MASTERS[msg.name] ? MASTERS[msg.name].name : msg.name;
-    return { role: msg.name === 'user' ? 'user' : 'assistant', content: prefix + '：' + msg.text };
+    var caller = getCallName(); var prefix = msg.name === 'user' ? caller : MASTERS[msg.name] ? MASTERS[msg.name].name : msg.name;
+    return { role: msg.name === 'user' ? 'user' : 'assistant', content: '[' + prefix + '] ' + msg.text };
   });
 
   if (respondRounds > 1 && repliedKeys.length >= 2) {
@@ -800,8 +821,8 @@ async function sendMsg() {
       }
       // Round 2: @-ed master does summary
       var finalHistory = conversation.map(function(msg) {
-        var prefix = msg.name === 'user' ? '用户' : MASTERS[msg.name] ? MASTERS[msg.name].name : msg.name;
-        return { role: msg.name === 'user' ? 'user' : 'assistant', content: prefix + '：' + msg.text };
+        var caller = getCallName(); var prefix = msg.name === 'user' ? caller : MASTERS[msg.name] ? MASTERS[msg.name].name : msg.name;
+        return { role: msg.name === 'user' ? 'user' : 'assistant', content: '[' + prefix + '] ' + msg.text };
       });
       var finalReply = await callMasterAPI(targetKey, activeNames, finalHistory, null, true);
       if (finalReply) {
@@ -819,8 +840,8 @@ async function sendMsg() {
 
         // Build current history: exclude all messages from this master
         var currentHistory = conversation.map(function(msg) {
-          var prefix = msg.name === 'user' ? '用户' : MASTERS[msg.name] ? MASTERS[msg.name].name : msg.name;
-          return { role: msg.name === 'user' ? 'user' : 'assistant', content: prefix + '：' + msg.text };
+          var caller = getCallName(); var prefix = msg.name === 'user' ? caller : MASTERS[msg.name] ? MASTERS[msg.name].name : msg.name;
+          return { role: msg.name === 'user' ? 'user' : 'assistant', content: '[' + prefix + '] ' + msg.text };
         });
         // Filter out this master's own messages
         var filtered = currentHistory.filter(function(msg) {
@@ -879,7 +900,7 @@ async function callMasterAPI(key, activeNames, history, userMsg, isReactMode) {
         + '\n\n规则：'
         + '\n① 用「我」说话。'
         + '\n② 可以提到其他大师的观点（例如"弗洛伊德刚才提到……我同意他的看法"）。'
-        + '\n③ 控制在120字以内，做一个有温度的收尾，最后看向用户。'
+        + '\n③ 控制在120字以内，做一个有温度的收尾，把注意力带回用户。'
         + '\n④ 可使用*斜体*或**加粗**做适度强调。禁止使用#、※、-等符号做列表或标题。]\n\n' + kbContent;
     } else if (isReactMode) {
       // Serial reaction round
@@ -952,6 +973,26 @@ function checkScenario(text) {
 }
 
 // ====== Init ======
+var userName = localStorage.getItem('rt_user_name') || '';
+
+function confirmName() {
+  var input = document.getElementById('nameInput');
+  var name = input.value.trim();
+  if (!name) return;
+  userName = name;
+  localStorage.setItem('rt_user_name', name);
+  document.getElementById('nameOverlay').style.display = 'none';
+  input.disabled = true;
+}
+
+function getCallName() { return userName || '朋友'; }
+
+// Show name dialog if no cached name
+if (!userName) {
+  document.getElementById('nameOverlay').style.display = 'flex';
+  document.getElementById('nameInput').focus();
+}
+
 loadProfile();  // Restore saved profile before rendering
 renderAvatarBar();
 // Restore font size
