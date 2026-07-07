@@ -980,7 +980,7 @@ async function callMasterAPI(key, activeNames, history, userMsg, isReactMode) {
     var apiRes = await fetch(cfg.api, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
-      body: JSON.stringify({ model: cfg.model, messages: msgs, temperature: isReactMode ? 0.6 : 0.7, max_tokens: isReactMode ? 200 : 512, stream: false })
+      body: JSON.stringify({ model: cfg.model, messages: msgs, temperature: isReactMode ? 0.6 : 0.7, max_tokens: isReactMode === 'summary' ? 600 : (isReactMode ? 400 : 512), stream: false })
     });
     if (!apiRes.ok) return '';
     var data = await apiRes.json();
