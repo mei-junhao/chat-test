@@ -311,6 +311,12 @@
     border-radius:10px; font-size:13px; cursor:pointer; font-family:inherit;
   }
   .share-box .share-close-btn:hover { opacity:0.85; }
+  .share-box .share-actions { display:flex; gap:10px; justify-content:center; align-items:center; }
+  .share-box .share-save-btn {
+    background:var(--card); color:var(--accent); border:1px solid var(--accent);
+    padding:8px 22px; border-radius:10px; font-size:13px; cursor:pointer; font-family:inherit;
+  }
+  .share-box .share-save-btn:hover { background:var(--accent); color:white; }
 
   .msg:hover .copy-btn { opacity:0.8; }
   @media (max-width: 768px) { .copy-btn { opacity:0.6; } }
@@ -772,9 +778,12 @@
 <!-- Share preview overlay -->
 <div class="share-overlay" id="shareOverlay" onclick="if(event.target===this)closeSharePreview()">
   <div class="share-box">
-    <p data-i18n="share-save">长按图片保存，分享到朋友圈</p>
+    <p id="shareTip" data-i18n="share-save">长按图片保存，分享到朋友圈</p>
     <img id="sharePreviewImg" src="" alt="分享卡片">
-    <button class="share-close-btn" onclick="closeSharePreview()" data-i18n="share-close">关 闭</button>
+    <div class="share-actions">
+      <button class="share-save-btn" id="shareSaveBtn" onclick="saveShareImage()" style="display:none;">保存图片</button>
+      <button class="share-close-btn" onclick="closeSharePreview()" data-i18n="share-close">关 闭</button>
+    </div>
   </div>
 </div>
 
@@ -1413,33 +1422,94 @@ function generateForwardCard() {
     }
   }
   html += '<div class="sc-footer">长按保存 · 分享到朋友圈</div>';
-  html += '<div class="sc-qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://6ef25e1d866643b38647207929046845.app.codebuddy.work" alt="扫码访问"><div class="sc-qr-label">扫码开始对话</div></div>';
+  html += '<div class="sc-qr"><img id="shareCardQr" alt="扫码访问"><div class="sc-qr-label">扫码开始对话</div></div>';
   inner.innerHTML = html;
 
-  // Render
-  var card = document.getElementById('shareCard');
-  card.style.left = '0';
-  card.style.top = '0';
-  card.style.position = 'fixed';
+  // Preload QR as a same-origin blob URL to avoid canvas CORS taint / load race
+  var qrImg = document.getElementById('shareCardQr');
+  var QR_TARGET = 'https://mei-junhao.github.io/winnicott-chat/';
+  var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=' + encodeURIComponent(QR_TARGET);
+  var startRender = function() { renderShareCard(isLacan); };
 
+  if (window.fetch) {
+    fetch(qrUrl).then(function(r){ return r.blob(); }).then(function(b){
+      qrImg.onload = startRender;
+      qrImg.onerror = function(){ qrImg.style.display = 'none'; startRender(); };
+      qrImg.src = URL.createObjectURL(b);
+    }).catch(function(){
+      qrImg.style.display = 'none';
+      startRender();
+    });
+  } else {
+    qrImg.crossOrigin = 'anonymous';
+    qrImg.onload = startRender;
+    qrImg.onerror = function(){ qrImg.style.display = 'none'; startRender(); };
+    qrImg.src = qrUrl;
+  }
+}
+
+function renderShareCard(isLacan) {
+  var card = document.getElementById('shareCard');
+  // Card stays off-screen (CSS default left:-9999px) so it never shows as a background
   var tryRender = function() {
-    if (!window.html2canvas) {
-      setTimeout(tryRender, 200);
-      return;
-    }
+    if (!window.html2canvas) { setTimeout(tryRender, 200); return; }
     html2canvas(card, {
       scale: 2, useCORS: true, backgroundColor: isLacan ? '#1a1614' : '#faf8f5', logging: false,
     }).then(function(canvas) {
-      card.style.left = '-9999px';
-      card.style.position = 'fixed';
-      var imgData = canvas.toDataURL('image/png');
-      document.getElementById('sharePreviewImg').src = imgData;
+      var imgData;
+      try {
+        imgData = canvas.toDataURL('image/png');
+      } catch (e) {
+        cleanupShareCard(card);
+        showBanner('error', '分享图生成失败，请重试');
+        return;
+      }
+      var previewImg = document.getElementById('sharePreviewImg');
+      previewImg.src = imgData;
+
+      var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+      var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
+      var saveBtn = document.getElementById('shareSaveBtn');
+      var tip = document.getElementById('shareTip');
+      if (!isWeChat && !isMobile) {
+        // Desktop: auto-download + show manual save button
+        try {
+          var a = document.createElement('a');
+          a.href = imgData;
+          a.download = 'winnicott-share-' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.png';
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        } catch (e) {}
+        if (tip) tip.textContent = '图片已生成，已自动保存到下载；也可点「保存图片」再存一份';
+        if (saveBtn) saveBtn.style.display = '';
+      } else {
+        if (tip) tip.textContent = '长按图片保存，分享到朋友圈';
+        if (saveBtn) saveBtn.style.display = 'none';
+      }
+
       document.getElementById('shareOverlay').classList.add('show');
       // Exit forward mode
       cancelForward();
+    }).catch(function() {
+      cleanupShareCard(card);
+      showBanner('error', '分享图生成失败，请重试');
     });
   };
   tryRender();
+}
+
+function cleanupShareCard(card) {
+  card.style.left = '-9999px';
+  card.style.position = 'fixed';
+  card.style.zIndex = '';
+}
+
+function saveShareImage() {
+  var img = document.getElementById('sharePreviewImg');
+  if (!img || !img.src) return;
+  var a = document.createElement('a');
+  a.href = img.src;
+  a.download = 'winnicott-share-' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.png';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
 function shareConversation(idx) {
