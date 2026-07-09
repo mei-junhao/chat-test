@@ -84,11 +84,92 @@
     });
   }catch(e){}
 })();
-</script></head>
+</script><!-- UI 优化（Tier A/B/C）：仅视觉层，不影响功能、不引入依赖 -->
+<style id="ui-optimize">
+  html { scroll-behavior: smooth; }
+
+  /* A3 键盘焦点环（无障碍） */
+  :focus-visible {
+    outline: 2px solid var(--accent, #8b6f5c);
+    outline-offset: 2px;
+  }
+
+  /* A1/A2 按钮物理反馈与 hover */
+  button, .btn-primary, .btn-aux, .btn-cancel, .btn-confirm,
+  .reward-close, .reward-btn, [role="button"], .m-item, .chip {
+    transition: transform .12s ease, background-color .2s ease,
+                border-color .2s ease, color .2s ease,
+                box-shadow .2s ease, opacity .2s ease;
+  }
+  button:active, .btn-primary:active, .btn-aux:active, .btn-cancel:active,
+  .btn-confirm:active, .reward-btn:active, [role="button"]:active, .chip:active {
+    transform: translateY(1px) scale(0.99);
+  }
+  .btn-primary:hover, .btn-confirm:hover, #sendBtn:hover, .reward-btn:hover {
+    transform: translateY(-1px);
+  }
+  .btn-aux:hover, .btn-cancel:hover { filter: brightness(0.97); }
+
+  /* A4 输入框聚焦态 */
+  textarea:focus, input:focus, [contenteditable="true"]:focus {
+    border-color: var(--accent, #8b6f5c);
+    box-shadow: 0 0 0 3px rgba(139,111,92,0.18);
+  }
+
+  /* B1 弹窗微抬升 + 淡入 */
+  .reward-box, .modal-box, .modal, .share-card, .name-box {
+    animation: uiPop .28s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes uiPop {
+    from { opacity: 0; transform: translateY(8px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* B2 消息气泡 hover 极轻反馈 */
+  .bubble:hover, .msg:hover { box-shadow: 0 1px 6px rgba(45,41,37,0.06); }
+
+  /* B4 温度 chip 选中态内描边 */
+  .chip.active, .chip.selected, .chip[aria-pressed="true"] {
+    box-shadow: inset 0 0 0 1px var(--accent, #8b6f5c);
+  }
+
+  /* C1 新消息气泡淡入 */
+  .bubble, .msg:not(.master) {
+    animation: uiMsgIn .3s ease both;
+  }
+  @keyframes uiMsgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+</style>
+
+</head>
 <body>
 <div class="app">
   <h1>与更多大师对话</h1>
   <p class="sub">选择一个精神分析大师开始对话</p>
+
+  <div style="margin:0 0 16px;padding:13px 18px;background:#FBF1E6;border:1px solid #E7C9A8;border-left:4px solid var(--accent);border-radius:var(--radius);font-size:13px;line-height:1.7;color:#7A5A3C;box-shadow:var(--shadow-sm);">
+    <strong style="color:var(--accent);">👉 这是我做的本地咨询管理工具</strong> —— 数据全部存在你自己的电脑里，不上传任何云端。点下面卡片右侧的「对这个项目的介绍」即可在线预览网页版。
+  </div>
+
+  <div class="card" onclick="location.href='https://e15e4471218544ee814d52b90d2b1500.app.codebuddy.work'" style="border-color:var(--accent);">
+    <div class="circle" style="background:#F5EDE3;color:#8B6F5C;">镜</div>
+    <div class="info">
+      <div class="name">心镜 · 本地咨询个案管理系统</div>
+      <div class="desc">纯本地、数据不出本机的咨询工作流（网页预览版）</div>
+    </div>
+    <a href="https://e15e4471218544ee814d52b90d2b1500.app.codebuddy.work" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:13px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;">对这个项目的介绍 →</a>
+  </div>
 
   <div class="card" onclick="openModeOverlay('winnicott')" data-master="winnicott">
     <div class="circle" style="background:var(--accent);color:white;">W</div>
