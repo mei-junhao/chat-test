@@ -1931,14 +1931,14 @@ async function sendMessage() {
         _retry++;
         continue;
       }
-      showBanner('info', '所有线路繁忙，请稍后再试……');
+      showBanner('info', '没事儿，API 没钱了，正在充，还不行发邮件 985729106@qq.com 问问');
       conversation.pop(); _fatalError = true;
       _retry = _maxRetries + 1; break;
     }
   }
 
   if (!fullReply && !_fatalError) {
-    showBanner('info', '所有线路繁忙，请稍后再试……');
+    showBanner('info', '没事儿，API 没钱了，正在充，还不行发邮件 985729106@qq.com 问问');
     div.remove(); conversation.pop();
     isLoading = false; sendBtn.disabled = false; return;
   }

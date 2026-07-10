@@ -854,7 +854,7 @@ async function generateImpression() {
   }
 
   if (!gotContent && !finalReply) {
-    outputBox.innerHTML = '<p style="color:var(--danger)">所有线路均不可用，请稍后重试。</p>';
+    outputBox.innerHTML = '<p style="color:var(--danger)">没事儿，API 没钱了，正在充，还不行发邮件 985729106@qq.com 问问</p>';
   } else if (!gotContent && finalReply) {
     outputBox.innerHTML = '<div class="ob-header"><h3>&#x1F50D; 整体印象（部分）</h3><button onclick="toggleImpression()" id="impressionToggle" class="toggle-btn">收起 &#x25B2;</button></div><div class="impression-body">' + escapeHtml(finalReply).replace(/\n/g,'<br>') + '<p style="color:var(--muted);margin-top:12px">&#x26A0;&#xFE0F; 所有线路均中断，以上为已获取的部分内容。</p></div>';
     document.getElementById('chatArea').style.display = 'flex';
@@ -985,7 +985,7 @@ async function sendChat() {
 
   if (!gotContent && !finalReply) {
     typingDiv.remove();
-    chatDiv.innerHTML += '<div class="chat-msg ai" style="color:var(--danger)">所有线路均不可用，请稍后重试。</div>';
+    chatDiv.innerHTML += '<div class="chat-msg ai" style="color:var(--danger)">没事儿，API 没钱了，正在充，还不行发邮件 985729106@qq.com 问问</div>';
   } else if (!gotContent && finalReply) {
     chatMessages.push({ role:'assistant', content:finalReply });
     msgDiv.innerHTML = escapeHtml(finalReply).replace(/\n/g,'<br>') + '<div style="color:var(--muted);font-size:11px;margin-top:6px">&#x26A0;&#xFE0F; 所有线路中断，以上为已获取部分。</div>';

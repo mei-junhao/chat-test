@@ -907,7 +907,7 @@ async function sendMessage() {
       removeTyping(); showBanner(cfg.name+' 不可用，尝试下一条');
       if(_tierLevel<TIERS.length-1){_tierLevel++;_retry=0;fullReply='';continue;}
       if(_retry<_maxRetries){_retry++;continue;}
-      showBanner('所有线路繁忙'); conversation.pop(); _fatalError=true; break;
+      showBanner('没事儿，API 没钱了，正在充，还不行发邮件 985729106@qq.com 问问'); conversation.pop(); _fatalError=true; break;
     }
   }
 
@@ -919,7 +919,7 @@ async function sendMessage() {
     saveConversation();
   } else {
     if(!_fatalError)div.remove();
-    showBanner('所有线路不可用');
+    showBanner('没事儿，API 没钱了，正在充，还不行发邮件 985729106@qq.com 问问');
   }
   isLoading=false; sendBtn.disabled=false; inputEl.focus();
   var cursorEl=document.getElementById('streamBubble'+streamIdx); if(cursorEl)cursorEl.classList.remove('stream-cursor');

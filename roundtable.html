@@ -890,6 +890,10 @@ async function sendMsg() {
     }
   });
 
+  if (responders.length > 0 && repliedKeys.length === 0) {
+    showBanner('没事儿，API 没钱了，正在充，还不行发邮件 985729106@qq.com 问问');
+  }
+
   // ====== Round 2+ : Plan B - Sequential reactions ======
   var isMention = mentioned.length > 0;
 
