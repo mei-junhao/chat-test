@@ -417,7 +417,7 @@
       • AIGC 水印清理</p>
       <p><strong style="color:var(--text);">v3.1</strong> (2026-06-22)<br>
       • 温尼科特对话网页上线（winnicott-chat v3.1）<br>
-      • EdgeOne Makers 代理，移除硬编码 API Key</p>
+      • SCF 云函数代理，移除硬编码 API Key</p>
     </div>
   </div>
 
@@ -737,7 +737,7 @@ function updateTemp(val) {
 function updateLength(val) { var l=['简洁','适中','详细']; var t=[1024,0,4096]; _maxTokens=t[parseInt(val)]; localStorage.setItem('mc_len_'+masterKey,_maxTokens); document.getElementById('lenLabel').textContent=l[parseInt(val)]; document.getElementById('lenSlider').style.background='linear-gradient(to right, var(--accent) '+(parseInt(val)/2*100)+'%, var(--border) '+(parseInt(val)/2*100)+'%)'; }
 
 function checkAllAPIs() {
-  var row=document.getElementById('apiHealthRow'); row.innerHTML='<span style="background:#eee;color:#999;padding:2px 8px;border-radius:8px;font-size:10px;">EdgeOne 代理 …</span>';
+  var row=document.getElementById('apiHealthRow'); row.innerHTML='<span style="background:#eee;color:#999;padding:2px 8px;border-radius:8px;font-size:10px;">SCF 代理 …</span>';
   var start=Date.now();
   var ac=new AbortController(); var tm=setTimeout(function(){ac.abort();},10000);
   fetch(API_PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:'hi'}],max_tokens:1}),signal:ac.signal})
