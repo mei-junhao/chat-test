@@ -702,11 +702,17 @@ var messagesEl = document.getElementById('messages');
 var inputEl = document.getElementById('input');
 var sendBtn = document.getElementById('sendBtn');
 
-// 所有真实 API Key 保存在 EdgeOne 边缘函数(/api/proxy)的环境变量中，前端不直接接触任何 Key。
-// 整个仓库部署到 EdgeOne 后，前端与代理同源：浏览器跑在 *.edgeone.* 上时自动用 location.origin + /api/proxy（免 CORS、白名单自动放行）。
-const API_PROXY = (location.hostname.endsWith('.edgeone.app') || location.hostname.endsWith('.edgeone.site') || location.hostname.endsWith('.edgeone.cool'))
-  ? location.origin + '/api/proxy'
-  : 'https://chat-test-k9b3jolf.edgeone.cool/api/proxy';
+// === 代理地址 ===
+// 优先 SCF 云函数（密钥存云端环境变量，最安全）；未配则 EdgeOne 边缘函数兜底
+const SCF_URL = ''; // 部署 SCF 后填入：'https://<appid>.scf.tencentcs.com/release/'
+const API_PROXY = (function(){
+  // 1) SCF 已配置：直接用函数 URL（浏览器直接 POST，密钥只在云端）
+  if(SCF_URL && SCF_URL.indexOf('://') >= 0) return SCF_URL.replace(/\/+$/, '');
+  // 2) EdgeOne 同源部署：自动拼 /api/proxy（免 CORS + 白名单自动放行）
+  try { var h=location.hostname; if(h&&(h.endsWith('.edgeone.app')||h.endsWith('.edgeone.site')||h.endsWith('.edgeone.cool'))) return location.origin+'/api/proxy'; }catch(e){}
+  // 3) GitHub Pages 兜底
+  return 'https://chat-test-k9b3jolf.edgeone.cool/api/proxy';
+})();
 
 // ====== Settings ======
 function toggleSettings() {

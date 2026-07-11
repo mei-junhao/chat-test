@@ -1,0 +1,3 @@
+#!/bin/bash
+# SCF Web Function 启动文件 — 用 Python3 拉起 index.py，监听 9000 端口
+/var/lang/python3/bin/python3 index.py
