@@ -704,7 +704,7 @@ var sendBtn = document.getElementById('sendBtn');
 
 // === 代理地址 ===
 // 优先 SCF 云函数（密钥存云端环境变量，最安全）；未配则 EdgeOne 边缘函数兜底
-const SCF_URL = ''; // 部署 SCF 后填入：'https://<appid>.scf.tencentcs.com/release/'
+const SCF_URL = 'https://1439314927-lx3a2qzw5z.ap-guangzhou.tencentscf.com';
 const API_PROXY = (function(){
   // 1) SCF 已配置：直接用函数 URL（浏览器直接 POST，密钥只在云端）
   if(SCF_URL && SCF_URL.indexOf('://') >= 0) return SCF_URL.replace(/\/+$/, '');
