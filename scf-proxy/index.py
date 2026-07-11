@@ -99,8 +99,13 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(err)
             return
 
+        # 前端发 model=proxy 或空字符串时，用默认模型
+        model = data.get("model", "").strip()
+        if not model or model == "proxy":
+            model = DEEPSEEK_MODEL
+
         payload = {
-            "model": data.get("model", DEEPSEEK_MODEL),
+            "model": model,
             "messages": messages,
             "stream": True,
             "temperature": data.get("temperature", 0.7),
