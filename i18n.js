@@ -255,7 +255,8 @@
   function injectStyles() {
     if (document.getElementById('i18n-style')) return;
     var css = '' +
-      '#langBtn{position:fixed;top:14px;left:14px;z-index:1000;display:inline-flex;align-items:center;gap:6px;' +
+      /* 浮动语言按钮默认放右下角 FAB，避免压住头部标题/返回控件 */
+      '#langBtn{position:fixed;bottom:84px;right:14px;z-index:1000;display:inline-flex;align-items:center;gap:6px;' +
       'padding:7px 13px;border-radius:999px;border:1px solid rgba(139,111,92,.35);background:rgba(255,255,255,.92);' +
       'color:#8b6f5c;font-size:12.5px;font-weight:600;letter-spacing:.03em;cursor:pointer;font-family:inherit;' +
       'box-shadow:0 1px 4px rgba(45,41,37,.08);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:all .2s ease;}' +
@@ -280,14 +281,25 @@
       '.i18n-box .prim{margin-top:2px;background:#8b6f5c;color:#fff;border:none;border-radius:10px;padding:11px 26px;' +
       'font-size:13.5px;cursor:pointer;font-family:inherit;letter-spacing:.04em;transition:all .18s ease;}' +
       '.i18n-box .prim:hover{background:#7a5f4d;transform:translateY(-1px);}' +
-      '.i18n-box .lnk{margin-top:10px;background:none;border:none;font-size:12px;color:#8f857d;cursor:pointer;font-family:inherit;display:block;width:100%;}';
+      '.i18n-box .lnk{margin-top:10px;background:none;border:none;font-size:12px;color:#8f857d;cursor:pointer;font-family:inherit;display:block;width:100%;}' +
+      /* 保留旧版兼容：若代码仍引用 lang-corner，也保证在右下角 */
+      '#langBtn.lang-corner{top:auto;bottom:84px;left:auto;right:14px;}';
     var s = document.createElement('style'); s.id = 'i18n-style'; s.textContent = css;
     document.head.appendChild(s);
   }
 
   function buildUI() {
     injectStyles();
-    if (!document.getElementById('langBtn')) {
+    var existing = document.querySelector('.lang-btn:not(#langBtn)');
+    if (existing) {
+      /* 页面自带语言按钮（已在头部就位）→ 直接接管，不再注入浮动按钮，避免重复/重叠 */
+      existing.setAttribute('data-i18n', 'lang-btn');
+      existing.onclick = openSelect;
+      if (!existing.id) existing.id = 'pageLangBtn';
+      /* 兜底：旧缓存可能已注入 #langBtn，发现页内按钮时强制隐藏它 */
+      var stale = document.getElementById('langBtn');
+      if (stale) stale.style.display = 'none';
+    } else if (!document.getElementById('langBtn')) {
       var btn = document.createElement('button');
       btn.id = 'langBtn';
       btn.setAttribute('aria-label', 'language');

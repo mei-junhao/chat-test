@@ -2,8 +2,9 @@
 <html lang="zh-CN">
 <head>
   <script src="proxy.js"></script>
-  <script src="i18n.js"></script>
+  <script src="i18n.js?v=3"></script>
 
+  <script>
   /* ===== 对话页界面三语化（由 i18n.js 在每次切语言时调用） ===== */
   window.onLangApplied = function (lang) {
     if (!window.T) return;
@@ -39,6 +40,7 @@
     var bm = document.querySelector('.back-btn');
     if (bm && /返回选择模式/.test(bm.textContent)) setTxt(bm, 'chat_back_home');
   };
+  </script>
 
 <link rel="icon" href="data:,">
 
