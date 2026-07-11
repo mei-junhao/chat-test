@@ -290,6 +290,8 @@
 
   function buildUI() {
     injectStyles();
+    /* 语言按钮仅当页面设了 __SHOW_LANG_BTN__ 时才注入（默认首页 index.html） */
+    if (!window.__SHOW_LANG_BTN__) return;
     var existing = document.querySelector('.lang-btn:not(#langBtn)');
     if (existing) {
       /* 页面自带语言按钮（已在头部就位）→ 直接接管，不再注入浮动按钮，避免重复/重叠 */
