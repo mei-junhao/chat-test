@@ -556,7 +556,10 @@ function updateRounds() {
   showBanner(respondRounds === 2 ? '串行回合已开启（大师逐一回应）' : '串行回合已关闭（仅一轮回应）');
 }
 
-// ====== TIERS (API config) ======
+// ====== SCF 云函数代理（优先） ======
+var SCF_URL = 'https://xinjingchat.online';
+
+// ====== TIERS (API config, 仅 SCF 不可用时回退) ======
 var TIERS = [
   { api:'https://api.deepseek.com/v1/chat/completions', key:'', model:'deepseek-v4-flash', name:'DeepSeek V4 Flash' },
   { api:'https://api.kkdmx.com/v1/chat/completions', key:'', model:'deepseek-ai/deepseek-v4-pro', name:'DeepSeek Pro' },
@@ -575,6 +578,7 @@ var apiMode = (customApi && customKey) ? 'custom' : 'default';
 
 function getActiveConfig() {
   if (apiMode === 'custom' && customApi && customKey) return { api: customApi, key: customKey, model: customModel || 'gpt-4o' };
+  if (SCF_URL) return { api: SCF_URL.replace(/\/+$/, ''), key: '', model: 'proxy' };
   return TIERS[_tierLevel] || TIERS[0];
 }
 
@@ -1095,9 +1099,11 @@ async function callMasterAPI(key, activeNames, history, userMsg, isReactMode) {
     if (userMsg) msgs.push(userMsg);
 
     var cfg = getActiveConfig();
+    var hdrs = { 'Content-Type': 'application/json' };
+    if (cfg.key) hdrs['Authorization'] = 'Bearer ' + cfg.key;
     var apiRes = await fetch(cfg.api, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
+      headers: hdrs,
       body: JSON.stringify({ model: cfg.model, messages: msgs, temperature: isReactMode ? 0.6 : 0.7, max_tokens: isReactMode === 'summary' ? 600 : (isReactMode ? 400 : 512), stream: false })
     });
     if (!apiRes.ok) return '';
