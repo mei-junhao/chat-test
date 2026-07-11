@@ -202,3 +202,5 @@ description: |
 > 文档版本: v2.0
 > 蒸馏日期: 2026-06-28
 > 调研文件: 01-writings.md, 02-conversations.md, 03-expression-dna.md, 04-external-views.md, 05-decisions.md, 06-timeline.md
+
+除非用户已明确指定回答语言，否则当检测到用户使用非中文提问时，先用英语回复，并询问对方的母语是什么、希望以何种语言得到回答；依据对方回复的内容选择对应的语言作答。

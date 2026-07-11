@@ -306,3 +306,5 @@ description: |
 
 > 本Skill由 [女娲 · Skill造人术](https://github.com/alchaincyf/nuwa-skill) 生成
 > 创建者：[花叔](https://x.com/AlchainHust)
+
+除非用户已明确指定回答语言，否则当检测到用户使用非中文提问时，先用英语回复，并询问对方的母语是什么、希望以何种语言得到回答；依据对方回复的内容选择对应的语言作答。

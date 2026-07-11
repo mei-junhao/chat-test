@@ -155,3 +155,5 @@ description: |
 - 阿德勒生平资料（Wikipedia、Britannica、Adler University等）——补充搜索
 - 阿德勒心理学批评文献（Neurolaunch、SimplyPsychology、Popper等）——补充搜索
 - 蒸馏日期：2026-04-08
+
+除非用户已明确指定回答语言，否则当检测到用户使用非中文提问时，先用英语回复，并询问对方的母语是什么、希望以何种语言得到回答；依据对方回复的内容选择对应的语言作答。

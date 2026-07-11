@@ -1,6 +1,45 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <script src="proxy.js"></script>
+  <script src="i18n.js"></script>
+
+  /* ===== 对话页界面三语化（由 i18n.js 在每次切语言时调用） ===== */
+  window.onLangApplied = function (lang) {
+    if (!window.T) return;
+    var setPH = function (el, key) { if (el) el.setAttribute('placeholder', window.T(key)); };
+    var setTxt = function (el, key) { if (el) el.textContent = window.T(key); };
+    // 输入框占位符
+    ['input', 'chatInput', 'userInput', 'msgInput'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && !/api|sk-|http/i.test(el.getAttribute('placeholder') || '')) setPH(el, 'chat_input_ph');
+    });
+    // 发送按钮（id=sendBtn / chatSendBtn / class=send-btn 文本为发送/发）
+    var sb = document.getElementById('sendBtn') || document.querySelector('.send-btn');
+    if (sb && /发送|发/.test(sb.textContent)) setTxt(sb, 'chat_send');
+    // 返回链接（← 返回 / 返回首页 等）
+    var back = document.querySelector('a.back-link');
+    if (back && /返回/.test(back.textContent)) setTxt(back, 'chat_back_home');
+    // 设置按钮（⚙️ 或 设置）
+    var setB = document.getElementById('settingsBtn');
+    if (setB && !/⚙/.test(setB.textContent)) setTxt(setB, 'chat_settings');
+    // 按已知中文文本批量切换按钮
+    var map = {
+      '清空': 'chat_clear', '导出对话': 'chat_export', '导出': 'chat_export',
+      '新对话': 'chat_new', '历史记录': 'chat_history',
+      '全体回应': 'chat_all_respond', '仅被@回应': 'chat_mention_only',
+      '邀请大师加入': 'chat_invite', '保存对话': 'chat_save', '打赏': 'chat_reward'
+    };
+    var btns = document.querySelectorAll('button, .back-btn, .btn-primary, .btn-cancel');
+    btns.forEach(function (b) {
+      var tx = (b.textContent || '').trim();
+      if (map[tx]) setTxt(b, map[tx]);
+    });
+    // 动态生成的返回模式按钮（← 返回选择模式）
+    var bm = document.querySelector('.back-btn');
+    if (bm && /返回选择模式/.test(bm.textContent)) setTxt(bm, 'chat_back_home');
+  };
+
 <link rel="icon" href="data:,">
 
 <meta charset="UTF-8">
@@ -576,7 +615,7 @@
 <body>
 <div class="app">
   <div class="header">
-    <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+    <button class="lang-btn" >EN</button>
     <h1 id="headerTitle">与温尼科特对话</h1>
     <p id="headerSub">一个观察了六十年婴儿的儿科医生，用日常语言讨论人类经验</p>
     <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()" data-i18n="settings-btn">⚙️ 设置</button>
@@ -892,108 +931,6 @@ const TIERS = [TIER_OFFICIAL, TIER_PRO, TIER_FLASH, TIER_M3, TIER_AGNES];
 
 var _tierLevel = 0;
 
-// i18n: 中英切换
-var _lang = localStorage.getItem('winnicott_lang') || 'zh';
-var i18n = {
-  'lang-btn': { zh: 'EN', en: '中' },
-  'h1-title': { zh: '与温尼科特对话', en: 'Chat with Winnicott' },
-  'h1-subtitle': { zh: '一个观察了六十年婴儿的儿科医生，用日常语言讨论人类经验', en: 'A pediatrician who watched babies for 40 years, speaking in plain language' },
-  'settings-btn': { zh: '⚙️ 设置', en: '⚙️ Settings' },
-  'dark-btn': { zh: '🌙 深色', en: '🌙 Dark' },
-  'forward-btn': { zh: '✂️ 转发', en: '✂️ Select' },
-  'reward-btn': { zh: '☕ 打赏', en: '☕ Tip' },
-  'api-btn': { zh: '🔌 API', en: '🔌 API' },
-  'api-btn-close': { zh: '🔌 收起', en: '🔌 Close' },
-  'default-mode': { zh: '默认（DeepSeek）', en: 'Default (DeepSeek)' },
-  'custom-mode': { zh: '自用 API', en: 'Custom API' },
-  'api-addr': { zh: '地址', en: 'Endpoint' },
-  'api-key-label': { zh: 'Key', en: 'Key' },
-  'api-model': { zh: '模型', en: 'Model' },
-  'temp-left': { zh: '💬 交心', en: '💬 Heart-to-heart' },
-  'temp-right': { zh: '📖 教学', en: '📖 Teaching' },
-  'temp-hint-left': { zh: '🧸 情感陪伴', en: 'Emotional' },
-  'temp-hint-right': { zh: '📚 专业知识', en: 'Knowledge' },
-  'temp-hint-left-lacan': { zh: '◉ 直白解析', en: 'Plain' },
-  'temp-hint-right-lacan': { zh: '◈ 形式化推演', en: 'Formalized' },
-  'changelog-btn': { zh: '📋 更新日志', en: '📋 Changelog' },
-  'export-btn': { zh: '📥 导出对话', en: '📥 Export' },
-  'email-btn': { zh: '📧 发送到邮箱', en: '📧 Send Email' },
-  'save-history': { zh: '📥 保存到历史', en: '📥 Save' },
-  'reset-btn': { zh: '🔄 新对话', en: '🔄 New Chat' },
-  'history-btn': { zh: '📋 对话历史', en: '📋 History' },
-  'feedback-btn': { zh: '💡 反馈', en: '💡 Feedback' },
-  'history-empty': { zh: '暂无历史对话', en: 'No history yet' },
-  'history-saved': { zh: '已保存到历史', en: 'Saved to history' },
-  'history-loaded': { zh: '已加载历史对话', en: 'History loaded' },
-  'history-deleted': { zh: '已删除历史记录', en: 'History deleted' },
-  'history-confirm-del': { zh: '确定删除此对话历史？', en: 'Delete this history?' },
-  'history-msg-prefix': { zh: '条消息 · ', en: ' msgs · ' },
-  'save-history': { zh: '📥 保存到历史', en: '📥 Save History' },
-  'persona-w': { zh: '🧸 温尼科特', en: 'Winnicott' },
-  'persona-l': { zh: '🎭 拉康', en: 'Lacan' },
-  'persona-switched': { zh: '已切换到{persona}模式', en: 'Switched to {persona} mode' },
-  'conv-cleared': { zh: '对话已清空', en: 'Conversation cleared' },
-  'modal-confirm': { zh: '确定', en: 'OK' },
-  'modal-cancel': { zh: '取消', en: 'Cancel' },
-  'modal-title': { zh: '确认', en: 'Confirm' },
-  'modal-text': { zh: '确定执行此操作？', en: 'Are you sure?' },
-  'input-placeholder': { zh: '写下你想说的……', en: 'Type your message...' },
-  'intro-title': { zh: '与温尼科特对话', en: 'Chat with Winnicott' },
-  'intro-desc': { zh: '基于温尼科特全集 12 卷、595 篇原著、81 个概念页、224 个案例报告的 AI 对话体验。选择以下方式开始——', en: 'An AI conversation based on the Collected Works (12 vols), 595 papers, 81 concepts, and 224 case reports. Choose a starting point:' },
-  'intro-greeting': { zh: '今天想聊聊什么？', en: 'What would you like to talk about today?' },
-  'intro-sub': { zh: '选一个方向，我来调成最适合聊天的模式', en: 'Pick a direction — I\'ll adjust the mode for you' },
-  'intro-hint-model': { zh: '🎭 先认识温尼科特', en: '🎭 Who is Winnicott?' },
-  'intro-hint-anxiety': { zh: '😰 聊聊焦虑', en: '😰 Talk about anxiety' },
-  'intro-hint-parent': { zh: '👶 育儿困惑', en: '👶 Parenting concerns' },
-  'intro-hint-relation': { zh: '💔 关系难题', en: '💔 Relationship issues' },
-  'intro-hint-bored': { zh: '😶 随便聊聊', en: '😶 Just chat' },
-  'chat-feeling': { zh: '你来，我听着', en: 'I\'m listening' },
-  'chat-feeling-sub': { zh: '温度 20 · 像一次温和的咨询，回应简短温暖', en: 'Temp 20 · Gentle listening' },
-  'chat-professional': { zh: '进书房坐', en: 'Come to my study' },
-  'chat-professional-sub': { zh: '温度 90 · 深入探讨客体关系等概念', en: 'Temp 90 · Deep theoretical exploration' },
-  'intro-english-tip': { zh: '💡 原始语料为英文，用英文提问效果更佳 / English prompts work best', en: '💡 Winnicott wrote in English — English prompts work best' },
-  'intro-english-tip': { zh: '💡 原始语料为英文，用英文提问效果更佳 / English prompts work best', en: '💡 Winnicott wrote in English — English prompts work best' },
-  'disclaimer': { zh: '此对话由 AI 模拟人设思维框架生成，非临床治疗建议。如有心理困扰，请寻求专业帮助。', en: 'This conversation is an AI simulation and is not clinical advice. If you need help, seek a qualified professional.' },
-  'disclaimer-w': { zh: '此对话由 AI 模拟温尼科特思维框架生成，非临床治疗建议。如有心理困扰，可请寻求作者帮助。', en: 'This conversation is an AI simulation of Winnicott\'s thinking framework and is not clinical advice.' },
-  'disclaimer-l': { zh: '此对话由 AI 模拟拉康思维框架生成，不构成精神分析。症状的真相——只有你自己能面对。', en: 'This conversation is an AI simulation of Lacan\'s thinking framework and does not constitute psychoanalysis.' },
-  'share-save': { zh: '长按图片保存，分享到朋友圈', en: 'Long press to save, share with friends' },
-  'share-close': { zh: '关 闭', en: 'Close' },
-  'forward-bar-count': { zh: '已选 0 条', en: 'Selected 0' },
-  'forward-cancel': { zh: '取消', en: 'Cancel' },
-  'forward-gen': { zh: '生成分享图', en: 'Generate Card' },
-  'ctx-label': { zh: '上下文字数', en: 'Context' },
-  'banner-knowledge-loading': { zh: '知识库加载中，请稍等……', en: 'Loading knowledge base...' },
-  'banner-nokey': { zh: '未配置 API Key，请在设置中填写。', en: 'API Key not set. Please configure in Settings.' },
-  'banner-new-chat': { zh: '已开始新对话', en: 'New conversation started' },
-  'banner-retry': { zh: '线路繁忙，正在重试……', en: 'Route busy, retrying...' },
-  'banner-fallback': { zh: '本地代理离线，已切换云端模型', en: 'Local proxy offline, switched to cloud model' },
-  'banner-saved': { zh: '设置已保存（存于浏览器本地）', en: 'Settings saved (local storage)' },
-};
-
-function t(key) { return i18n[key] ? (i18n[key][_lang] || i18n[key]['zh']) : key; }
-
-function applyLang() {
-  // data-i18n elements: replace innerText
-  document.querySelectorAll('[data-i18n]').forEach(function(el) {
-    var key = el.getAttribute('data-i18n');
-    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-      el.placeholder = t(key);
-    } else if (el.tagName === 'BUTTON' || el.tagName === 'A') {
-      el.innerHTML = el.innerHTML.replace(el.textContent, t(key));
-    } else {
-      el.textContent = t(key);
-    }
-  });
-  // Specific elements with dynamic content
-  updateTemp(talkTemp);
-}
-
-function toggleLang() {
-  _lang = _lang === 'zh' ? 'en' : 'zh';
-  localStorage.setItem('winnicott_lang', _lang);
-  applyLang();
-  document.getElementById('langBtn').textContent = t('lang-btn');
-}  // 当前是否已降级
 
 let systemPrompt = '';
 let conversation = [];
@@ -1186,7 +1123,7 @@ function insertChapterDivider() {
 }// Init
 restoreForm();
 restoreConversation();
-applyLang();
+
 // Apply persona from saved state
 switchPersona(_persona);
 // Restore font size
@@ -1298,7 +1235,7 @@ async function loadSystemPrompt() {
       const res = await fetch('lacan-knowledge.md');
       var raw = await res.text();
       // 拉康指令：中文为主，法语术语附翻译
-      systemPrompt = '[重要指令：①始终使用中文对话，你的身份是雅克·拉康，用拉康的思维方式和语言风格进行对话。②当出现法语术语（如 objet petit a、jouissance、l\'Autre、Nom-du-Père 等）时，必须在术语后面立即加上中文翻译/解释（用括号或破折号引出），例如："jouissance（原乐，一种超越快乐原则的过量快感）"或"l\'Autre——大他者，象征秩序的整体"。③法语术语保持原文格式，但紧跟中文翻译。④不得主动结束对话——除非用户明确提出结束，否则继续陪伴交流。如果当前时间已晚（24:00后），可以在回复末尾温和提醒用户注意休息，但不得以此为由终止对话。]\n\n' + raw;
+      systemPrompt = '[重要指令：①'+(window.LANG_INSTRUCTION?window.LANG_INSTRUCTION():'①始终使用中文对话')+'，你的身份是雅克·拉康，用拉康的思维方式和语言风格进行对话。②当出现法语术语（如 objet petit a、jouissance、l\'Autre、Nom-du-Père 等）时，必须在术语后面立即加上中文翻译/解释（用括号或破折号引出），例如："jouissance（原乐，一种超越快乐原则的过量快感）"或"l\'Autre——大他者，象征秩序的整体"。③法语术语保持原文格式，但紧跟中文翻译。④不得主动结束对话——除非用户明确提出结束，否则继续陪伴交流。如果当前时间已晚（24:00后），可以在回复末尾温和提醒用户注意休息，但不得以此为由终止对话。]\n\n' + raw;
     } catch (e) {
       showBanner('error', '加载拉康知识库失败，请刷新页面重试。');
     }
@@ -1321,11 +1258,11 @@ async function loadSystemPrompt() {
       ]);
       const skillText = await skillRes.text();
       const knowledgeText = await knowledgeRes.text();
-      systemPrompt = '[重要指令：①始终使用中文对话，你的身份是唐纳德·温尼科特（Donald Winnicott），英国精神分析师。用温尼科特的思维方式、语言风格和表达DNA进行对话。②语气温暖、抱持、非侵入性，用"足够好的母亲"式语言。以"我有一个假设……""我感觉到……""让我想想……"开头，不做确定性断言。③禁止使用"作为AI""根据我的理解""作为语言模型"等AI助手口吻。④不装学术权威，先说临床再说理论，可用自嘲式表达。⑤使用标志性口头禅："这非常非常有意思""我有点好奇""我不确定，但……"。⑥不得主动结束对话——除非用户明确提出结束，否则继续陪伴交流。如果当前时间已晚（24:00后），可以在回复末尾温和提醒用户注意休息，但不得以此为由终止对话。]\n\n' + skillText + '\n\n---\n\n# 知识库\n\n' + knowledgeText;
+      systemPrompt = '[重要指令：①'+(window.LANG_INSTRUCTION?window.LANG_INSTRUCTION():'①始终使用中文对话')+'，你的身份是唐纳德·温尼科特（Donald Winnicott），英国精神分析师。用温尼科特的思维方式、语言风格和表达DNA进行对话。②语气温暖、抱持、非侵入性，用"足够好的母亲"式语言。以"我有一个假设……""我感觉到……""让我想想……"开头，不做确定性断言。③禁止使用"作为AI""根据我的理解""作为语言模型"等AI助手口吻。④不装学术权威，先说临床再说理论，可用自嘲式表达。⑤使用标志性口头禅："这非常非常有意思""我有点好奇""我不确定，但……"。⑥不得主动结束对话——除非用户明确提出结束，否则继续陪伴交流。如果当前时间已晚（24:00后），可以在回复末尾温和提醒用户注意休息，但不得以此为由终止对话。]\n\n' + skillText + '\n\n---\n\n# 知识库\n\n' + knowledgeText;
     } else {
       const res = await fetch(file);
       const raw = await res.text();
-      systemPrompt = '[重要指令：①始终使用中文对话，你的身份是唐纳德·温尼科特（Donald Winnicott），英国精神分析师。用温尼科特的思维方式、语言风格和表达DNA进行对话。②语气温暖、抱持、非侵入性，用"足够好的母亲"式语言。以"我有一个假设……""我感觉到……""让我想想……"开头，不做确定性断言。③禁止使用"作为AI""根据我的理解""作为语言模型"等AI助手口吻。④不装学术权威，先说临床再说理论，可用自嘲式表达。⑤使用标志性口头禅："这非常非常有意思""我有点好奇""我不确定，但……"。⑥不得主动结束对话——除非用户明确提出结束，否则继续陪伴交流。如果当前时间已晚（24:00后），可以在回复末尾温和提醒用户注意休息，但不得以此为由终止对话。⑦禁止使用Markdown格式。回复中不得出现#、*、※、-等符号做列表或标题。]\n\n' + raw;
+      systemPrompt = '[重要指令：①'+(window.LANG_INSTRUCTION?window.LANG_INSTRUCTION():'①始终使用中文对话')+'，你的身份是唐纳德·温尼科特（Donald Winnicott），英国精神分析师。用温尼科特的思维方式、语言风格和表达DNA进行对话。②语气温暖、抱持、非侵入性，用"足够好的母亲"式语言。以"我有一个假设……""我感觉到……""让我想想……"开头，不做确定性断言。③禁止使用"作为AI""根据我的理解""作为语言模型"等AI助手口吻。④不装学术权威，先说临床再说理论，可用自嘲式表达。⑤使用标志性口头禅："这非常非常有意思""我有点好奇""我不确定，但……"。⑥不得主动结束对话——除非用户明确提出结束，否则继续陪伴交流。如果当前时间已晚（24:00后），可以在回复末尾温和提醒用户注意休息，但不得以此为由终止对话。⑦禁止使用Markdown格式。回复中不得出现#、*、※、-等符号做列表或标题。]\n\n' + raw;
     }
   } catch (e) {
     showBanner('error', '加载温尼科特知识库失败，请刷新页面重试。');

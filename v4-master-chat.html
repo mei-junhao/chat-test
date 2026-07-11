@@ -1,6 +1,45 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <script src="proxy.js"></script>
+  <script src="i18n.js"></script>
+
+  /* ===== 对话页界面三语化（由 i18n.js 在每次切语言时调用） ===== */
+  window.onLangApplied = function (lang) {
+    if (!window.T) return;
+    var setPH = function (el, key) { if (el) el.setAttribute('placeholder', window.T(key)); };
+    var setTxt = function (el, key) { if (el) el.textContent = window.T(key); };
+    // 输入框占位符
+    ['input', 'chatInput', 'userInput', 'msgInput'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && !/api|sk-|http/i.test(el.getAttribute('placeholder') || '')) setPH(el, 'chat_input_ph');
+    });
+    // 发送按钮（id=sendBtn / chatSendBtn / class=send-btn 文本为发送/发）
+    var sb = document.getElementById('sendBtn') || document.querySelector('.send-btn');
+    if (sb && /发送|发/.test(sb.textContent)) setTxt(sb, 'chat_send');
+    // 返回链接（← 返回 / 返回首页 等）
+    var back = document.querySelector('a.back-link');
+    if (back && /返回/.test(back.textContent)) setTxt(back, 'chat_back_home');
+    // 设置按钮（⚙️ 或 设置）
+    var setB = document.getElementById('settingsBtn');
+    if (setB && !/⚙/.test(setB.textContent)) setTxt(setB, 'chat_settings');
+    // 按已知中文文本批量切换按钮
+    var map = {
+      '清空': 'chat_clear', '导出对话': 'chat_export', '导出': 'chat_export',
+      '新对话': 'chat_new', '历史记录': 'chat_history',
+      '全体回应': 'chat_all_respond', '仅被@回应': 'chat_mention_only',
+      '邀请大师加入': 'chat_invite', '保存对话': 'chat_save', '打赏': 'chat_reward'
+    };
+    var btns = document.querySelectorAll('button, .back-btn, .btn-primary, .btn-cancel');
+    btns.forEach(function (b) {
+      var tx = (b.textContent || '').trim();
+      if (map[tx]) setTxt(b, map[tx]);
+    });
+    // 动态生成的返回模式按钮（← 返回选择模式）
+    var bm = document.querySelector('.back-btn');
+    if (bm && /返回选择模式/.test(bm.textContent)) setTxt(bm, 'chat_back_home');
+  };
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="pageTitle">与大师对话</title>
@@ -181,7 +220,7 @@
 <div class="app">
   <div class="header" id="header">
     <a class="back-link" href="index.html">← 返回</a>
-    <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+    <button class="lang-btn" >EN</button>
     <h1 id="headerTitle">与大师对话</h1>
     <p id="headerSub"></p>
     <button class="settings-btn" onclick="toggleSettings()">⚙️ 设置</button>
@@ -549,7 +588,7 @@ function changeFontSize(d){ _fontSize=Math.max(12,Math.min(22,_fontSize+d)); loc
 
 // ====== Knowledge ======
 async function loadSystemPrompt() {
-  try{ var res=await fetch(M.kb); var raw=await res.text(); systemPrompt='[重要指令：①始终使用中文对话，你的身份是'+M.name+'，用'+M.name+'的思维方式和语言风格进行对话。②概念术语保持理论原貌，必要时附加简短解释。]\n\n'+raw; }
+  try{ var res=await fetch(M.kb); var raw=await res.text(); systemPrompt='[重要指令：①'+(window.LANG_INSTRUCTION?window.LANG_INSTRUCTION():'①始终使用中文对话')+'，你的身份是'+M.name+'，用'+M.name+'的思维方式和语言风格进行对话。②概念术语保持理论原貌，必要时附加简短解释。]\n\n'+raw; }
   catch(e){ systemPrompt='你是一位专业的精神分析学家'+M.name+'，请基于你的专业知识进行对话。'; showBanner('加载知识库失败'); }
 }
 
@@ -613,7 +652,7 @@ async function sendMessage() {
   inputEl.value=''; appendMessage('user',text); conversation.push({role:'user',content:text});
   _streamIdx++; isLoading=true; sendBtn.disabled=true; showTyping(); document.querySelector('.header').classList.add('compact');
 
-  var tempInstr='\n\n[请以'+M.name+'的身份和风格进行回应，用中文。温度权重'+talkTemp+'/100。';
+  var tempInstr='\n\n[请以'+M.name+'的身份和风格进行回应，用中文'+(window.LANG_REPLY_LANG?window.LANG_REPLY_LANG():'用中文')+'。温度权重'+talkTemp+'/100。';
   if(talkTemp<=30) tempInstr+='偏向内心感受与情感陪伴]';
   else if(talkTemp<=70) tempInstr+='默认平衡状态]';
   else tempInstr+='偏向专业知识与概念深度]';
@@ -754,46 +793,6 @@ function showChangelog(){
   if(saved) try{conversation=JSON.parse(saved);if(conversation.length){document.getElementById('intro').style.display='none';document.querySelector('.header').classList.add('compact');for(var i=0;i<conversation.length;i++)appendMessage(conversation[i].role,conversation[i].content,i);}}catch(e){}
 })();
 
-// ====== New Features ======
-var _lang = localStorage.getItem('mc_lang_'+masterKey) || 'zh';
-var i18n = {
-  'lang-btn': { zh: 'EN', en: '中' },
-  'dark-btn': { zh: '🌙 深色', en: '🌙 Dark' },
-  'forward-btn': { zh: '✂️ 转发', en: '✂️ Select' },
-  'reward-btn': { zh: '☕ 打赏', en: '☕ Tip' },
-  'export-btn': { zh: '📥 导出对话', en: '📥 Export' },
-  'changelog-btn': { zh: '📋 更新日志', en: '📋 Changelog' },
-  'reset-btn': { zh: '🔄 新对话', en: '🔄 New Chat' },
-  'history-btn': { zh: '📋 对话历史', en: '📋 History' },
-  'feedback-btn': { zh: '💡 反馈', en: '💡 Feedback' },
-  'switch-master': { zh: '🎭 换大师', en: '🎭 Switch' },
-  'supervisor-link': { zh: '🧑‍⚕️ AI督导', en: '🧑‍⚕️ Supervision' },
-  'forward-bar-count': { zh: '已选 0 条', en: 'Selected 0' },
-  'forward-cancel': { zh: '取消', en: 'Cancel' },
-  'forward-gen': { zh: '生成分享图', en: 'Generate Card' },
-  'share-save': { zh: '长按图片保存，分享到朋友圈', en: 'Long press to save, share with friends' },
-  'share-close': { zh: '关 闭', en: 'Close' },
-  'reward-title': { zh: '☕ 觉得是个好活？', en: '☕ Enjoying the chat?' },
-  'reward-desc': { zh: '这网站免费用\n如果你聊得开心，可以打赏点 token 钱', en: 'Free to use\nIf you enjoy it, feel free to tip!' },
-  'reward-close': { zh: '收到，关掉', en: 'Got it, close' },
-  'history-empty': { zh: '暂无历史对话', en: 'No history yet' }
-};
-function t(key) { return i18n[key] ? (i18n[key][_lang] || i18n[key]['zh']) : key; }
-function applyLang() {
-  document.querySelectorAll('[data-i18n]').forEach(function(el) {
-    var key = el.getAttribute('data-i18n');
-    if (key === 'lang-btn') return;
-    el.innerText = t(key);
-  });
-}
-function toggleLang() {
-  _lang = (_lang === 'zh' ? 'en' : 'zh');
-  localStorage.setItem('mc_lang_'+masterKey, _lang);
-  document.getElementById('langBtn').textContent = t('lang-btn');
-  applyLang();
-}
-document.getElementById('langBtn').textContent = t('lang-btn');
-applyLang();
 
 // Forward / Share
 var forwardSelected = {};

@@ -1,6 +1,45 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <script src="proxy.js"></script>
+  <script src="i18n.js"></script>
+
+  /* ===== 对话页界面三语化（由 i18n.js 在每次切语言时调用） ===== */
+  window.onLangApplied = function (lang) {
+    if (!window.T) return;
+    var setPH = function (el, key) { if (el) el.setAttribute('placeholder', window.T(key)); };
+    var setTxt = function (el, key) { if (el) el.textContent = window.T(key); };
+    // 输入框占位符
+    ['input', 'chatInput', 'userInput', 'msgInput'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && !/api|sk-|http/i.test(el.getAttribute('placeholder') || '')) setPH(el, 'chat_input_ph');
+    });
+    // 发送按钮（id=sendBtn / chatSendBtn / class=send-btn 文本为发送/发）
+    var sb = document.getElementById('sendBtn') || document.querySelector('.send-btn');
+    if (sb && /发送|发/.test(sb.textContent)) setTxt(sb, 'chat_send');
+    // 返回链接（← 返回 / 返回首页 等）
+    var back = document.querySelector('a.back-link');
+    if (back && /返回/.test(back.textContent)) setTxt(back, 'chat_back_home');
+    // 设置按钮（⚙️ 或 设置）
+    var setB = document.getElementById('settingsBtn');
+    if (setB && !/⚙/.test(setB.textContent)) setTxt(setB, 'chat_settings');
+    // 按已知中文文本批量切换按钮
+    var map = {
+      '清空': 'chat_clear', '导出对话': 'chat_export', '导出': 'chat_export',
+      '新对话': 'chat_new', '历史记录': 'chat_history',
+      '全体回应': 'chat_all_respond', '仅被@回应': 'chat_mention_only',
+      '邀请大师加入': 'chat_invite', '保存对话': 'chat_save', '打赏': 'chat_reward'
+    };
+    var btns = document.querySelectorAll('button, .back-btn, .btn-primary, .btn-cancel');
+    btns.forEach(function (b) {
+      var tx = (b.textContent || '').trim();
+      if (map[tx]) setTxt(b, map[tx]);
+    });
+    // 动态生成的返回模式按钮（← 返回选择模式）
+    var bm = document.querySelector('.back-btn');
+    if (bm && /返回选择模式/.test(bm.textContent)) setTxt(bm, 'chat_back_home');
+  };
+
 <link rel="icon" href="data:,">
 
 <meta charset="UTF-8">
@@ -1010,7 +1049,8 @@ async function callMasterAPI(key, activeNames, history, userMsg, isReactMode) {
     var sysPrompt;
     if (isReactMode === 'summary') {
       // Final summary round (Winnicott)
-      sysPrompt = '[你是' + m.name + '，你是这场圆桌讨论的总结者。'
+      sysPrompt = '[重要指令：' + (window.LANG_INSTRUCTION?window.LANG_INSTRUCTION():'①始终使用中文对话') + ']'
+      + '[你是' + m.name + '，你是这场圆桌讨论的总结者。'
         + '\n在场的还有：' + activeNames + '。'
         + '\n\n刚才各位大师围绕用户的问题各自发表了看法，还进行了讨论。'
         + '\n现在请你作为最后发言的人，对整场讨论做总结性回应，然后把注意力带回用户身上。'
@@ -1021,7 +1061,8 @@ async function callMasterAPI(key, activeNames, history, userMsg, isReactMode) {
         + '\n④ 可使用*斜体*或**加粗**做适度强调。禁止使用#、※、-等符号做列表或标题。]\n\n' + kbContent;
     } else if (isReactMode) {
       // Serial reaction round
-      sysPrompt = '[你是' + m.name + '。刚才用户提问后，各位大师已经分别回应了。'
+      sysPrompt = '[重要指令：' + (window.LANG_INSTRUCTION?window.LANG_INSTRUCTION():'①始终使用中文对话') + ']'
+      + '[你是' + m.name + '。刚才用户提问后，各位大师已经分别回应了。'
         + '\n在场的还有：' + activeNames + '。'
         + '\n你刚才已经说过你的看法了。现在请看看其他大师说了什么。'
         + '\n如果你觉得有必要补充、回应或质疑，可以说一两句。'
@@ -1034,7 +1075,8 @@ async function callMasterAPI(key, activeNames, history, userMsg, isReactMode) {
         + '\n⑤ 没什么要说的就输出一个空格。'
         + '\n⑥ 温尼科特作为最后总结者时，记得把话题带回用户身上，问问用户的感受或想法。]\n\n' + kbContent;
     } else {
-      sysPrompt = '[你是' + m.name + '，你是参与圆桌讨论的其中一位。'
+      sysPrompt = '[重要指令：' + (window.LANG_INSTRUCTION?window.LANG_INSTRUCTION():'①始终使用中文对话') + ']'
+      + '[你是' + m.name + '，你是参与圆桌讨论的其中一位。'
         + '\n在场的还有：' + activeNames + '。'
         + '\n\n规则：'
         + '\n① 用「我」说话。就像你本人坐在房间里一样。'
