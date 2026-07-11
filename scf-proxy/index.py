@@ -14,16 +14,20 @@ except Exception as e:
     sys.stderr.write("IMPORT FAILED: %s\n" % e)
 
 DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
-DEEPSEEK_MODEL = "deepseek-v4-flash"
+DEEPSEEK_MODEL = "deepseek-chat"
 TIMEOUT = 120
 
 def is_allowed(headers):
     allowed = os.environ.get("ALLOWED_REFERER", "").strip()
     if not allowed:
         return True
-    src = headers.get("Referer") or headers.get("Origin") or ""
+    src = (headers.get("Referer") or headers.get("Origin") or "").lower()
     if not src:
         return True
+    # 自动放行本地开发环境
+    for local in ("localhost", "127.0.0.1", "192.168.", "10.", "172.16."):
+        if local in src:
+            return True
     return allowed in src
 
 class Handler(BaseHTTPRequestHandler):
@@ -119,7 +123,10 @@ class Handler(BaseHTTPRequestHandler):
         try:
             upstream = urllib.request.urlopen(req, timeout=TIMEOUT)
         except urllib.error.HTTPError as e:
-            err = json.dumps({"error": "DeepSeek HTTP %d" % e.code}).encode()
+            body = ""
+            try: body = e.read().decode()[:500]
+            except: pass
+            err = json.dumps({"error": "DeepSeek HTTP %d" % e.code, "detail": body}).encode()
             self.send_response(502)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")
