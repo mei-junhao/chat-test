@@ -25,6 +25,17 @@ class ProxyHandler(BaseHTTPRequestHandler):
         self._cors_headers()
         self.end_headers()
 
+    def do_GET(self):
+        # 健康检查端点（供前端 proxy.js 探测远程代理可用性）
+        if self.path.split('?')[0] == '/health':
+            self.send_response(200)
+            self._cors_headers()
+            self.end_headers()
+            self.wfile.write(b'ok')
+            return
+        self.send_response(404)
+        self.end_headers()
+
     def do_POST(self):
         content_len = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(content_len)

@@ -1,17 +1,17 @@
 /*
- * proxy.js — 本地代理「透明拦截」前端侧
+ * proxy.js — 代理「透明拦截」前端侧
  * ------------------------------------------------------------
- * 作用：当本机运行 local-server.js（开发服务器 + 代理）时，把对
- *       api.deepseek.com / api.kkdmx.com / apihub.agnes-ai.com
- *       的聊天请求重路由到本地 /chat，并剥离 Authorization（key）。
- *       这样浏览器永远不直接持有 key，key 只留在你本机服务端。
+ * 三种代理来源（按顺序探测 /health，取第一个可用）：
+ *   1. 本机 dev server：location.origin（本地起 local-server.js 时）
+ *   2. 独立本机代理：http://localhost:3000
+ *   3. 远程云函数代理：从 URL hash #proxy=<URL> 或 localStorage.remoteProxyUrl 读取
+ *        —— 用于已部署到 Cloudflare Worker / 腾讯云 SCF 等云端的代理
  *
- * 安全前提：本文件只做「请求重路由」，不藏任何 key。
- * 兼容前提：若本机没有运行代理（例如直接打开已部署的 GitHub Pages），
- *       探测失败，自动回退为原始直连逻辑（与现在行为一致）。
- *
- * 自定义 API（用户输入的其它地址，如 OpenAI / 硅基流动）不在此拦截范围内，
- * 仍按原样直连，key 由用户自己负责。
+ * 行为：把对 api.deepseek.com / api.kkdmx.com / apihub.agnes-ai.com 的聊天请求
+ *       重路由到代理并剥离 Authorization（key 只留在代理侧）。
+ * 安全：本文件只做「请求重路由」，不藏任何 key。
+ * 兼容：若所有代理都不可用（如直接打开 GitHub Pages 且没配远程代理），
+ *       自动回退为原始直连逻辑。
  */
 (function () {
   'use strict';
@@ -21,12 +21,26 @@
   // 仅这几个「已知上游」会被拦截并重路由；其它地址（含自定义 API）保持直连
   var PROXY_HOSTS = ['api.deepseek.com', 'api.kkdmx.com', 'apihub.agnes-ai.com'];
 
-  // 探测候选：优先同源 dev server（推荐做法），其次独立代理 3000 端口
+  // 解析远程代理 URL：优先 URL hash #proxy=<encoded URL>，其次 localStorage
+  function getRemoteProxy() {
+    try {
+      var m = location.hash && location.hash.match(/proxy=([^&]+)/);
+      if (m) {
+        var u = decodeURIComponent(m[1]);
+        try { localStorage.setItem('remoteProxyUrl', u); } catch (e) {}
+        return u;
+      }
+    } catch (e) {}
+    try { return localStorage.getItem('remoteProxyUrl') || ''; } catch (e) { return ''; }
+  }
+
   var CANDIDATES = [];
   if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-    CANDIDATES.push(location.origin);
+    CANDIDATES.push(location.origin); // 本机 dev server
   }
-  CANDIDATES.push('http://localhost:3000');
+  CANDIDATES.push('http://localhost:3000'); // 独立本机代理
+  var REMOTE = getRemoteProxy();
+  if (REMOTE) CANDIDATES.push(REMOTE); // 远程云函数代理
 
   // 顺序探测，返回第一个 /health 可用的 base（或 null）
   var probePromise = CANDIDATES.reduce(function (chain, base) {
@@ -54,7 +68,7 @@
     if (!bodyObj || !Array.isArray(bodyObj.messages)) return REAL_FETCH(input, init);
 
     return probePromise.then(function (base) {
-      if (!base) return REAL_FETCH(input, init); // 本机无代理 → 回退直连
+      if (!base) return REAL_FETCH(input, init); // 无可用代理 → 回退直连
 
       // 复制原始 headers，但剥离 Authorization
       var headers = {};
@@ -75,7 +89,9 @@
       newInit.headers = headers;
       newInit.body = JSON.stringify(bodyObj);
 
-      return REAL_FETCH(base + '/chat', newInit);
+      // 本机代理走 /chat 端点；远程云函数直接 POST 到其 URL（函数接收任意 POST 代理）
+      var target = (base === REMOTE) ? base : base + '/chat';
+      return REAL_FETCH(target, newInit);
     });
   };
 })();

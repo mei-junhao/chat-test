@@ -3,6 +3,7 @@
 
 export default {
   async fetch(request, env) {
+    const url = new URL(request.url);
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         headers: {
@@ -12,6 +13,10 @@ export default {
           'Access-Control-Max-Age': '86400',
         },
       });
+    }
+    // 健康检查端点（供前端 proxy.js 探测远程代理可用性）
+    if (request.method === 'GET' && url.pathname === '/health') {
+      return new Response('ok', { status: 200 });
     }
     if (request.method !== 'POST') {
       return new Response('Method not allowed', { status: 405 });
