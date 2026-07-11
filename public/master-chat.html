@@ -700,13 +700,9 @@ var messagesEl = document.getElementById('messages');
 var inputEl = document.getElementById('input');
 var sendBtn = document.getElementById('sendBtn');
 
-const TIERS = [
-  { api:'https://api.deepseek.com/v1/chat/completions', key:'', model:'deepseek-v4-flash', name:'DeepSeek V4 Flash' },
-  { api:'https://api.kkdmx.com/v1/chat/completions', key:'', model:'deepseek-ai/deepseek-v4-pro', name:'DeepSeek Pro' },
-  { api:'https://api.kkdmx.com/v1/chat/completions', key:'', model:'deepseek-ai/deepseek-v4-flash', name:'DeepSeek Flash' },
-  { api:'https://api.kkdmx.com/v1/chat/completions', key:'', model:'minimaxai/minimax-m3', name:'MiniMax M3' },
-  { api:'https://apihub.agnes-ai.com/v1/chat/completions', key:'', model:'agnes-2.0-flash', name:'Agnes' }
-];
+// 所有真实 API Key 保存在 EdgeOne 边缘函数(chattest-s7wlh4rd.edgeone.cool/api/proxy)的环境变量中，
+// 前端不直接接触任何 Key。多供应商回退(DeepSeek→kkdmx Pro/Flash→MiniMax→Agnes)在边缘函数内部完成。
+const API_PROXY = 'https://chattest-s7wlh4rd.edgeone.cool/api/proxy';
 
 // ====== Settings ======
 function toggleSettings() {
@@ -718,7 +714,7 @@ function setMode(m) { apiMode=m; document.getElementById('defaultModeBtn').class
 function fillPreset(api,model) { document.getElementById('customApi').value=api; document.getElementById('customModel').value=model; if(apiMode!=='custom')setMode('custom'); showBanner('已填入，请填写 Key'); }
 function saveSettings() { customApi=document.getElementById('customApi').value.trim(); customKey=document.getElementById('customKey').value.trim(); customModel=document.getElementById('customModel').value.trim()||'gpt-4o'; if(customApi)localStorage.setItem('mc_custom_api_'+masterKey,customApi);else localStorage.removeItem('mc_custom_api_'+masterKey); if(customKey)localStorage.setItem('mc_custom_key_'+masterKey,customKey);else localStorage.removeItem('mc_custom_key_'+masterKey); localStorage.setItem('mc_custom_model_'+masterKey,customModel); showBanner('设置已保存'); }
 function restoreSettings() { customApi=localStorage.getItem('mc_custom_api_'+masterKey)||''; customKey=localStorage.getItem('mc_custom_key_'+masterKey)||''; customModel=localStorage.getItem('mc_custom_model_'+masterKey)||'gpt-4o'; document.getElementById('customApi').value=customApi; document.getElementById('customKey').value=customKey; document.getElementById('customModel').value=customModel; }
-function getActiveConfig() { if(apiMode==='custom'&&customApi&&customKey) return {api:customApi,key:customKey,model:customModel}; return TIERS[_tierLevel]||TIERS[0]; }
+function getActiveConfig() { if(apiMode==='custom'&&customApi&&customKey) return {api:customApi,key:customKey,model:customModel,name:'自定义'}; return {api:API_PROXY,key:'',model:'proxy',name:'EdgeOne 代理'}; }
 
 function updateTemp(val) {
   var old=talkTemp; talkTemp=parseInt(val);
@@ -731,28 +727,18 @@ function updateTemp(val) {
 function updateLength(val) { var l=['简洁','适中','详细']; var t=[1024,0,4096]; _maxTokens=t[parseInt(val)]; localStorage.setItem('mc_len_'+masterKey,_maxTokens); document.getElementById('lenLabel').textContent=l[parseInt(val)]; document.getElementById('lenSlider').style.background='linear-gradient(to right, var(--accent) '+(parseInt(val)/2*100)+'%, var(--border) '+(parseInt(val)/2*100)+'%)'; }
 
 function checkAllAPIs() {
-  var row=document.getElementById('apiHealthRow'); row.innerHTML=TIERS.map(function(t){return '<span style="background:#eee;color:#999;padding:2px 8px;border-radius:8px;font-size:10px;">'+t.name+' …</span>';}).join('');
-  TIERS.forEach(function(t,i){ setTimeout(function(){
-    var start=Date.now();
-    // AbortController for timeout
-    var ac=new AbortController(); var tm=setTimeout(function(){ac.abort();},8000);
-    fetch(t.api,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t.key},body:JSON.stringify({model:t.model,messages:[{role:'user',content:'hi'}],max_tokens:1}),signal:ac.signal})
-    .then(function(r){
-      clearTimeout(tm);
-      // Any response = connected (even 4xx/5xx means reachable)
-      var ms=Date.now()-start;
-      var color=r.ok||r.status<500?'#4a9':'#c60';
-      var label=r.ok?'✓ ':'⚡ '; label+=ms+'ms';
-      updateBadge(t.name,color,label);
-    })
-    .catch(function(){
-      clearTimeout(tm);
-      // Also try a simple GET or OPTIONS as fallback
-      fetch(t.api,{method:'OPTIONS',signal:AbortSignal.timeout(5000)})
-      .then(function(){ updateBadge(t.name,'#c60','⚡ 响应慢'); })
-      .catch(function(){ updateBadge(t.name,'#c33','✗ 超时'); });
-    });
-  }, i*600);});
+  var row=document.getElementById('apiHealthRow'); row.innerHTML='<span style="background:#eee;color:#999;padding:2px 8px;border-radius:8px;font-size:10px;">EdgeOne 代理 …</span>';
+  var start=Date.now();
+  var ac=new AbortController(); var tm=setTimeout(function(){ac.abort();},10000);
+  fetch(API_PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:'hi'}],max_tokens:1}),signal:ac.signal})
+  .then(function(r){
+    clearTimeout(tm);
+    var ms=Date.now()-start;
+    if(r.ok){ updateBadge('EdgeOne 代理','#4a9','✓ '+ms+'ms'); }
+    else if(r.status===403){ updateBadge('EdgeOne 代理','#c33','✗ 来源被拒'); }
+    else { updateBadge('EdgeOne 代理','#c60','⚡ '+r.status); }
+  })
+  .catch(function(){ clearTimeout(tm); updateBadge('EdgeOne 代理','#c33','✗ 不可达'); });
 }
 function updateBadge(name,color,label) {
   var row=document.getElementById('apiHealthRow');
@@ -916,14 +902,17 @@ async function sendMessage() {
   var div=document.createElement('div'); div.className='msg ai'; _streamIdx++; var streamIdx=_streamIdx;
   div.innerHTML='<div class="ai-header"><div class="avatar" style="overflow:hidden;background:transparent;">'+(M.avatar?'<img src="'+M.avatar+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">':M.initial)+'</div><span class="ai-name">'+M.name+'</span></div><div class="bubble" id="streamBubble'+streamIdx+'"></div>';
 
+  cfg=getActiveConfig();
   for(var attempt=0;attempt<_maxRetries;attempt++){
-    cfg=getActiveConfig();
     try{
       removeTyping(); messagesEl.appendChild(div); scrollToBottom();
       var hdrs={'Content-Type':'application/json'};
-      if(cfg.key)hdrs['Authorization']='Bearer '+cfg.key;
+      if(cfg.key)hdrs['Authorization']='Bearer '+cfg.key;   // 仅「自定义」模式带用户自己的 Key；代理模式不带
       var res=await fetch(cfg.api,{method:'POST',headers:hdrs,body:JSON.stringify({model:cfg.model,messages:ctxMessages,temperature:0.7,max_tokens:_maxTokens||undefined,stream:true})});
-      if(!res.ok){showBanner(cfg.name+' 返回 '+res.status+'，尝试下一条'); continue;}
+      if(!res.ok){
+        showBanner(cfg.name+' 返回 '+res.status+(res.status===403?'（来源被边缘函数拒绝：检查 Referer 白名单是否为 mei-junhao.github.io）':''));
+        if(attempt<_maxRetries-1){_retry++;continue;} break;
+      }
 
       var reader=res.body.getReader(); var decoder=new TextDecoder();
       var sb=document.getElementById('streamBubble'+streamIdx); var buf='';
@@ -940,12 +929,11 @@ async function sendMessage() {
           }
         }
       }
-      if(fullReply){success=true;_tierLevel=attempt; break;}
+      if(fullReply){success=true; break;}
       _retry++;
     }catch(e){
-      removeTyping(); showBanner(cfg.name+' 不可用，尝试下一条');
-      if(_tierLevel<TIERS.length-1){_tierLevel++;_retry=0;fullReply='';continue;}
-      if(_retry<_maxRetries){_retry++;continue;}
+      removeTyping(); showBanner(cfg.name+' 请求失败：'+((e&&e.message)?e.message:e));
+      if(attempt<_maxRetries-1){_retry++;continue;}
       showBanner('没事儿，API 没钱了，正在充，还不行发邮件 985729106@qq.com 问问'); conversation.pop(); _fatalError=true; break;
     }
   }
