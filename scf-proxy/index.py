@@ -165,8 +165,12 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")
         self.send_header("Connection", "keep-alive")
+        self.send_header("X-Accel-Buffering", "no")  # 禁止 SCF 网关缓冲
         self.send_header("X-Provider", "DeepSeek")
         self.end_headers()
+        # 立即推送响应头（强制 chunked 模式）
+        self.wfile.flush()
+        sys.stdout.flush()
 
         try:
             while True:
@@ -175,6 +179,7 @@ class Handler(BaseHTTPRequestHandler):
                     break
                 self.wfile.write(chunk)
                 self.wfile.flush()
+                sys.stdout.flush()
         except Exception:
             pass
         finally:
