@@ -52,7 +52,7 @@
 
   /* Header */
   .header { padding:14px 20px 6px; text-align:center; border-bottom:1px solid #e8e1d9; background:#fffdfb; flex-shrink:0; position:relative; z-index:2; }
-  .header h1 { font-size:16px; font-weight:500; margin-bottom:2px; }
+  .header h1 { font-size:16px; font-weight:500; margin-bottom:2px; padding:0 80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .header p { font-size:11px; color:#8f857d; margin-bottom:6px; }
   .back-link { position:absolute; left:16px; top:14px; font-size:12px; color:#8f857d; text-decoration:none; }
   .back-link:hover { color:#8b6f5c; }
@@ -155,7 +155,7 @@
   .history-empty { text-align:center; padding:24px; color:#8f857d; font-size:12px; }
 
   /* Banner */
-  .banner { position:fixed; top:0; left:50%; transform:translateX(-50%); z-index:300; background:#8b6f5c; color:white; padding:8px 20px; border-radius:0 0 10px 10px; font-size:12px; opacity:0; transition:opacity 0.3s; pointer-events:none; }
+  .banner { position:fixed; top:0; left:50%; transform:translateX(-50%); z-index:300; background:#8b6f5c; color:white; padding:8px 20px; border-radius:0 0 10px 10px; font-size:12px; opacity:0; transition:opacity 0.3s; pointer-events:none; white-space:normal; text-align:center; max-width:calc(100vw - 24px); }
   .banner.show { opacity:1; pointer-events:auto; }
 
   /* Invite modal */
