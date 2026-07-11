@@ -17,6 +17,17 @@ export function onRequestOptions(context) {
   });
 }
 
+// GET 健康检查（供前端 proxy.js 探测远程代理可用性）
+export function onRequestGet(context) {
+  const url = new URL(context.request.url);
+  if (url.pathname === '/health') {
+    return new Response('ok', {
+      headers: { 'Access-Control-Allow-Origin': '*' },
+    });
+  }
+  return new Response('Method not allowed', { status: 405 });
+}
+
 // POST 代理
 export async function onRequestPost(context) {
   const body = await context.request.json();
