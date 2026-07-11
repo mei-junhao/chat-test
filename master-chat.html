@@ -724,7 +724,7 @@ function setMode(m) { apiMode=m; document.getElementById('defaultModeBtn').class
 function fillPreset(api,model) { document.getElementById('customApi').value=api; document.getElementById('customModel').value=model; if(apiMode!=='custom')setMode('custom'); showBanner('已填入，请填写 Key'); }
 function saveSettings() { customApi=document.getElementById('customApi').value.trim(); customKey=document.getElementById('customKey').value.trim(); customModel=document.getElementById('customModel').value.trim()||'gpt-4o'; if(customApi)localStorage.setItem('mc_custom_api_'+masterKey,customApi);else localStorage.removeItem('mc_custom_api_'+masterKey); if(customKey)localStorage.setItem('mc_custom_key_'+masterKey,customKey);else localStorage.removeItem('mc_custom_key_'+masterKey); localStorage.setItem('mc_custom_model_'+masterKey,customModel); showBanner('设置已保存'); }
 function restoreSettings() { customApi=localStorage.getItem('mc_custom_api_'+masterKey)||''; customKey=localStorage.getItem('mc_custom_key_'+masterKey)||''; customModel=localStorage.getItem('mc_custom_model_'+masterKey)||'gpt-4o'; document.getElementById('customApi').value=customApi; document.getElementById('customKey').value=customKey; document.getElementById('customModel').value=customModel; }
-function getActiveConfig() { if(apiMode==='custom'&&customApi&&customKey) return {api:customApi,key:customKey,model:customModel,name:'自定义'}; return {api:API_PROXY,key:'',model:'proxy',name:'EdgeOne 代理'}; }
+function getActiveConfig() { if(apiMode==='custom'&&customApi&&customKey) return {api:customApi,key:customKey,model:customModel,name:'自定义'}; return {api:API_PROXY,key:'',model:'proxy',name:'SCF 代理'}; }
 
 function updateTemp(val) {
   var old=talkTemp; talkTemp=parseInt(val);
@@ -744,11 +744,11 @@ function checkAllAPIs() {
   .then(function(r){
     clearTimeout(tm);
     var ms=Date.now()-start;
-    if(r.ok){ updateBadge('EdgeOne 代理','#4a9','✓ '+ms+'ms'); }
-    else if(r.status===403){ updateBadge('EdgeOne 代理','#c33','✗ 来源被拒'); }
-    else { updateBadge('EdgeOne 代理','#c60','⚡ '+r.status); }
+    if(r.ok){ updateBadge('SCF 代理','#4a9','✓ '+ms+'ms'); }
+    else if(r.status===403){ updateBadge('SCF 代理','#c33','✗ 来源被拒'); }
+    else { updateBadge('SCF 代理','#c60','⚡ '+r.status); }
   })
-  .catch(function(){ clearTimeout(tm); updateBadge('EdgeOne 代理','#c33','✗ 不可达'); });
+  .catch(function(){ clearTimeout(tm); updateBadge('SCF 代理','#c33','✗ 不可达'); });
 }
 function updateBadge(name,color,label) {
   var row=document.getElementById('apiHealthRow');
