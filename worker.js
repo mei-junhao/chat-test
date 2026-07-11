@@ -15,7 +15,7 @@ export default {
       });
     }
     // 健康检查端点（供前端 proxy.js 探测远程代理可用性）
-    if (request.method === 'GET' && url.pathname === '/health') {
+    if (request.method === 'GET' && url.pathname.endsWith('/health')) {
       return new Response('ok', { status: 200 });
     }
     if (request.method !== 'POST') {

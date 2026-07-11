@@ -20,7 +20,7 @@ export function onRequestOptions(context) {
 // GET 健康检查（供前端 proxy.js 探测远程代理可用性）
 export function onRequestGet(context) {
   const url = new URL(context.request.url);
-  if (url.pathname === '/health') {
+  if (url.pathname.endsWith('/health')) {
     return new Response('ok', {
       headers: { 'Access-Control-Allow-Origin': '*' },
     });

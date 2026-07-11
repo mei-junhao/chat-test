@@ -27,7 +27,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         # 健康检查端点（供前端 proxy.js 探测远程代理可用性）
-        if self.path.split('?')[0] == '/health':
+        if self.path.split('?')[0].endswith('/health'):
             self.send_response(200)
             self._cors_headers()
             self.end_headers()

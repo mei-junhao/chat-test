@@ -54,14 +54,60 @@ wrangler deploy
 
 ---
 
-## B. 腾讯 EdgeOne Makers
+## B. 腾讯 EdgeOne Makers（你选的「边缘函数」）
 
-1. 打开 EdgeOne Makers 控制台，新建/打开一个项目。
-2. 把 `edge-functions/api/proxy.js` 的内容作为边缘函数部署（访问路径 `/api/proxy`）。
-3. 在 Makers 环境变量里设置 `DEEPSEEK_API_KEY`（**只填这里**）。
-4. 部署后地址形如 `https://<你的域名>/api/proxy`（POST 地址即含 `/api/proxy`）。
+> 函数文件：`edge-functions/api/proxy.js`，线上路径固定为 `/api/proxy`。
+> 已补全 `GET /health`，可被 `proxy.js` 自动探测。无响应体限制、原生 SSE 流式。
 
-> 该函数已补全 `GET /health`，可与 Cloudflare / SCF 一样被 `proxy.js` 自动探测。
+### 方式一：CLI 部署（推荐，可脚本化）
+
+```bash
+# 1) 装 CLI（需 Node / npm）
+npm install -g edgeone
+edgeone -v                       # 看到版本号即成功
+
+# 2) 登录（选 China 国内站）
+edgeone login                    # 弹浏览器授权；或 export EDGEONE_API_TOKEN=xxx 后免登录
+
+# 3) 准备项目：把本仓库的 edge-functions/ 放到一个 EdgeOne Makers 项目根目录
+#    （控制台新建 Makers 项目后 git 克隆到本地，再把 proxy.js 放进 edge-functions/api/）
+cp -r edge-functions ./makers-project/   # 或直接在克隆的项目里编辑
+
+# 4) 关联 / 新建项目（在函数所在目录执行）
+cd makers-project
+edgeone makers init              # 若尚未初始化（会生成 edge-functions/cloud-functions 样板）
+edgeone makers link -n <你的Makers项目名>   # 关联已建项目；不存在则按提示新建
+
+# 5) 注入 key（只进 Makers 环境变量，不进文件/前端）
+edgeone makers env set DEEPSEEK_API_KEY 'sk-你的key' -t <EDGEONE_API_TOKEN>
+#    也可在 Makers 控制台「环境变量」页面手动填 DEEPSEEK_API_KEY
+
+# 6) 部署
+edgeone makers deploy -n <你的Makers项目名> -e production
+#    成功后给出线上 URL，形如：
+#      https://<项目名>.<edgeone域名>/api/proxy
+#    或你绑定的自定义域名：https://你的域名/api/proxy
+```
+
+### 方式二：控制台部署（不想碰 CLI）
+
+1. Makers 控制台新建项目 → 在函数目录 `edge-functions/api/` 下新建 `proxy.js`，粘贴本仓库 `edge-functions/api/proxy.js` 全文。
+2. 项目设置 → 环境变量 → 新增 `DEEPSEEK_API_KEY=你的key`（**只填这里**）。
+3. 点击「部署」，拿到 `https://<域名>/api/proxy`。
+
+### 本地 dev 预检（零成本，先确认函数能跑）
+
+```bash
+edgeone makers dev               # 本地起服务，默认 http://localhost:8088
+# 另开终端：
+curl -i http://localhost:8088/api/proxy/health     # 应返回 200 ok
+python3 verify_proxy.py --url http://localhost:8088/api/proxy --name EdgeOne-dev
+#   注：dev 也需要 DEEPSEEK_API_KEY —— 用 edgeone makers env set 或本地 .env 提供
+```
+
+> ⚠️ EdgeOne Makers 的访问路径由文件位置决定（`edge-functions/api/proxy.js` → `/api/proxy`），
+> 所以 `proxy.js` 的 `#proxy=` 地址要写**含 `/api/proxy` 的完整地址**，
+> 例如 `https://你的域名/api/proxy`（不要再补 `/chat` 之类后缀）。
 
 ---
 
@@ -88,10 +134,10 @@ wrangler deploy
 
 ```bash
 cd chat-test
+# 你选的对比：腾讯 EdgeOne（边缘） vs 腾讯 SCF（云函数）
 python3 verify_proxy.py \
-  --url https://winnicott-chat-proxy.<子域>.workers.dev --name CF \
-  --url https://<id>.apigw.tencentcs.com/release/...      --name SCF \
-  --url https://<你的域名>/api/proxy                       --name EdgeOne
+  --url https://<你的域名>/api/proxy                       --name EdgeOne \
+  --url https://<id>.apigw.tencentcs.com/release/...      --name SCF
 ```
 
 脚本会：
@@ -121,8 +167,11 @@ https://mei-junhao.github.io/chat-test/master-chat.html#proxy=<函数地址>
 
 ## 3. 最终怎么选（给你做决定的依据）
 
-- **首选 Cloudflare Worker**：无响应体限制、原生 Streams、免费、部署一行命令。之前担心的「serverless 截断」在正确流式透传下不存在。
-- **次选 EdgeOne**：若你要国内边缘 / 全腾讯生态，接口与 CF 一致，同样无限制。
-- **SCF Web Function 可用但最繁琐**：必须 Web Function + API 网关开 SSE 流式；若漏开 SSE 开关，虽能用但是「整段缓冲」而非真流式（verify 会标 `PASS(buffered)`）。普通函数（6MB）则直接不可用。
+你选了 **EdgeOne（腾讯边缘）** 作为边缘函数对手，与 **SCF（腾讯云函数）** 对比。预期结论：
 
-把 `verify_proxy.py` 的三行结果贴回来，我帮你出最终对比结论。
+- **EdgeOne（边缘）**：无响应体限制、原生 SSE 流式、`new Response(response.body)` 透传，最省心。verify 应直接 `PASS(streaming)`。国内边缘、与 DeepSeek 同生态，延迟更优。
+- **SCF Web Function**：可用但最繁琐——必须 Web Function + API 网关开 SSE 流式；若漏开 SSE 开关，虽能用但是「整段缓冲」（`PASS(buffered)`）；普通函数（6MB 限制）则直接不可用。
+
+只要两边都跑出 `PASS(streaming)`，说明「边缘 vs 云函数」在代理 DeepSeek 这事上都能用；区别只在部署繁琐度与延迟。把 `verify_proxy.py` 的两行结果贴回来，我帮你出最终对比结论。
+
+> 注：若你只想先用 EdgeOne 跑通验证（暂不上 SCF），把上面命令里 SCF 那行删掉即可，单跑 `python3 verify_proxy.py --url https://<域名>/api/proxy --name EdgeOne`。
