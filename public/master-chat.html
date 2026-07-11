@@ -702,9 +702,11 @@ var messagesEl = document.getElementById('messages');
 var inputEl = document.getElementById('input');
 var sendBtn = document.getElementById('sendBtn');
 
-// 所有真实 API Key 保存在 EdgeOne 边缘函数(chattest-s7wlh4rd.edgeone.cool/api/proxy)的环境变量中，
-// 前端不直接接触任何 Key。多供应商回退(DeepSeek→kkdmx Pro/Flash→MiniMax→Agnes)在边缘函数内部完成。
-const API_PROXY = 'https://chattest-s7wlh4rd.edgeone.cool/api/proxy';
+// 所有真实 API Key 保存在 EdgeOne 边缘函数(/api/proxy)的环境变量中，前端不直接接触任何 Key。
+// 整个仓库部署到 EdgeOne 后，前端与代理同源：浏览器跑在 *.edgeone.* 上时自动用 location.origin + /api/proxy（免 CORS、白名单自动放行）。
+const API_PROXY = (location.hostname.endsWith('.edgeone.app') || location.hostname.endsWith('.edgeone.site') || location.hostname.endsWith('.edgeone.cool'))
+  ? location.origin + '/api/proxy'
+  : 'https://chattest-s7wlh4rd.edgeone.cool/api/proxy';
 
 // ====== Settings ======
 function toggleSettings() {

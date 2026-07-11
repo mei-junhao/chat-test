@@ -1,14 +1,13 @@
-// EdgeOne Pages / Makers 边缘函数 — 多供应商大模型代理（隐藏 API Key）
+// EdgeOne 边缘函数 — 单供应商(DeepSeek)大模型代理，隐藏 API Key
 // 路由: /api/proxy  （由 edge-functions/api/proxy.js 自动映射）
-// 部署: EdgeOne Pages 项目 或 EdgeOne Makers（直接上传整个 edge-functions/ 目录）
+// 部署: 把整个仓库部署到 EdgeOne Pages/Makers，函数自动挂在 /api/proxy
 //
 // 环境变量（在 EdgeOne 控制台「环境变量」中设置）:
-//   ALLOWED_REFERER  = mei-junhao.github.io        # 逗号分隔的多个允许来源，防盗刷；留空则放行所有来源
-//   DEEPSEEK_API_KEY = sk-xxx                       # 第1层
-//   KKDMX_KEY_PRO    = sk-xxx                       # 第2层
-//   KKDMX_KEY_FLASH  = sk-xxx                       # 第3层
-//   KKDMX_KEY_MINIMAX= sk-xxx                       # 第4层
-//   AGNES_KEY        = sk-xxx                       # 第5层
+//   ALLOWED_REFERER  = （可选）逗号分隔的允许来源，防盗刷；留空则仅用同源白名单
+//   DEEPSEEK_API_KEY = sk-xxx   ← 唯一需要的 Key
+
+const DEEPSEEK_API = 'https://api.deepseek.com/v1/chat/completions';
+const DEEPSEEK_MODEL = 'deepseek-chat'; // 默认模型；若你的 Key 支持其他模型(如 deepseek-reasoner)，可在前端「自定义模式」填写
 
 function corsHeaders(origin) {
   return {
@@ -34,24 +33,13 @@ function getEnv(context) {
   return e;
 }
 
-// 沿用前端 master-chat.html 中 TIERS 的顺序与模型
-function buildTiers(env) {
-  return [
-    { name: 'DeepSeek V4 Flash', api: 'https://api.deepseek.com/v1/chat/completions',    key: env.DEEPSEEK_API_KEY,  model: 'deepseek-v4-flash' },
-    { name: 'DeepSeek Pro',       api: 'https://api.kkdmx.com/v1/chat/completions',       key: env.KKDMX_KEY_PRO,     model: 'deepseek-ai/deepseek-v4-pro' },
-    { name: 'DeepSeek Flash',     api: 'https://api.kkdmx.com/v1/chat/completions',       key: env.KKDMX_KEY_FLASH,  model: 'deepseek-ai/deepseek-v4-flash' },
-    { name: 'MiniMax M3',         api: 'https://api.kkdmx.com/v1/chat/completions',       key: env.KKDMX_KEY_MINIMAX, model: 'minimaxai/minimax-m3' },
-    { name: 'Agnes',              api: 'https://apihub.agnes-ai.com/v1/chat/completions', key: env.AGNES_KEY,        model: 'agnes-2.0-flash' },
-  ];
-}
-
 // 解析允许的 Referer 列表（逗号/空格分隔）；自动包含本函数自身域名（同源）
 function allowedReferers(env, request) {
-  const raw = (env.ALLOWED_REFERER || 'mei-junhao.github.io').toLowerCase();
+  const raw = (env.ALLOWED_REFERER || '').toLowerCase();
   const list = raw.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
   try {
     const host = new URL(request.url).host.toLowerCase();
-    if (host) list.push(host);           // 同源放行（如 chattest-s7wlh4rd.edgeone.cool 自身）
+    if (host) list.push(host); // 同源放行（如 chattest-s7wlh4rd.edgeone.cool 自身）
   } catch (e) {}
   return list;
 }
@@ -68,13 +56,11 @@ export function onRequestGet(context) {
     return new Response('Method not allowed', { status: 405 });
   }
   const env = getEnv(context);
-  const tiers = buildTiers(env);
   const diag = {
     ok: true,
     functionHost: url.host,
     allowedReferers: allowedReferers(env, context.request),
-    providers: tiers.map(t => ({ name: t.name, hasKey: !!t.key })),
-    allKeysMissing: tiers.every(t => !t.key),
+    deepseekConfigured: !!env.DEEPSEEK_API_KEY,
   };
   return new Response(JSON.stringify(diag, null, 2), {
     status: 200,
@@ -86,10 +72,9 @@ export async function onRequestPost(context) {
   const { request } = context;
   const env = getEnv(context);
 
-  // 1) 防盗刷：Referer / Origin 白名单（留空 ALLOWED_REFERER 则放行全部，便于排查）
+  // 1) 防盗刷：Referer / Origin 白名单（同源自动放行；ALLOWED_REFERER 留空则仅依赖同源）
   const allowed = allowedReferers(env, request);
   const referer = (request.headers.get('referer') || request.headers.get('origin') || '').toLowerCase();
-  const origin  = request.headers.get('origin') || '*';
   if (env.ALLOWED_REFERER && env.ALLOWED_REFERER.trim() !== '' && referer) {
     const pass = allowed.some(a => referer.includes(a));
     if (!pass) {
@@ -97,7 +82,7 @@ export async function onRequestPost(context) {
     }
   }
 
-  // 2) 解析请求体（前端只需传 messages / temperature / max_tokens）
+  // 2) 解析请求体（前端只需传 messages / temperature / max_tokens / 可选 model）
   let body;
   try {
     body = await request.json();
@@ -105,48 +90,46 @@ export async function onRequestPost(context) {
     return json({ error: 'Invalid JSON body' }, 400);
   }
   body.stream = true;
-  // 上游多数需要显式 max_tokens，缺失时给一个合理默认，避免被拒
+  // 上游需要显式 max_tokens，缺失时给合理默认
   if (!body.max_tokens || body.max_tokens <= 0) body.max_tokens = 2048;
+  // 模型：前端自定义模式可指定；否则用默认 DeepSeek 模型（'proxy' 是占位，不当真）
+  body.model = (body.model && body.model !== 'proxy') ? body.model : DEEPSEEK_MODEL;
 
-  // 3) 逐层回退
-  const tiers = buildTiers(env);
-  let lastError = null;
-  const skipped = [];
-  for (const t of tiers) {
-    if (!t.key) { skipped.push(t.name); continue; }   // 缺密钥的层跳过
-    body.model = t.model;                              // 每层使用自己的模型
-    try {
-      const upstream = await fetch(t.api, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + t.key,
-        },
-        body: JSON.stringify(body),
-      });
-      if (!upstream.ok) {
-        lastError = `${t.name} -> HTTP ${upstream.status}`;
-        continue;                                       // 该层失败，试下一层
-      }
-      // 成功拿到 200，直接把流透传回去（保住打字机效果）
-      return new Response(upstream.body, {
-        status: 200,
-        headers: {
-          'Access-Control-Allow-Origin': origin,
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache, no-transform',
-          'Connection': 'keep-alive',
-          'X-Upstream-Tier': t.name,
-        },
-      });
-    } catch (e) {
-      lastError = `${t.name} -> ${e.message}`;
-    }
+  // 3) 仅使用 DeepSeek 单一供应商
+  const key = env.DEEPSEEK_API_KEY;
+  if (!key) {
+    return json({
+      error: 'DeepSeek API key not configured',
+      hint: '请在 EdgeOne 控制台环境变量中设置 DEEPSEEK_API_KEY',
+    }, 502);
   }
-  return json({
-    error: 'All providers failed',
-    detail: lastError,
-    skippedLayersWithoutKey: skipped,
-    hint: skipped.length === tiers.length ? '所有 Key 均未配置或 context.env 取不到变量，请在 EdgeOne 控制台确认环境变量名与拼写' : '部分 Key 缺失，已跳过；如仍失败请检查其余 Key 有效性',
-  }, 502);
+
+  try {
+    const upstream = await fetch(DEEPSEEK_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!upstream.ok) {
+      let detail = '';
+      try { detail = (await upstream.text()).slice(0, 500); } catch (e) {}
+      return json({ error: 'DeepSeek returned ' + upstream.status, detail }, 502);
+    }
+    // 成功拿到 200，直接把流透传回去（保住打字机效果）
+    return new Response(upstream.body, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': request.headers.get('origin') || '*',
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+        'X-Upstream': 'DeepSeek',
+      },
+    });
+  } catch (e) {
+    return json({ error: 'Upstream request failed', detail: e.message }, 502);
+  }
 }
